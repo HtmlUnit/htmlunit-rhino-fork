@@ -256,7 +256,8 @@ public abstract class ScriptableObject implements Scriptable, Serializable,
                                 return true;
                             }
                         }
-                        getter = null;
+                        if (owner == start)
+                            getter = null;
                     }
                     else {
                         // Based on TC39 ES3.1 Draft of 9-Feb-2009, 8.12.4, step 2,
