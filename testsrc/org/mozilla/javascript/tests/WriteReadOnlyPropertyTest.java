@@ -20,7 +20,6 @@ import org.mozilla.javascript.ScriptableObject;
  * It is needed by HtmlUnit to simulate IE as well as FF2 (but not FF3).
  * @see <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=519933">Rhino bug 519933</a>
  * @author Marc Guillemot
- * @author Jake Cobb
  */
 public class WriteReadOnlyPropertyTest {
 
@@ -71,39 +70,6 @@ public class WriteReadOnlyPropertyTest {
 					return !acceptWriteReadOnly;
 				}
 				return super.hasFeature(cx, featureIndex);
-			}
-		};
-		contextFactory.call(action);
-	}
-
-	/** @see https://sourceforge.net/p/htmlunit/bugs/1633/ */
-	@Test
-	public void testWriteReadOnlyNoCorruption() throws Exception {
-		final String script = ""
-			+ "var proto = Object.create(Object.prototype, {myProp: {get: function() { return 'hello'; }}});\n"
-			+ "var o1 = Object.create(proto), o2 = Object.create(proto);"
-			+ "o2.myProp = 'bar'; result = o1.myProp;";
-
-		final ContextAction action = new ContextAction() {
-			public Object run(final Context cx) {
-				final ScriptableObject top = cx.initStandardObjects();
-				Object result = cx.evaluateString(top, script, "script", 0, null);
-				Assert.assertEquals("Prototype was corrupted", "hello", result);
-				return null;
-			}
-		};
-
-		final ContextFactory contextFactory = new ContextFactory() {
-			@Override
-			protected boolean hasFeature(final Context cx, final int featureIndex) {
-				switch(featureIndex) {
-				case Context.FEATURE_STRICT_MODE:
-					return false;
-				case Context.FEATURE_HTMLUNIT_ASK_OBJECT_TO_WRITE_READONLY:
-					return true;
-				default:
-					return super.hasFeature(cx, featureIndex);
-				}
 			}
 		};
 		contextFactory.call(action);
