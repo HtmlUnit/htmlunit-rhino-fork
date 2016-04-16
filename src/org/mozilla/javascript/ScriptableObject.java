@@ -2204,13 +2204,11 @@ public abstract class ScriptableObject implements Scriptable, Serializable,
     {
         // FIXME: some classes throw NPE in toString methods!
         // FIXME: some classes throw StackOverflow in toString methods!
-        System.out.println("getTopLevelScope: obj.class=" + obj.getClass());
         final HashSet<Scriptable> cache = new HashSet<Scriptable>();
         cache.add(obj);
         Scriptable temp = obj;
         for (;;) {
             final Scriptable parent = temp.getParentScope();
-            System.out.println("parent: " + parent);
             // prevent indefinite loop.
             // FIXME: HtmlUnit's Window handles are sometimes each other's descendants.
             if (cache.contains(parent)) {
