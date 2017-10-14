@@ -95,7 +95,7 @@ public class JsonParser {
         }
         String id;
         Object value;
-        boolean needsComma = false;
+        boolean needsComma = true;
         while (pos < length) {
             char c = src.charAt(pos++);
             switch(c) {
