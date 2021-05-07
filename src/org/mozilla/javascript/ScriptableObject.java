@@ -2256,14 +2256,26 @@ public abstract class ScriptableObject implements Scriptable,
      * @param obj a JavaScript object
      * @return the corresponding global scope
      */
-    public static Scriptable getTopLevelScope(Scriptable obj)
+    public static Scriptable getTopLevelScope(final Scriptable obj)
     {
+        // FIXME: some classes throw NPE in toString methods!
+        // FIXME: some classes throw StackOverflow in toString methods!
+        final HashSet<Scriptable> cache = new HashSet<Scriptable>();
+        cache.add(obj);
+        Scriptable temp = obj;
         for (;;) {
-            Scriptable parent = obj.getParentScope();
-            if (parent == null) {
-                return obj;
+            final Scriptable parent = temp.getParentScope();
+            // prevent indefinite loop.
+            // FIXME: HtmlUnit's Window handles are sometimes each other's descendants.
+            if (cache.contains(parent)) {
+                return parent;
+//              throw new IllegalStateException("Scriptable is it's own descendant!: " + obj);
             }
-            obj = parent;
+            if (parent == null) {
+                return temp;
+            }
+            temp = parent;
+            cache.add(parent);
         }
     }
 
