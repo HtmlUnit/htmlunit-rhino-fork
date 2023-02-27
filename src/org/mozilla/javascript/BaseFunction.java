@@ -311,6 +311,10 @@ public class BaseFunction extends IdScriptableObject implements Function {
             case Id_toString:
                 {
                     BaseFunction realf = realFunction(thisObj, f);
+                    if (cx.getLanguageVersion() >= Context.VERSION_ES6 && realf instanceof NativeFunction) {
+                        return ((NativeFunction) realf).getEncodedSource();
+                    }
+
                     int indent = ScriptRuntime.toInt32(args, 0);
                     return realf.decompile(indent, 0);
                 }
@@ -318,6 +322,10 @@ public class BaseFunction extends IdScriptableObject implements Function {
             case Id_toSource:
                 {
                     BaseFunction realf = realFunction(thisObj, f);
+                    if (cx.getLanguageVersion() >= Context.VERSION_ES6 && realf instanceof NativeFunction) {
+                        return ((NativeFunction) realf).getEncodedSource();
+                    }
+
                     int indent = 0;
                     int flags = Decompiler.TO_SOURCE_FLAG;
                     if (args.length != 0) {

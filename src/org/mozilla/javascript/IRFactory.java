@@ -91,7 +91,7 @@ public final class IRFactory extends Parser {
     private static final int ALWAYS_TRUE_BOOLEAN = 1;
     private static final int ALWAYS_FALSE_BOOLEAN = -1;
 
-    private Decompiler decompiler = new Decompiler();
+    private SourceInformation decompiler = new Decompiler();
 
     public IRFactory() {
         super();
@@ -103,6 +103,14 @@ public final class IRFactory extends Parser {
 
     public IRFactory(CompilerEnvirons env, ErrorReporter errorReporter) {
         super(env, errorReporter);
+
+        decompiler = new Decompiler();
+    }
+
+    public IRFactory(CompilerEnvirons env, String sourceString, ErrorReporter errorReporter) {
+        super(env, errorReporter);
+
+        decompiler = new PlainSourceInformation(sourceString);
     }
 
     /**
@@ -617,7 +625,7 @@ public final class IRFactory extends Parser {
 
     private Node transformFunction(FunctionNode fn) {
         int functionType = fn.getFunctionType();
-        int start = decompiler.markFunctionStart(functionType);
+        int start = decompiler.markFunctionStart(fn);
         Node mexpr = decompileFunctionHeader(fn);
         int index = currentScriptOrFn.addFunction(fn);
 
@@ -689,7 +697,7 @@ public final class IRFactory extends Parser {
         fn.setRequiresActivation();
 
         int functionType = fn.getFunctionType();
-        int start = decompiler.markFunctionStart(functionType);
+        int start = decompiler.markFunctionStart(fn);
         Node mexpr = decompileFunctionHeader(fn);
         int index = currentScriptOrFn.addFunction(fn);
 

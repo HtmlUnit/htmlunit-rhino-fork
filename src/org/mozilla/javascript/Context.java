@@ -2559,7 +2559,15 @@ public class Context implements Closeable {
             }
         }
 
-        IRFactory irf = new IRFactory(compilerEnv, compilationErrorReporter);
+        // IRFactory irf = new IRFactory(compilerEnv, compilationErrorReporter);
+        IRFactory irf;
+        if (getLanguageVersion() >= Context.VERSION_ES6) {
+            irf = new IRFactory(compilerEnv, sourceString, compilationErrorReporter);
+        }
+        else {
+            irf = new IRFactory(compilerEnv, compilationErrorReporter);
+        }
+
         ScriptNode tree = irf.transformTree(ast);
         return tree;
     }

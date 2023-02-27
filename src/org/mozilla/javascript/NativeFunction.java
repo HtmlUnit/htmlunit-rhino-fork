@@ -36,6 +36,11 @@ public abstract class NativeFunction extends BaseFunction {
         if (encodedSource == null) {
             return super.decompile(indent, flags);
         }
+
+        if (Context.getCurrentContext().getLanguageVersion() >= Context.VERSION_ES6) {
+            return encodedSource;
+        }
+
         UintMap properties = new UintMap(1);
         properties.put(Decompiler.INITIAL_INDENT_PROP, indent);
         return Decompiler.decompile(encodedSource, flags, properties);

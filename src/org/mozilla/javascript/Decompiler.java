@@ -34,7 +34,7 @@ import org.mozilla.javascript.ast.FunctionNode;
  * space... but would require some method of deriving the final constant pool entry from information
  * available at parse time.
  */
-public class Decompiler {
+public class Decompiler implements SourceInformation {
     /**
      * Flag to indicate that the decompilation should omit the function header and trailing brace.
      */
@@ -56,15 +56,19 @@ public class Decompiler {
     // the last RC of object literals in case of function expressions
     private static final int FUNCTION_END = Token.LAST_TOKEN + 1;
 
-    String getEncodedSource() {
+    @Override
+    public String getEncodedSource() {
         return sourceToString(0);
     }
 
-    int getCurrentOffset() {
+    @Override
+    public int getCurrentOffset() {
         return sourceTop;
     }
 
-    int markFunctionStart(int functionType) {
+    @Override
+    public int markFunctionStart(FunctionNode fn) {
+        int functionType = fn.getFunctionType();
         int savedOffset = getCurrentOffset();
         if (functionType != FunctionNode.ARROW_FUNCTION) {
             addToken(Token.FUNCTION);
@@ -73,46 +77,54 @@ public class Decompiler {
         return savedOffset;
     }
 
-    int markFunctionEnd(int functionStart) {
+    @Override
+    public int markFunctionEnd(int functionStart) {
         int offset = getCurrentOffset();
         append((char) FUNCTION_END);
         return offset;
     }
 
-    void addToken(int token) {
+    @Override
+    public void addToken(int token) {
         if (!(0 <= token && token <= Token.LAST_TOKEN)) throw new IllegalArgumentException();
 
         append((char) token);
     }
 
-    void addEOL(int token) {
+    @Override
+    public void addEOL(int token) {
         if (!(0 <= token && token <= Token.LAST_TOKEN)) throw new IllegalArgumentException();
 
         append((char) token);
         append((char) Token.EOL);
     }
 
-    void addName(String str) {
+    @Override
+    public void addName(String str) {
         addToken(Token.NAME);
         appendString(str);
     }
 
-    void addString(String str) {
+    @Override
+    public void addString(String str) {
         addToken(Token.STRING);
         appendString(str);
     }
 
-    void addTemplateLiteral(String str) {
+    @Override
+    public void addTemplateLiteral(String str) {
         addToken(Token.TEMPLATE_CHARS);
         appendString(str);
     }
 
-    void addRegexp(String regexp, String flags) {
+    @Override
+    public void addRegexp(String regexp, String flags) {
         addToken(Token.REGEXP);
         appendString('/' + regexp + '/' + flags);
     }
 
-    void addNumber(double n) {
+    @Override
+    public void addNumber(double n) {
         addToken(Token.NUMBER);
 
         /* encode the number in the source stream.
@@ -162,7 +174,8 @@ public class Decompiler {
         }
     }
 
-    void addBigInt(BigInteger n) {
+    @Override
+    public void addBigInt(BigInteger n) {
         addToken(Token.BIGINT);
         appendString(n.toString());
     }
@@ -787,7 +800,10 @@ public class Decompiler {
             ++i;
         }
 
-        if (toSource) {
+        if (!toSource) {
+            // add that trailing newline if it's an outermost function.
+            if (!justFunctionBody) result.append('\n');
+        } else {
             if (topFunctionType == FunctionNode.FUNCTION_EXPRESSION) {
                 result.append(')');
             }
