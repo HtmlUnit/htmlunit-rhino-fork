@@ -11,6 +11,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Kit;
+import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
@@ -2716,6 +2717,14 @@ public class NativeRegExp extends IdScriptableObject {
                 return realThis(thisObj, f).compile(cx, scope, args);
 
             case Id_toString:
+                if (thisObj instanceof NativeObject) {
+                    Object sourceObj = thisObj.get("source", thisObj);
+                    String source = sourceObj.equals(NOT_FOUND) ? "undefined" : escapeRegExp(sourceObj);
+                    Object flagsObj = thisObj.get("flags", thisObj);
+                    String flags = flagsObj.equals(NOT_FOUND) ? "undefined" : flagsObj.toString();
+
+                    return "/" + source + "/" + flags;
+                }
             case Id_toSource:
                 return realThis(thisObj, f).toString();
 

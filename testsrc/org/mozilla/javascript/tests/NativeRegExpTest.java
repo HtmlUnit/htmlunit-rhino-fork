@@ -328,6 +328,16 @@ public class NativeRegExpTest {
         test("0-undefined-true-false-undefined", script);
     }
 
+    /** @throws Exception if an error occurs */
+    @Test
+    public void objectToString() throws Exception {
+        test("/undefined/undefined", "RegExp.prototype.toString.call({})");
+        test("/Foo/undefined", "RegExp.prototype.toString.call({source: 'Foo'})");
+        test("/undefined/gy", "RegExp.prototype.toString.call({flags: 'gy'})");
+        test("/Foo/g", "RegExp.prototype.toString.call({source: 'Foo', flags: 'g'})");
+        test("/Foo/g", "RegExp.prototype.toString.call({source: 'Foo', flags: 'g', sticky: true})");
+    }
+
     private static void test(final String expected, final String script) {
         Utils.runWithAllOptimizationLevels(
                 cx -> {
