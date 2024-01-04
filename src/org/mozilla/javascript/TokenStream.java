@@ -1496,6 +1496,7 @@ class TokenStream {
             if (matchChar('g')) addToString('g');
             else if (matchChar('i')) addToString('i');
             else if (matchChar('m')) addToString('m');
+            else if (matchChar('s')) addToString('s');
             else if (matchChar('y')) // FireFox 3
             addToString('y');
             else break;
