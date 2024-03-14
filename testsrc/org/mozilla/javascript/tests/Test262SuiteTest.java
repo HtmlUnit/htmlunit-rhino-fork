@@ -91,7 +91,6 @@ public class Test262SuiteTest {
                             "Atomics",
                             "IsHTMLDDA",
                             "SharedArrayBuffer",
-                            "Symbol.species",
                             "async-functions",
                             "async-iteration",
                             "class",

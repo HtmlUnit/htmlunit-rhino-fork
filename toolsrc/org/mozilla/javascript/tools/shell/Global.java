@@ -339,9 +339,9 @@ public class Global extends ImporterTopLevel {
         Object obj = args[0];
         String filename = Context.toString(args[1]);
         FileOutputStream fos = new FileOutputStream(filename);
-        ScriptableOutputStream out = new ScriptableOutputStream(fos, scope);
-        out.writeObject(obj);
-        out.close();
+        try (ScriptableOutputStream out = new ScriptableOutputStream(fos, scope)) {
+            out.writeObject(obj);
+        }
     }
 
     public static Object deserialize(Context cx, Scriptable scope, Scriptable thisObj, Object[] args, Function funObj)
@@ -350,11 +350,12 @@ public class Global extends ImporterTopLevel {
             throw Context.reportRuntimeError("Expected a filename to read the serialization from");
         }
         String filename = Context.toString(args[0]);
-        FileInputStream fis = new FileInputStream(filename);
-        ObjectInputStream in = new ScriptableInputStream(fis, scope);
-        Object deserialized = in.readObject();
-        in.close();
-        return Context.toObject(deserialized, scope);
+        try (FileInputStream fis = new FileInputStream(filename)) {
+            try (ObjectInputStream in = new ScriptableInputStream(fis, scope)) {
+                Object deserialized = in.readObject();
+                return Context.toObject(deserialized, scope);
+            }
+        }
     }
 
     public String[] getPrompts(Context cx) {
@@ -1030,14 +1031,12 @@ public class Global extends ImporterTopLevel {
                 is = new FileInputStream(f);
             }
 
-            Reader r;
-            if (charCoding == null) {
-                r = new InputStreamReader(is);
-            } else {
-                r = new InputStreamReader(is, charCoding);
+            try (Reader r =
+                    new InputStreamReader(
+                            is,
+                            charCoding == null ? Charset.defaultCharset().name() : charCoding)) {
+                return readReader(r, chunkLength);
             }
-            return readReader(r, chunkLength);
-
         } finally {
             if (is != null) is.close();
         }
@@ -1141,10 +1140,12 @@ class Runner implements Runnable, ContextAction<Object> {
         s = script;
     }
 
+    @Override
     public void run() {
         factory.call(this);
     }
 
+    @Override
     public Object run(Context cx) {
         if (f != null) return f.call(cx, scope, scope, args);
         else return s.exec(cx, scope);
