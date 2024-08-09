@@ -296,6 +296,12 @@ public class ContextFactory {
 
             case Context.FEATURE_HTMLUNIT_FUNCTION_DECLARED_FORWARD_IN_BLOCK:
                 return false;
+
+            case Context.FEATURE_HTMLUNIT_MEMBERBOX_NAME:
+                return false;
+
+            case Context.FEATURE_HTMLUNIT_ARRAY_SORT_COMPERATOR_ACCEPTS_BOOL:
+                return false;
         }
         // It is a bug to call the method with unknown featureIndex
         throw new IllegalArgumentException(String.valueOf(featureIndex));

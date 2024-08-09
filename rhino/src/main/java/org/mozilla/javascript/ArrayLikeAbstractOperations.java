@@ -232,6 +232,15 @@ public class ArrayLikeAbstractOperations {
                         cmpBuf[0] = x;
                         cmpBuf[1] = y;
                         Object ret = jsCompareFunction.call(cx, scope, funThis, cmpBuf);
+
+                        // HtmlUnit
+                        if (cx.hasFeature(Context.FEATURE_HTMLUNIT_ARRAY_SORT_COMPERATOR_ACCEPTS_BOOL)) {
+                            if (Boolean.FALSE == ret) {
+                                return -1;
+                            }
+                        }
+                        // end HtmlUnit
+
                         double d = ScriptRuntime.toNumber(ret);
                         int cmp = Double.compare(d, 0);
                         if (cmp < 0) {

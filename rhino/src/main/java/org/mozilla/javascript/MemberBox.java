@@ -117,9 +117,6 @@ final class MemberBox implements Serializable {
         }
         String name = memberObject.getName();
         name = Character.toLowerCase(name.charAt(3)) + name.substring(4);
-        if (context.hasFeature(Context.FEATURE_HTMLUNIT_MEMBERBOX_NEWLINE)) {
-            return "\nfunction " + name + "() {\n    [native code]\n}\n";
-        }
         return "function " + name + "() {\n    [native code]\n}";
     }
 
