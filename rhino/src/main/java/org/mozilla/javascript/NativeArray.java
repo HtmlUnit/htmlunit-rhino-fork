@@ -539,7 +539,7 @@ public class NativeArray extends IdScriptableObject implements List {
         }
 
         ScriptableObject desc = ScriptableObject.buildDataDescriptor(obj, true, EMPTY);
-        for (var k : UNSCOPABLES) {
+        for (String k : UNSCOPABLES) {
             obj.defineOwnProperty(cx, k, desc);
         }
         obj.setPrototype(null); // unscopables don't have any prototype
