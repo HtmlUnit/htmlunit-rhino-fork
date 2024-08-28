@@ -240,6 +240,10 @@ final class NativeReflect extends ScriptableObject {
                 Object prop = ScriptableObject.getProperty(target, (Symbol) args[1]);
                 return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
             }
+            if (args[1] instanceof Integer) {
+                Object prop = ScriptableObject.getProperty(target, (int) args[1]);
+                return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
+            }
             if (args[1] instanceof Double) {
                 Object prop = ScriptableObject.getProperty(target, ScriptRuntime.toIndex(args[1]));
                 return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
