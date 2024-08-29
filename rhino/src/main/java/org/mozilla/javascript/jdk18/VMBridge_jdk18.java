@@ -66,6 +66,7 @@ public class VMBridge_jdk18 extends VMBridge {
         return accessible.isAccessible();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected Object getInterfaceProxyHelper(ContextFactory cf, Class<?>[] interfaces) {
         throw new RuntimeException("org.mozilla.javascript.jdk18.VMBridge_jdk18.getInterfaceProxyHelper(ContextFactory, Class<?>[]) not supported");
