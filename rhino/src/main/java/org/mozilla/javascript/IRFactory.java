@@ -758,7 +758,35 @@ public final class IRFactory {
     private Node transformInfix(InfixExpression node) {
         Node left = transform(node.getLeft());
         Node right = transform(node.getRight());
-        return createBinary(node.getType(), left, right);
+        return (node.getType() == Token.NULLISH_COALESCING)
+                ? transformNullishCoalescing(left, right, node)
+                : createBinary(node.getType(), left, right);
+    }
+
+    private Node transformNullishCoalescing(Node left, Node right, Node parent) {
+        String tempName = parser.currentScriptOrFn.getNextTempName();
+
+        Node nullNode = new Node(Token.NULL);
+        Node undefinedNode = new Name(0, "undefined");
+
+        Node conditional =
+                new Node(
+                        Token.OR,
+                        new Node(Token.SHEQ, nullNode, parser.createName(tempName)),
+                        new Node(Token.SHEQ, undefinedNode, parser.createName(tempName)));
+
+        Node hookNode =
+                new Node(
+                        Token.HOOK,
+                        /* left= */ conditional,
+                        /* mid= */ right,
+                        /* right= */ parser.createName(tempName));
+
+        parser.defineSymbol(Token.LP, tempName, true);
+        return createBinary(
+                Token.COMMA,
+                createAssignment(Token.ASSIGN, parser.createName(tempName), left),
+                hookNode);
     }
 
     private Node transformLabeledStatement(LabeledStatement ls) {
@@ -2066,11 +2094,17 @@ public final class IRFactory {
             case Token.ASSIGN_BITOR:
                 assignOp = Token.BITOR;
                 break;
+            case Token.ASSIGN_LOGICAL_OR:
+                assignOp = Token.OR;
+                break;
             case Token.ASSIGN_BITXOR:
                 assignOp = Token.BITXOR;
                 break;
             case Token.ASSIGN_BITAND:
                 assignOp = Token.BITAND;
+                break;
+            case Token.ASSIGN_LOGICAL_AND:
+                assignOp = Token.AND;
                 break;
             case Token.ASSIGN_LSH:
                 assignOp = Token.LSH;

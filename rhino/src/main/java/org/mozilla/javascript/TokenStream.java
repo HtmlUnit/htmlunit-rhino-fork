@@ -1146,6 +1146,9 @@ class TokenStream implements Parser.CurrentPositionReporter {
                 case ',':
                     return Token.COMMA;
                 case '?':
+                    if (matchChar('?')) {
+                        return Token.NULLISH_COALESCING;
+                    }
                     return Token.HOOK;
                 case ':':
                     if (matchChar(':')) {
@@ -1167,7 +1170,8 @@ class TokenStream implements Parser.CurrentPositionReporter {
 
                 case '|':
                     if (matchChar('|')) {
-                        return Token.OR;
+                        if (matchChar('=')) return Token.ASSIGN_LOGICAL_OR;
+                        else return Token.OR;
                     } else if (matchChar('=')) {
                         return Token.ASSIGN_BITOR;
                     } else {
@@ -1182,7 +1186,8 @@ class TokenStream implements Parser.CurrentPositionReporter {
 
                 case '&':
                     if (matchChar('&')) {
-                        return Token.AND;
+                        if (matchChar('=')) return Token.ASSIGN_LOGICAL_AND;
+                        else return Token.AND;
                     } else if (matchChar('=')) {
                         return Token.ASSIGN_BITAND;
                     } else {
