@@ -98,7 +98,6 @@ public class Test262SuiteTest {
                             "class-fields-private",
                             "class-fields-public",
                             "default-arg",
-                            "default-parameters",
                             "new.target",
                             "object-rest",
                             "regexp-dotall",
@@ -425,7 +424,9 @@ public class Test262SuiteTest {
             Pattern.compile(
                     "(~|(?:\\s*)(?:!|#)(?:\\s*)|\\s+)?(\\S+)(?:[^\\S\\r\\n]+(?:strict|non-strict|non-interpreted|\\d+/\\d+ \\(\\d+(?:\\.\\d+)?%%\\)|\\{(?:non-strict|strict|unsupported): \\[.*\\],?\\}))?[^\\S\\r\\n]*(.*)");
 
-    /** @see https://github.com/tc39/test262/blob/main/INTERPRETING.md#host-defined-functions */
+    /**
+     * @see https://github.com/tc39/test262/blob/main/INTERPRETING.md#host-defined-functions
+     */
     public static class $262 {
         private ScriptableObject scope;
 

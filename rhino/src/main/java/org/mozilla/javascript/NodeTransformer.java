@@ -6,6 +6,8 @@
 
 package org.mozilla.javascript;
 
+import static org.mozilla.javascript.Context.reportError;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -296,7 +298,7 @@ public class NodeTransformer {
                         }
                         // fall through to process let declaration...
                     }
-                    /* fall through */
+                /* fall through */
                 case Token.CONST:
                 case Token.VAR:
                     {
@@ -372,8 +374,16 @@ public class NodeTransformer {
                 case Token.SETNAME:
                     if (inStrictMode) {
                         node.setType(Token.STRICT_SETNAME);
+                        if (node.getFirstChild().getType() == Token.BINDNAME) {
+                            Node name = node.getFirstChild();
+                            if (name instanceof Name
+                                    && ((Name) name).getIdentifier().equals("eval")) {
+                                // Don't allow set of `eval` in strict mode
+                                reportError("syntax error");
+                            }
+                        }
                     }
-                    /* fall through */
+                /* fall through */
                 case Token.NAME:
                 case Token.SETCONST:
                 case Token.DELPROP:

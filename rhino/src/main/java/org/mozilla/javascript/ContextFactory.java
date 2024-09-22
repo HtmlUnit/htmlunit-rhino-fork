@@ -539,7 +539,9 @@ public class ContextFactory {
         return enterContext(null);
     }
 
-    /** @deprecated Use {@link Context#exit()} instead. */
+    /**
+     * @deprecated Use {@link Context#exit()} instead.
+     */
     @Deprecated
     public final void exit() {
         Context.exit();
