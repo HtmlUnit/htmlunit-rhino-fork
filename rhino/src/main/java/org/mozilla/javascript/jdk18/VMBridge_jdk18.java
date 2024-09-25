@@ -52,18 +52,13 @@ public class VMBridge_jdk18 extends VMBridge {
         storage[0] = cx;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected boolean tryToMakeAccessible(AccessibleObject accessible) {
-        // HtmlUnit return accessible.trySetAccessible();
-        if (accessible.isAccessible()) {
-            return true;
-        }
-        try {
+        if (!accessible.isAccessible()) {
             accessible.setAccessible(true);
-        } catch (Exception ex) {
         }
-
-        return accessible.isAccessible();
+        return true;
     }
 
     @SuppressWarnings("deprecation")

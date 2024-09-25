@@ -396,6 +396,7 @@ public class Global extends ImporterTopLevel {
         return global.runDoctest(cx, global, session, null, 0);
     }
 
+    @SuppressWarnings("AndroidJdkLibsChecker")
     public int runDoctest(
             Context cx, Scriptable scope, String session, String sourceName, int lineNumber) {
         doctestCanonicalizations = new HashMap<String, String>();
@@ -599,6 +600,7 @@ public class Global extends ImporterTopLevel {
      *   <li><code>dir</code> - the working direcotry to run the commands.
      * </ul>
      */
+    @SuppressWarnings("AndroidJdkLibsChecker")
     public static Object runCommand(Context cx, Scriptable scope, Scriptable thisObj, Object[] args, Function funObj)
             throws IOException {
         int L = args.length;
