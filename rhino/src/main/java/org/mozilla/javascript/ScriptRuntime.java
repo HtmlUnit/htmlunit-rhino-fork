@@ -290,6 +290,9 @@ public class ScriptRuntime {
             NativeWeakMap.init(scope, sealed);
             NativeWeakSet.init(scope, sealed);
             NativeBigInt.init(scope, sealed);
+
+            NativeProxy.init(cx, scope, sealed);
+            NativeReflect.init(cx, scope, sealed);
         }
 
         if (scope instanceof TopLevel) {
@@ -2767,11 +2770,11 @@ public class ScriptRuntime {
      *
      * <p>See ECMA 11.2.2
      */
-    public static Scriptable newObject(Object fun, Context cx, Scriptable scope, Object[] args) {
-        if (!(fun instanceof Constructable)) {
-            throw notFunctionError(fun);
+    public static Scriptable newObject(Object ctor, Context cx, Scriptable scope, Object[] args) {
+        if (!(ctor instanceof Constructable)) {
+            throw notFunctionError(ctor);
         }
-        return ((Constructable) fun).construct(cx, scope, args);
+        return ((Constructable) ctor).construct(cx, scope, args);
     }
 
     public static Object callSpecial(
@@ -2867,7 +2870,7 @@ public class ScriptRuntime {
     /**
      * @return true if the passed in Scriptable looks like an array
      */
-    private static boolean isArrayLike(Scriptable obj) {
+    public static boolean isArrayLike(Scriptable obj) {
         return obj != null
                 && (obj instanceof NativeArray
                         || obj instanceof Arguments
@@ -3556,6 +3559,10 @@ public class ScriptRuntime {
                 }
             }
             return eqNumber(b ? 1.0 : 0.0, y);
+        } else if (x instanceof SymbolKey) {
+            return x.equals(y);
+        } else if (y instanceof SymbolKey) {
+            return y.equals(x);
         } else if (x instanceof Scriptable) {
             if (x instanceof Delegator) {
                 x = ((Delegator) x).getDelegee();
