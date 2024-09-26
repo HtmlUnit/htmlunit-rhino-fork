@@ -635,7 +635,6 @@ public class NativeObject extends IdScriptableObject implements Map {
                     if (!status) {
                         throw ScriptRuntime.typeError("Object is not sealable");
                     }
-
                     return arg;
                 }
             case ConstructorId_freeze:

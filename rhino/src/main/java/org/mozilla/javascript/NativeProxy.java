@@ -333,7 +333,8 @@ final class NativeProxy extends ScriptableObject implements Callable, Constructa
                             "proxy [[OwnPropertyKeys]] must return an array with only string and symbol elements");
 
             boolean extensibleTarget = target.isExtensible();
-            Object[] targetKeys = target.getIds(getNonEnumerable, getSymbols);
+            // don't use the provided values here we have to check all
+            Object[] targetKeys = target.getIds(true, true);
 
             HashSet<Object> uncheckedResultKeys = new HashSet<Object>(trapResult);
             if (uncheckedResultKeys.size() != trapResult.size()) {
@@ -358,7 +359,7 @@ final class NativeProxy extends ScriptableObject implements Callable, Constructa
             for (Object key : targetNonconfigurableKeys) {
                 if (!uncheckedResultKeys.contains(key)) {
                     throw ScriptRuntime.typeError(
-                            "proxy can't skip a non-configurable property " + key);
+                            "proxy can't skip a non-configurable property '" + key + "'");
                 }
                 uncheckedResultKeys.remove(key);
             }
@@ -378,7 +379,7 @@ final class NativeProxy extends ScriptableObject implements Callable, Constructa
                 throw ScriptRuntime.typeError("proxy can't skip properties");
             }
 
-            return trapResult.toArray();
+            // target is not extensible, fall back to the target call
         }
 
         return target.getIds(getNonEnumerable, getSymbols);
@@ -1035,7 +1036,7 @@ final class NativeProxy extends ScriptableObject implements Callable, Constructa
                 }
             } else {
                 if (!AbstractEcmaObjectOperations.isCompatiblePropertyDescriptor(
-                        extensibleTarget, desc, targetDesc)) {
+                        cx, extensibleTarget, desc, targetDesc)) {
                     throw ScriptRuntime.typeError(
                             "proxy can't define an incompatible property descriptor");
                 }

@@ -297,8 +297,9 @@ public class AbstractEcmaObjectOperations {
      * <p>https://262.ecma-international.org/12.0/#sec-iscompatiblepropertydescriptor
      */
     static boolean isCompatiblePropertyDescriptor(
-            boolean extensible, ScriptableObject desc, ScriptableObject current) {
+            Context cx, boolean extensible, ScriptableObject desc, ScriptableObject current) {
         return validateAndApplyPropertyDescriptor(
+                cx,
                 Undefined.SCRIPTABLE_UNDEFINED,
                 Undefined.SCRIPTABLE_UNDEFINED,
                 extensible,
@@ -312,6 +313,7 @@ public class AbstractEcmaObjectOperations {
      * <p>https://262.ecma-international.org/12.0/#sec-validateandapplypropertydescriptor
      */
     static boolean validateAndApplyPropertyDescriptor(
+            Context cx,
             Scriptable o,
             Scriptable p,
             boolean extensible,
@@ -352,12 +354,11 @@ public class AbstractEcmaObjectOperations {
             }
         }
 
-        // if (!ScriptableObject.isGenericDescriptor(desc)) {
         if (ScriptableObject.isGenericDescriptor(desc)) {
             return true;
-        } else if (!Objects.equals(
-                ScriptableObject.isGenericDescriptor(current),
-                ScriptableObject.isGenericDescriptor(desc))) {
+        }
+
+        if (ScriptableObject.isDataDescriptor(current) != ScriptableObject.isDataDescriptor(desc)) {
             if (Boolean.FALSE.equals(current.get("configurable"))) {
                 return false;
             }
@@ -463,5 +464,34 @@ public class AbstractEcmaObjectOperations {
         }
 
         return groups;
+    }
+
+    /**
+     * IsConstructor ( argument )
+     *
+     * <p>https://262.ecma-international.org/12.0/#sec-isconstructor
+     */
+    static boolean isConstructor(Context cx, Object argument) {
+        /*
+           The abstract operation IsConstructor takes argument argument (an ECMAScript language value).
+           It determines if argument is a function object with a [[Construct]] internal method.
+           It performs the following steps when called:
+
+           1. If Type(argument) is not Object, return false.
+           2. If argument has a [[Construct]] internal method, return true.
+           3. Return false.
+        */
+
+        // Found no good way to implement this based on the spec.
+        // Therefor I did this as first step - this only supports Lambda based method declarations.
+        // see #1376 for more
+        if (argument instanceof LambdaConstructor) {
+            return true;
+        }
+        if (argument instanceof LambdaFunction) {
+            return false;
+        }
+
+        return argument instanceof Constructable;
     }
 }

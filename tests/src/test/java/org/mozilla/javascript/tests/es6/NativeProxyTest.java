@@ -1,21 +1,20 @@
 package org.mozilla.javascript.tests.es6;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.tests.Utils;
 
 public class NativeProxyTest {
 
     @Test
     public void testToString() {
-        testString("function Proxy() {\n\t[native code, arity=2]\n}\n", "Proxy.toString()");
+        Utils.assertWithAllOptimizationLevelsES6(
+                "function Proxy() {\n\t[native code, arity=2]\n}\n", "Proxy.toString()");
 
-        testString("[object Object]", "Object.prototype.toString.call(new Proxy({}, {}))");
-        testString("[object Array]", "Object.prototype.toString.call(new Proxy([], {}))");
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
+                "[object Object]", "Object.prototype.toString.call(new Proxy({}, {}))");
+        Utils.assertWithAllOptimizationLevelsES6(
+                "[object Array]", "Object.prototype.toString.call(new Proxy([], {}))");
+        Utils.assertWithAllOptimizationLevelsES6(
                 "[object Array]",
                 "Object.prototype.toString.call(new Proxy(new Proxy([], {}), {}))");
     }
@@ -31,46 +30,46 @@ public class NativeProxyTest {
                         + "  '' + e;\n"
                         + "}";
 
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Illegal operation attempted on a revoked proxy",
                 String.format(js, "{}", "rev.proxy"));
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Illegal operation attempted on a revoked proxy",
                 String.format(js, "[]", "rev.proxy"));
     }
 
     @Test
     public void prototype() {
-        testString("false", "'' + Object.hasOwnProperty.call(Proxy, 'prototype')");
+        Utils.assertWithAllOptimizationLevelsES6(
+                "false", "'' + Object.hasOwnProperty.call(Proxy, 'prototype')");
 
-        testString("2", "'' + Proxy.length");
+        Utils.assertWithAllOptimizationLevelsES6("2", "'' + Proxy.length");
     }
 
     @Test
     public void ctorMissingArgs() {
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Proxy.ctor: At least 2 arguments required, but only 0 passed",
                 "try { new Proxy() } catch(e) { '' + e }");
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Proxy.ctor: At least 2 arguments required, but only 1 passed",
                 "try { new Proxy({}) } catch(e) { '' + e }");
 
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Expected argument of type object, but instead had type undefined",
                 "try { new Proxy(undefined, {}) } catch(e) { '' + e }");
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Expected argument of type object, but instead had type object",
                 "try { new Proxy(null, {}) } catch(e) { '' + e }");
     }
 
     @Test
     public void ctorAsFunction() {
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: The constructor for Proxy may not be invoked as a function",
                 "try { Proxy() } catch(e) { '' + e }");
     }
 
-    @Test
     public void construct() {
         String js =
                 "var _target, _handler, _args, _P;\n"
@@ -91,24 +90,7 @@ public class NativeProxyTest {
                         + "+ ' ' + (_P === P)"
                         + "+ ' ' + _args.length + ' ' + _args[0] + ' ' + _args[1]";
 
-        testString("true true true 2 1 4", js);
-    }
-
-    @Test
-    public void testTrapSet() {
-        String js =
-                "var res = '';\n"
-                        + "var proxy = new Proxy({}, {\n"
-                        + "  set(obj, prop, value) {\n"
-                        + "    res += value + ' ' + (value instanceof Array);\n"
-                        + "    obj[prop] = value;\n"
-                        + "    return true;\n"
-                        + "  },\n"
-                        + "});\n"
-                        + "proxy.foo = [1, 2, 3];\n"
-                        + "res";
-
-        testString("1,2,3 true", js);
+        Utils.assertWithAllOptimizationLevelsES6("true true true 2 1 4", js);
     }
 
     @Test
@@ -128,7 +110,7 @@ public class NativeProxyTest {
                         + "var x = ' ' + proxy1(1, 2);\n"
                         + "res + x";
 
-        testString(" Calculate sum: 1,2 21", js);
+        Utils.assertWithAllOptimizationLevelsES6(" Calculate sum: 1,2 21", js);
     }
 
     @Test
@@ -154,7 +136,7 @@ public class NativeProxyTest {
                         + "+ ' ' + (_context === context)"
                         + "+ ' ' + _args.length + ' ' + _args[0] + ' ' + _args[1]";
 
-        testString("true true true 2 1 4", js);
+        Utils.assertWithAllOptimizationLevelsES6("true true true 2 1 4", js);
     }
 
     @Test
@@ -178,7 +160,7 @@ public class NativeProxyTest {
                         + "+ ' ' + (_context === context)"
                         + "+ ' ' + res";
 
-        testString("1 true 3", js);
+        Utils.assertWithAllOptimizationLevelsES6("1 true 3", js);
     }
 
     @Test
@@ -190,7 +172,7 @@ public class NativeProxyTest {
                         + "var proxy1 = new Proxy(sum, {});\n"
                         + "proxy1(1, 2);";
 
-        testDouble(3.0, js);
+        Utils.assertWithAllOptimizationLevelsES6(3, js);
     }
 
     @Test
@@ -208,7 +190,7 @@ public class NativeProxyTest {
                         + "var proxy1 = new Proxy(o, handler);\n"
                         + "Object.defineProperty(proxy1, 'p', { value: 42, writable: false });\n"
                         + "res;";
-        testString("[object Object] p false undefined undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("[object Object] p false undefined undefined", js);
     }
 
     @Test
@@ -222,7 +204,7 @@ public class NativeProxyTest {
                         + "});\n"
                         + "'' + Reflect.defineProperty(p, 'attr', {})"
                         + "+ ' ' + Object.getOwnPropertyDescriptor(target, 'attr')";
-        testString("false undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("false undefined", js);
     }
 
     @Test
@@ -247,7 +229,8 @@ public class NativeProxyTest {
                         + "} catch(e) {\n"
                         + "  '' + e;\n"
                         + "}\n";
-        testString("TypeError: proxy can't define an incompatible property descriptor", js);
+        Utils.assertWithAllOptimizationLevelsES6(
+                "TypeError: proxy can't define an incompatible property descriptor", js);
     }
 
     @Test
@@ -269,7 +252,8 @@ public class NativeProxyTest {
                         + "} catch(e) {\n"
                         + "  '' + e;\n"
                         + "}\n";
-        testString("TypeError: proxy can't define an incompatible property descriptor", js);
+        Utils.assertWithAllOptimizationLevelsES6(
+                "TypeError: proxy can't define an incompatible property descriptor", js);
     }
 
     @Test
@@ -293,7 +277,8 @@ public class NativeProxyTest {
                         + "} catch(e) {\n"
                         + "  '' + e;\n"
                         + "}\n";
-        testString("TypeError: proxy can't define an incompatible property descriptor", js);
+        Utils.assertWithAllOptimizationLevelsES6(
+                "TypeError: proxy can't define an incompatible property descriptor", js);
     }
 
     @Test
@@ -303,7 +288,7 @@ public class NativeProxyTest {
                         + "var proxy1 = new Proxy(o, {});\n"
                         + "proxy1.p = 42;\n"
                         + "'' + o.p;";
-        testString("42", js);
+        Utils.assertWithAllOptimizationLevelsES6("42", js);
     }
 
     @Test
@@ -318,7 +303,7 @@ public class NativeProxyTest {
                         + "} catch(e) {\n"
                         + "  '' + e;"
                         + "}\n";
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Cannot add properties to this object because extensible is false.", js);
     }
 
@@ -333,7 +318,8 @@ public class NativeProxyTest {
                         + "} catch(e) {\n"
                         + "  '' + e;"
                         + "}\n";
-        testString("TypeError: defineProperty is not a function, it is number.", js);
+        Utils.assertWithAllOptimizationLevelsES6(
+                "TypeError: defineProperty is not a function, it is number.", js);
     }
 
     @Test
@@ -347,7 +333,7 @@ public class NativeProxyTest {
                         + "} catch(e) {\n"
                         + "  '' + e;"
                         + "}\n";
-        testString("42", js);
+        Utils.assertWithAllOptimizationLevelsES6("42", js);
     }
 
     @Test
@@ -361,7 +347,7 @@ public class NativeProxyTest {
                         + "} catch(e) {\n"
                         + "  '' + e;"
                         + "}\n";
-        testString("42", js);
+        Utils.assertWithAllOptimizationLevelsES6("42", js);
     }
 
     @Test
@@ -371,7 +357,7 @@ public class NativeProxyTest {
                         + "var proxy1 = new Proxy(o, {});\n"
                         + "delete proxy1.p;\n"
                         + "'' + o.p;";
-        testString("undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("undefined", js);
     }
 
     @Test
@@ -395,7 +381,7 @@ public class NativeProxyTest {
                         + "+ ' ' + result.writable "
                         + "+ ' ' + (result.get === fn) "
                         + "+ ' ' + (result.set === undefined)";
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "undefined 7 [value,writable,enumerable,configurable] true true false false true",
                 js);
     }
@@ -410,7 +396,7 @@ public class NativeProxyTest {
                         + "            }\n"
                         + "          });\n"
                         + "'' + Object.getOwnPropertyDescriptor(p, 'attr');";
-        testString("undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("undefined", js);
     }
 
     @Test
@@ -429,7 +415,8 @@ public class NativeProxyTest {
                         + "+ ' ' + result.configurable"
                         + "+ ' ' + (result.get === fn)"
                         + "+ ' ' + (result.set === undefined)";
-        testString("[get,set,enumerable,configurable] false true true true", js);
+        Utils.assertWithAllOptimizationLevelsES6(
+                "[get,set,enumerable,configurable] false true true true", js);
     }
 
     @Test
@@ -450,7 +437,7 @@ public class NativeProxyTest {
                         + "var x = Object.isExtensible(proxy1);\n"
                         + "res += ' ' + x;\n"
                         + "res += ' ' + x;\n";
-        testString(" a true true true", js);
+        Utils.assertWithAllOptimizationLevelsES6(" a true true true", js);
     }
 
     @Test
@@ -465,7 +452,7 @@ public class NativeProxyTest {
                         + "var proxy2 = new Proxy(o2, {});\n"
                         + "result += ' ' + Object.isExtensible(o2) + '-' + Object.isExtensible(proxy2);\n";
 
-        testString("true-true false-false false-false", js);
+        Utils.assertWithAllOptimizationLevelsES6("true-true false-false false-false", js);
     }
 
     @Test
@@ -480,7 +467,7 @@ public class NativeProxyTest {
                         + "var res = '' + Reflect.preventExtensions(p);\n"
                         + "Object.preventExtensions(target);\n"
                         + "res += ' ' + Reflect.preventExtensions(p);\n";
-        testString("false false", js);
+        Utils.assertWithAllOptimizationLevelsES6("false false", js);
     }
 
     @Test
@@ -489,7 +476,7 @@ public class NativeProxyTest {
                 "var target = {};\n"
                         + "var p = new Proxy(target, {});\n"
                         + "'' + Reflect.preventExtensions(p);";
-        testString("true", js);
+        Utils.assertWithAllOptimizationLevelsES6("true", js);
     }
 
     @Test
@@ -506,7 +493,7 @@ public class NativeProxyTest {
                         + "var proxy1 = new Proxy(o, handler);\n"
                         + "var x = Object.keys(proxy1);\n"
                         + "res += ' ' + x;\n";
-        testString("true d", js);
+        Utils.assertWithAllOptimizationLevelsES6("true d", js);
     }
 
     @Test
@@ -519,7 +506,7 @@ public class NativeProxyTest {
                         + "var p = new Proxy(target, {});\n"
                         + "var keys = Object.getOwnPropertyNames(p);\n"
                         + "'' + keys[0] + ' ' + keys[1] + ' ' + keys.length";
-        testString("foo bar 2", js);
+        Utils.assertWithAllOptimizationLevelsES6("foo bar 2", js);
     }
 
     @Test
@@ -531,7 +518,7 @@ public class NativeProxyTest {
                         + "  }\n"
                         + "});\n"
                         + "try { Object.keys(p); } catch(e) { '' + e }\n";
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: proxy [[OwnPropertyKeys]] must return an array with only string and symbol elements",
                 js);
     }
@@ -548,7 +535,7 @@ public class NativeProxyTest {
                         + "var proxy2 = new Proxy(a1, {});\n"
                         + "'' + Object.keys(proxy1)"
                         + "+ ' ' + Object.keys(proxy2)";
-        testString("p1,p2 ", js);
+        Utils.assertWithAllOptimizationLevelsES6("p1,p2 ", js);
     }
 
     @Test
@@ -571,14 +558,13 @@ public class NativeProxyTest {
                         + "var a1 = [];\n"
                         + "var proxy1 = new Proxy(o1, {});\n"
                         + "'' + Object.keys(proxy1)";
-        // FF: 0,6,8,55,773,s1,str,-1,s2,str2
-        testString("-1,0,6,8,55,773,s1,str,s2,str2", js);
+        Utils.assertWithAllOptimizationLevelsES6("0,6,8,55,773,s1,str,-1,s2,str2", js);
     }
 
     @Test
     public void ownKeysWithoutHandlerEmptyObj() {
         String js = "var proxy1 = new Proxy({}, {});\n" + "'' + Object.keys(proxy1).length";
-        testString("0", js);
+        Utils.assertWithAllOptimizationLevelsES6("0", js);
     }
 
     @Test
@@ -588,19 +574,19 @@ public class NativeProxyTest {
                         + "delete o.d;\n"
                         + "var proxy1 = new Proxy(o, {});\n"
                         + "'' + Object.keys(proxy1).length";
-        testString("0", js);
+        Utils.assertWithAllOptimizationLevelsES6("0", js);
     }
 
     @Test
     public void ownKeysWithoutHandlerEmptyArray() {
         String js = "var proxy1 = new Proxy([], {});\n" + "'' + Object.keys(proxy1)";
-        testString("", js);
+        Utils.assertWithAllOptimizationLevelsES6("", js);
     }
 
     @Test
     public void ownKeysWithoutHandlerArray() {
         String js = "var proxy1 = new Proxy([, , 2], {});\n" + "'' + Object.keys(proxy1)";
-        testString("2", js);
+        Utils.assertWithAllOptimizationLevelsES6("2", js);
     }
 
     @Test
@@ -611,7 +597,7 @@ public class NativeProxyTest {
                         + "Object.defineProperty(o, 'p2', { get: function() {}, enumerable: false });\n"
                         + "var proxy1 = new Proxy(o, {});\n"
                         + "'' + Object.keys(proxy1)";
-        testString("", js);
+        Utils.assertWithAllOptimizationLevelsES6("", js);
     }
 
     @Test
@@ -632,7 +618,7 @@ public class NativeProxyTest {
                         + "Object.preventExtensions(target);\n"
                         + "try { 'attr' in p; } catch(e) { '' + e }\n";
 
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: proxy can't report an existing own property 'attr' as non-existent on a non-extensible object",
                 js);
     }
@@ -656,7 +642,7 @@ public class NativeProxyTest {
                         + "+ ' ' + ('attr' === _prop)"
                         + "+ ' ' + ('attr' in p)";
 
-        testString("false false false false", js);
+        Utils.assertWithAllOptimizationLevelsES6("false false false false", js);
     }
 
     @Test
@@ -667,7 +653,7 @@ public class NativeProxyTest {
                         + "'' + ('p' in proxy1)"
                         + "+ ' ' + ('p2' in proxy1)"
                         + "+ ' ' + ('toString' in proxy1)";
-        testString("true false true", js);
+        Utils.assertWithAllOptimizationLevelsES6("true false true", js);
     }
 
     @Test
@@ -680,7 +666,7 @@ public class NativeProxyTest {
                         + "var proxy1 = new Proxy(o, {});\n"
                         + "'' + (s1 in proxy1)"
                         + "+ ' ' + (2 in proxy1)";
-        testString("true false", js);
+        Utils.assertWithAllOptimizationLevelsES6("true false", js);
     }
 
     @Test
@@ -693,7 +679,7 @@ public class NativeProxyTest {
                         + "'' + stringProxy.length"
                         + " + ' ' + stringProxy[0]"
                         + " + ' ' + stringProxy[4];";
-        testString("3 s undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("3 s undefined", js);
     }
 
     @Test
@@ -716,13 +702,30 @@ public class NativeProxyTest {
                         + " + ' ' + proxy[10]"
                         + " + ' ' + Object.create(proxy).foo"
                         + " + ' ' + proxy.bar;";
-        testString("1 2 3 undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("1 2 3 undefined", js);
+    }
+
+    @Test
+    public void setTrap() {
+        String js =
+                "var res = '';\n"
+                        + "var proxy = new Proxy({}, {\n"
+                        + "  set(obj, prop, value) {\n"
+                        + "    res += value + ' ' + (value instanceof Array);\n"
+                        + "    obj[prop] = value;\n"
+                        + "    return true;\n"
+                        + "  },\n"
+                        + "});\n"
+                        + "proxy.foo = [1, 2, 3];\n"
+                        + "res";
+
+        Utils.assertWithAllOptimizationLevelsES6("1,2,3 true", js);
     }
 
     @Test
     public void getPropertyByIntWithoutHandler() {
         String js = "var a = ['zero', 'one'];" + "var proxy1 = new Proxy(a, {});\n" + "proxy1[1];";
-        testString("one", js);
+        Utils.assertWithAllOptimizationLevelsES6("one", js);
     }
 
     @Test
@@ -742,7 +745,7 @@ public class NativeProxyTest {
                         + "result += ', ' + proxy2.p;\n"
                         + "result += ', ' + proxy2.u;\n";
 
-        testString("value 1!, foo!, 42, undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("value 1!, foo!, 42, undefined", js);
     }
 
     @Test
@@ -770,7 +773,7 @@ public class NativeProxyTest {
                         + "p['attr'];\n"
                         + "res + ' ' + (_prop == 'attr')";
 
-        testString("true true true true true", js);
+        Utils.assertWithAllOptimizationLevelsES6("true true true true true", js);
     }
 
     @Test
@@ -790,7 +793,7 @@ public class NativeProxyTest {
                         + "result += ', ' + proxy2.p;\n"
                         + "result += ', ' + proxy2.u;\n";
 
-        testString("value 1, undefined, foo, 42, undefined", js);
+        Utils.assertWithAllOptimizationLevelsES6("value 1, undefined, foo, 42, undefined", js);
     }
 
     @Test
@@ -801,7 +804,7 @@ public class NativeProxyTest {
                         + "  getPrototypeOf: null,\n"
                         + "});\n"
                         + "'' + Object.getPrototypeOf(plainObjectProxy);\n";
-        testString("null", js);
+        Utils.assertWithAllOptimizationLevelsES6("null", js);
     }
 
     @Test
@@ -813,13 +816,13 @@ public class NativeProxyTest {
                         + "result += ' ' + Reflect.setPrototypeOf(o1, null);\n"
                         + "var o2 = {};\n"
                         + "result += ' ' + Reflect.setPrototypeOf(Object.freeze(o2), null);\n";
-        testString("true true false", js);
+        Utils.assertWithAllOptimizationLevelsES6("true true false", js);
     }
 
     @Test
     public void setPrototypeOfCycleWithoutHandler() {
         String js = "var o1 = {};\n" + "'' + Reflect.setPrototypeOf(o1, o1);\n";
-        testString("false", js);
+        Utils.assertWithAllOptimizationLevelsES6("false", js);
     }
 
     @Test
@@ -831,7 +834,7 @@ public class NativeProxyTest {
                         + "'' + Reflect.setPrototypeOf(o1, o2)"
                         + "+ ' ' + Reflect.setPrototypeOf(o2, o3)"
                         + "+ ' ' + Reflect.setPrototypeOf(o3, o1)";
-        testString("true true false", js);
+        Utils.assertWithAllOptimizationLevelsES6("true true false", js);
     }
 
     @Test
@@ -847,19 +850,20 @@ public class NativeProxyTest {
                         + "'' + Reflect.setPrototypeOf(o1, Object.prototype)"
                         + "+ ' ' + Reflect.setPrototypeOf(o2, null)"
                         + "+ ' ' + Reflect.setPrototypeOf(o3, proto)";
-        testString("true true true", js);
+        Utils.assertWithAllOptimizationLevelsES6("true true true", js);
     }
 
     @Test
     public void typeof() {
-        testString("object", "typeof new Proxy({}, {})");
-        testString("function", "typeof new Proxy(function() {}, {})");
+        Utils.assertWithAllOptimizationLevelsES6("object", "typeof new Proxy({}, {})");
+        Utils.assertWithAllOptimizationLevelsES6("function", "typeof new Proxy(function() {}, {})");
     }
 
     @Test
     public void typeofRevocable() {
-        testString("object", "var rev = Proxy.revocable({}, {}); rev.revoke(); typeof rev.proxy");
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
+                "object", "var rev = Proxy.revocable({}, {}); rev.revoke(); typeof rev.proxy");
+        Utils.assertWithAllOptimizationLevelsES6(
                 "function",
                 "var rev = Proxy.revocable(function() {}, {}); rev.revoke(); typeof rev.proxy");
 
@@ -868,7 +872,7 @@ public class NativeProxyTest {
                         + "revocableTarget.revoke();\n"
                         + "var revocable = Proxy.revocable(revocableTarget.proxy, {});\n"
                         + "'' + typeof revocable.proxy;\n";
-        testString("function", js);
+        Utils.assertWithAllOptimizationLevelsES6("function", js);
     }
 
     @Test
@@ -880,40 +884,64 @@ public class NativeProxyTest {
                         + "+ ' ' + desc.writable "
                         + "+ ' ' + desc.enumerable "
                         + "+ ' ' + desc.configurable";
-        testString("undefined  false false true", js);
+        Utils.assertWithAllOptimizationLevelsES6("undefined  false false true", js);
     }
 
     @Test
     public void revocableGetPrototypeOf() {
-        testString(
+        Utils.assertWithAllOptimizationLevelsES6(
                 "TypeError: Illegal operation attempted on a revoked proxy",
                 "var rev = Proxy.revocable({}, {}); rev.revoke(); "
                         + "try { Object.getPrototypeOf(rev.proxy); } catch(e) { '' + e }");
     }
 
-    private static void testString(String expected, String js) {
-        Utils.runWithAllOptimizationLevels(
-                cx -> {
-                    cx.setLanguageVersion(Context.VERSION_ES6);
-                    final Scriptable scope = cx.initStandardObjects();
+    @Test
+    public void keysFailsWithOwnKeysOverwritten() {
+        String js =
+                "var target = {};\n"
+                        + "Object.defineProperty(target, 'prop', {\n"
+                        + "  value: 1,\n"
+                        + "  writable: true,\n"
+                        + "  enumerable: false,\n"
+                        + "  configurable: false,\n"
+                        + "});\n"
+                        + "var proxy = new Proxy(target, {\n"
+                        + "  ownKeys: function() {\n"
+                        + "    return [];\n"
+                        + "  },\n"
+                        + "});\n"
+                        + "try {"
+                        + "  Object.keys(proxy);\n"
+                        + "} catch(e) {\n"
+                        + "  '' + e;\n"
+                        + "}";
 
-                    Object result = cx.evaluateString(scope, js, "test", 1, null);
-                    assertEquals(expected, result);
-
-                    return null;
-                });
+        Utils.assertWithAllOptimizationLevelsES6(
+                "TypeError: proxy can't skip a non-configurable property 'prop'", js);
     }
 
-    private static void testDouble(double expected, String js) {
-        Utils.runWithAllOptimizationLevels(
-                cx -> {
-                    cx.setLanguageVersion(Context.VERSION_ES6);
-                    final Scriptable scope = cx.initStandardObjects();
+    @Test
+    public void keysPreventExtensions() {
+        String js =
+                "var target = {};\n"
+                        + "Object.defineProperty(target, 'prop', {\n"
+                        + "  value: 3,\n"
+                        + "  writable: true,\n"
+                        + "  enumerable: false,\n"
+                        + "  configurable: true,\n"
+                        + "});\n"
+                        + "var proxy = new Proxy(target, {\n"
+                        + "  ownKeys: function() {\n"
+                        + "    return ['prop'];\n"
+                        + "  },\n"
+                        + "});\n"
+                        + "Object.preventExtensions(target);\n"
+                        + "try {"
+                        + "  Object.keys(proxy).length === 0;\n"
+                        + "} catch(e) {\n"
+                        + "  '' + e;\n"
+                        + "}";
 
-                    Object result = cx.evaluateString(scope, js, "test", 1, null);
-                    assertEquals(expected, ((Double) result).doubleValue(), 0.00001);
-
-                    return null;
-                });
+        Utils.assertWithAllOptimizationLevelsES6(true, js);
     }
 }

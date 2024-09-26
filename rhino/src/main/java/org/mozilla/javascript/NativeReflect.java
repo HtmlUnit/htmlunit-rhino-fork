@@ -142,7 +142,7 @@ final class NativeReflect extends ScriptableObject {
                     Integer.toString(args.length));
         }
 
-        if (!(args[0] instanceof Constructable)) {
+        if (!AbstractEcmaObjectOperations.isConstructor(cx, args[0])) {
             throw ScriptRuntime.typeErrorById("msg.not.ctor", ScriptRuntime.typeof(args[0]));
         }
 
@@ -151,7 +151,7 @@ final class NativeReflect extends ScriptableObject {
             return ctor.construct(cx, scope, ScriptRuntime.emptyArgs);
         }
 
-        if (args.length > 2 && !(args[2] instanceof Constructable)) {
+        if (args.length > 2 && !AbstractEcmaObjectOperations.isConstructor(cx, args[2])) {
             throw ScriptRuntime.typeErrorById("msg.not.ctor", ScriptRuntime.typeof(args[2]));
         }
 
@@ -174,7 +174,9 @@ final class NativeReflect extends ScriptableObject {
             }
         }
 
-        // hack to set the right prototype before calling the ctor
+        // our Constructable interface does not support the newTarget;
+        // therefore we use a cloned implementation that fixes
+        // the prototype before executing call(..).
         if (ctor instanceof BaseFunction && newTargetPrototype != null) {
             BaseFunction ctorBaseFunction = (BaseFunction) ctor;
             Scriptable result = ctorBaseFunction.createObject(cx, scope);
@@ -240,11 +242,7 @@ final class NativeReflect extends ScriptableObject {
                 Object prop = ScriptableObject.getProperty(target, (Symbol) args[1]);
                 return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
             }
-            if (args[1] instanceof Integer) {
-                Object prop = ScriptableObject.getProperty(target, (int) args[1]);
-                return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
-            }
-            if (args[1] instanceof Double) {
+            if (args[1] instanceof Number) {
                 Object prop = ScriptableObject.getProperty(target, ScriptRuntime.toIndex(args[1]));
                 return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
             }
