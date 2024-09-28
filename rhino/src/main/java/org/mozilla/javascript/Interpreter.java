@@ -1603,6 +1603,16 @@ public final class Interpreter extends Icode implements Evaluator {
                                                     lhs, stringReg, cx, frame.scope);
                                     continue Loop;
                                 }
+                            case Token.GETPROP_OPTIONAL:
+                                {
+                                    Object lhs = stack[stackTop];
+                                    if (lhs == DBL_MRK)
+                                        lhs = ScriptRuntime.wrapNumber(sDbl[stackTop]);
+                                    stack[stackTop] =
+                                            ScriptRuntime.getObjectPropOptional(
+                                                    lhs, stringReg, cx, frame.scope);
+                                    continue Loop;
+                                }
                             case Token.SETPROP:
                                 {
                                     Object rhs = stack[stackTop];
@@ -1699,6 +1709,19 @@ public final class Interpreter extends Icode implements Evaluator {
                                 ++stackTop;
                                 stack[stackTop] = ScriptRuntime.lastStoredScriptable(cx);
                                 continue Loop;
+                            case Icode_PROP_AND_THIS_OPTIONAL:
+                                {
+                                    Object obj = stack[stackTop];
+                                    if (obj == DBL_MRK)
+                                        obj = ScriptRuntime.wrapNumber(sDbl[stackTop]);
+                                    // stringReg: property
+                                    stack[stackTop] =
+                                            ScriptRuntime.getPropFunctionAndThisOptional(
+                                                    obj, stringReg, cx, frame.scope);
+                                    ++stackTop;
+                                    stack[stackTop] = ScriptRuntime.lastStoredScriptable(cx);
+                                    continue Loop;
+                                }
                             case Icode_PROP_AND_THIS:
                                 {
                                     Object obj = stack[stackTop];
@@ -1749,6 +1772,7 @@ public final class Interpreter extends Icode implements Evaluator {
                                     continue Loop;
                                 }
                             case Token.CALL:
+                            case Token.CALL_OPTIONAL:
                             case Icode_TAIL_CALL:
                             case Token.REF_CALL:
                                 {
@@ -2262,6 +2286,17 @@ public final class Interpreter extends Icode implements Evaluator {
                                         obj = ScriptRuntime.wrapNumber(sDbl[stackTop]);
                                     stack[stackTop] =
                                             ScriptRuntime.specialRef(
+                                                    obj, stringReg, cx, frame.scope);
+                                    continue Loop;
+                                }
+                            case Token.REF_SPECIAL_OPTIONAL:
+                                {
+                                    // stringReg: name of special property
+                                    Object obj = stack[stackTop];
+                                    if (obj == DBL_MRK)
+                                        obj = ScriptRuntime.wrapNumber(sDbl[stackTop]);
+                                    stack[stackTop] =
+                                            ScriptRuntime.optionalSpecialRef(
                                                     obj, stringReg, cx, frame.scope);
                                     continue Loop;
                                 }
