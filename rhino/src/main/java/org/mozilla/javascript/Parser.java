@@ -766,7 +766,7 @@ public class Parser {
         // Would prefer not to call createDestructuringAssignment until codegen,
         // but the symbol definitions have to happen now, before body is parsed.
         Map<String, Node> destructuring = null;
-        Map<String, Node> destructuringDefault = null;
+        Map<String, AstNode> destructuringDefault = null;
 
         Set<String> paramNames = new HashSet<>();
         do {
@@ -878,7 +878,7 @@ public class Parser {
             Node destructuringNode = new Node(Token.COMMA);
             // Add assignment helper for each destructuring parameter
             for (Map.Entry<String, Node> param : destructuring.entrySet()) {
-                Node defaultValue = null;
+                AstNode defaultValue = null;
                 if (destructuringDefault != null) {
                     defaultValue = destructuringDefault.get(param.getKey());
                 }
@@ -1024,7 +1024,7 @@ public class Parser {
         // Would prefer not to call createDestructuringAssignment until codegen,
         // but the symbol definitions have to happen now, before body is parsed.
         Map<String, Node> destructuring = new HashMap<>();
-        Map<String, Node> destructuringDefault = new HashMap<>();
+        Map<String, AstNode> destructuringDefault = new HashMap<>();
         Set<String> paramNames = new HashSet<>();
 
         PerFunctionVariables savedVars = new PerFunctionVariables(fnNode);
@@ -1047,7 +1047,7 @@ public class Parser {
                 Node destructuringNode = new Node(Token.COMMA);
                 // Add assignment helper for each destructuring parameter
                 for (Map.Entry<String, Node> param : destructuring.entrySet()) {
-                    Node defaultValue = null;
+                    AstNode defaultValue = null;
                     if (destructuringDefault != null) {
                         defaultValue = destructuringDefault.get(param.getKey());
                     }
@@ -1087,7 +1087,7 @@ public class Parser {
             FunctionNode fnNode,
             AstNode params,
             Map<String, Node> destructuring,
-            Map<String, Node> destructuringDefault,
+            Map<String, AstNode> destructuringDefault,
             Set<String> paramNames)
             throws IOException {
         if (params instanceof ArrayLiteral || params instanceof ObjectLiteral) {
@@ -2911,6 +2911,7 @@ public class Parser {
         if (pn == null) codeBug();
         int pos = pn.getPosition();
         int lineno;
+        boolean isOptionalChain = false;
         tailLoop:
         for (; ; ) {
             int tt = peekToken();
@@ -2919,7 +2920,8 @@ public class Parser {
                 case Token.QUESTION_DOT:
                 case Token.DOTDOT:
                     lineno = ts.lineno;
-                    pn = propertyAccess(tt, pn);
+                    isOptionalChain |= (tt == Token.QUESTION_DOT);
+                    pn = propertyAccess(tt, pn, isOptionalChain);
                     pn.setLineno(lineno);
                     break;
 
@@ -2946,20 +2948,8 @@ public class Parser {
 
                 case Token.LB:
                     consumeToken();
-                    int lb = ts.tokenBeg, rb = -1;
                     lineno = ts.lineno;
-                    AstNode expr = expr(false);
-                    end = getNodeEnd(expr);
-                    if (mustMatchToken(Token.RB, "msg.no.bracket.index", true)) {
-                        rb = ts.tokenBeg;
-                        end = ts.tokenEnd;
-                    }
-                    ElementGet g = new ElementGet(pos, end - pos);
-                    g.setTarget(pn);
-                    g.setElement(expr);
-                    g.setParens(lb, rb);
-                    g.setLineno(lineno);
-                    pn = g;
+                    pn = makeElemGet(pn, ts.tokenBeg, lineno);
                     break;
 
                 case Token.LP:
@@ -3016,9 +3006,11 @@ public class Parser {
      * Handles any construct following a "." or ".." operator.
      *
      * @param pn the left-hand side (target) of the operator. Never null.
+     * @param isOptionalChain whether we are inside an optional chain, i.e. whether a preceding
+     *     property access was done via the {@code ?.} operator
      * @return a PropertyGet, XmlMemberGet, or ErrorNode
      */
-    private AstNode propertyAccess(int tt, AstNode pn) throws IOException {
+    private AstNode propertyAccess(int tt, AstNode pn, boolean isOptionalChain) throws IOException {
         if (pn == null) codeBug();
         int memberTypeFlags = 0, lineno = ts.lineno, dotPos = ts.tokenBeg;
         consumeToken();
@@ -3047,27 +3039,6 @@ public class Parser {
 
         AstNode ref = null; // right side of . or .. operator
         int token = nextToken();
-        if (token == Token.LP && tt == Token.QUESTION_DOT) {
-            // optional chaining operator method call, o.func?.()
-            int pos = pn.getPosition();
-            pn.setType(Token.QUESTION_DOT);
-            consumeToken();
-            checkCallRequiresActivation(pn);
-            FunctionCall f = new FunctionCall(pos);
-            f.setTarget(pn);
-            // Assign the line number for the function call to where
-            // the paren appeared, not where the name expression started.
-            f.setLineno(lineno);
-            f.setLp(ts.tokenBeg - pos);
-            List<AstNode> args = argumentList();
-            if (args != null && args.size() > ARGC_LIMIT) reportError("msg.too.many.function.args");
-            f.setArguments(args);
-            f.setRp(ts.tokenBeg - pos);
-            f.setLength(ts.tokenEnd - pos);
-            f.setType(Token.CALL_OPTIONAL);
-            return f;
-        }
-
         switch (token) {
             case Token.THROW:
                 // needed for generator.throw();
@@ -3099,6 +3070,19 @@ public class Parser {
                     ref = propertyName(-1, memberTypeFlags);
                     break;
                 }
+
+            case Token.LB:
+                if (tt == Token.QUESTION_DOT) {
+                    // a ?.[ expr ]
+                    consumeToken();
+                    ElementGet g = makeElemGet(pn, ts.tokenBeg, ts.lineno);
+                    g.setType(Token.QUESTION_DOT);
+                    return g;
+                } else {
+                    reportError("msg.no.name.after.dot");
+                    return makeErrorNode();
+                }
+
             default:
                 if (compilerEnv.isReservedKeywordAsIdentifier()) {
                     // allow keywords as property names, e.g. ({if: 1})
@@ -3116,6 +3100,7 @@ public class Parser {
         boolean xml = ref instanceof XmlRef;
         InfixExpression result = xml ? new XmlMemberGet() : new PropertyGet();
         if (xml && tt == Token.DOT) result.setType(Token.DOT);
+        if (isOptionalChain) result.setType(Token.QUESTION_DOT);
         int pos = pn.getPosition();
         result.setPosition(pos);
         result.setLength(getNodeEnd(ref) - pos);
@@ -3123,11 +3108,24 @@ public class Parser {
         result.setLineno(pn.getLineno());
         result.setLeft(pn); // do this after setting position
         result.setRight(ref);
-
-        if (tt == Token.QUESTION_DOT && result instanceof PropertyGet) {
-            result.setType(Token.QUESTION_DOT);
-        }
         return result;
+    }
+
+    private ElementGet makeElemGet(AstNode pn, int lb, int lineno) throws IOException {
+        int pos = pn.getPosition();
+        AstNode expr = expr(false);
+        int end = getNodeEnd(expr);
+        int rb = -1;
+        if (mustMatchToken(Token.RB, "msg.no.bracket.index", true)) {
+            rb = ts.tokenBeg;
+            end = ts.tokenEnd;
+        }
+        ElementGet g = new ElementGet(pos, end - pos);
+        g.setTarget(pn);
+        g.setElement(expr);
+        g.setParens(lb, rb);
+        g.setLineno(lineno);
+        return g;
     }
 
     /**
@@ -4215,7 +4213,7 @@ public class Parser {
      * @return expression that performs a series of assignments to the variables defined in left
      */
     Node createDestructuringAssignment(
-            int type, Node left, Node right, Node defaultValue, Transformer transformer) {
+            int type, Node left, Node right, AstNode defaultValue, Transformer transformer) {
         String tempName = currentScriptOrFn.getNextTempName();
         Node result =
                 destructuringAssignmentHelper(
@@ -4229,7 +4227,7 @@ public class Parser {
         return createDestructuringAssignment(type, left, right, null, transformer);
     }
 
-    Node createDestructuringAssignment(int type, Node left, Node right, Node defaultValue) {
+    Node createDestructuringAssignment(int type, Node left, Node right, AstNode defaultValue) {
         return createDestructuringAssignment(type, left, right, defaultValue, null);
     }
 
@@ -4238,7 +4236,7 @@ public class Parser {
             Node left,
             Node right,
             String tempName,
-            Node defaultValue,
+            AstNode defaultValue,
             Transformer transformer) {
         Scope result = createScopeNode(Token.LETEXPR, left.getLineno());
         result.addChildToFront(new Node(Token.LET, createName(Token.NAME, tempName, right)));
@@ -4297,7 +4295,7 @@ public class Parser {
             String tempName,
             Node parent,
             List<String> destructuringNames,
-            Node defaultValue, /* defaultValue to use in function param decls */
+            AstNode defaultValue, /* defaultValue to use in function param decls */
             Transformer transformer) {
         boolean empty = true;
         int setOp = variableType == Token.CONST ? Token.SETCONST : Token.SETNAME;
@@ -4368,14 +4366,7 @@ public class Parser {
             //              : $1[0])
             //          : x
 
-            if ((n.getRight() instanceof FunctionNode
-                            || n.getRight() instanceof UpdateExpression
-                            || n.getRight() instanceof ParenthesizedExpression)
-                    && transformer != null) {
-                right = transformer.transform(n.getRight());
-            } else {
-                right = n.getRight();
-            }
+            right = (transformer != null) ? transformer.transform(n.getRight()) : n.getRight();
 
             Node cond_inner =
                     new Node(
@@ -4384,21 +4375,18 @@ public class Parser {
                             right,
                             rightElem);
 
-            // if right is a function/update expression, it should be processed later
-            // store it in the node to be processed
-            if ((right instanceof FunctionNode
-                            || right instanceof UpdateExpression
-                            || right instanceof ParenthesizedExpression)
-                    && transformer == null) {
-                currentScriptOrFn.putDestructuringRvalues(cond_inner, right);
-            }
-
             Node cond =
                     new Node(
                             Token.HOOK,
                             new Node(Token.SHEQ, createName("undefined"), createName(name)),
                             cond_inner,
                             left);
+
+            // store it to be transformed later
+            if (transformer == null) {
+                currentScriptOrFn.putDestructuringRvalues(cond_inner, right);
+            }
+
             parent.addChildToBack(new Node(setOp, createName(Token.BINDNAME, name, null), cond));
             if (variableType != -1) {
                 defineSymbol(variableType, name, true);
@@ -4427,43 +4415,17 @@ public class Parser {
     }
 
     private void setupDefaultValues(
-            String tempName, Node parent, Node defaultValue, int setOp, Transformer transformer) {
+            String tempName,
+            Node parent,
+            AstNode defaultValue,
+            int setOp,
+            Transformer transformer) {
         if (defaultValue != null) {
             // if there's defaultValue it can be substituted for tempName if that's undefined
             // i.e. $1 = ($1 == undefined) ? defaultValue : $1
-            Node defaultRvalue = new Node(defaultValue.getType());
 
-            if (defaultValue instanceof ArrayLiteral) {
-                for (AstNode child : ((ArrayLiteral) defaultValue).getElements())
-                    defaultRvalue.addChildToBack(child);
-            } else if (defaultValue instanceof ObjectLiteral) {
-                // TODO: check if "Symbol.iterator" is defined
-                //                Node error_call = new Node(Token.NEW, createName("Error"));
-                //                error_call.addChildToBack(Node.newString("value is not
-                // iterable"));
-                //
-                //                Node check_iterator = new Node(
-                //                        Token.HOOK,
-                //                        new Node(Token.SHEQ,
-                //                                new Node(Token.GETPROP,
-                //                                        defaultValue,
-                //                                        createName("Symbol.iterator")),
-                //                                createName("undefined")),
-                //                        error_call,
-                //                        new Node(Token.TRUE));
-                //                parent.addChildToBack(check_iterator);
-
-                List<ObjectProperty> elems = ((ObjectLiteral) defaultValue).getElements();
-                Object[] props = new Object[elems.size()];
-                int i = 0;
-                for (ObjectProperty child : elems) {
-                    Object key = getPropKey(child.getLeft());
-                    Node right = child.getRight();
-                    props[i++] = key;
-                    defaultRvalue.addChildToBack(right);
-                }
-                defaultRvalue.putProp(Node.OBJECT_IDS_PROP, props);
-            }
+            Node defaultRvalue =
+                    transformer != null ? transformer.transform(defaultValue) : defaultValue;
 
             Node cond_default =
                     new Node(
@@ -4471,6 +4433,10 @@ public class Parser {
                             new Node(Token.SHEQ, createName(tempName), createName("undefined")),
                             defaultRvalue,
                             createName(tempName));
+
+            if (transformer == null) {
+                currentScriptOrFn.putDestructuringRvalues(cond_default, defaultRvalue);
+            }
 
             Node set_default =
                     new Node(setOp, createName(Token.BINDNAME, tempName, null), cond_default);
@@ -4484,7 +4450,7 @@ public class Parser {
             String tempName,
             Node parent,
             List<String> destructuringNames,
-            Node defaultValue, /* defaultValue to use in function param decls */
+            AstNode defaultValue, /* defaultValue to use in function param decls */
             Transformer transformer) {
         boolean empty = true;
         int setOp = variableType == Token.CONST ? Token.SETCONST : Token.SETNAME;
