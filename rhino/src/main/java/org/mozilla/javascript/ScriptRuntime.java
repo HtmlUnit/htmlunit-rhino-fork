@@ -4848,16 +4848,26 @@ public class ScriptRuntime {
      * object literal is compiled. The next instance will be the version called from new code.
      * <strong>This method only present for compatibility.</strong>
      *
-     * @deprecated Use {@link #newObjectLiteral(Object[], Object[], int[], Context, Scriptable)}
-     *     instead
+     * @deprecated Use {@link #fillObjectLiteral(Scriptable, Object[], Object[], int[], Context,
+     *     Scriptable)} instead
      */
     @Deprecated
     public static Scriptable newObjectLiteral(
             Object[] propertyIds, Object[] propertyValues, Context cx, Scriptable scope) {
         // Passing null for getterSetters means no getters or setters
-        return newObjectLiteral(propertyIds, propertyValues, null, cx, scope);
+        Scriptable object = cx.newObject(scope);
+        fillObjectLiteral(object, propertyIds, propertyValues, null, cx, scope);
+        return object;
     }
 
+    /**
+     * This method is here for backward compat with existing compiled code. <strong>This method only
+     * present for compatibility.</strong>
+     *
+     * @deprecated Use {@link #fillObjectLiteral(Scriptable, Object[], Object[], int[], Context,
+     *     Scriptable)}
+     */
+    @Deprecated
     public static Scriptable newObjectLiteral(
             Object[] propertyIds,
             Object[] propertyValues,
@@ -4865,6 +4875,17 @@ public class ScriptRuntime {
             Context cx,
             Scriptable scope) {
         Scriptable object = cx.newObject(scope);
+        fillObjectLiteral(object, propertyIds, propertyValues, getterSetters, cx, scope);
+        return object;
+    }
+
+    public static void fillObjectLiteral(
+            Scriptable object,
+            Object[] propertyIds,
+            Object[] propertyValues,
+            int[] getterSetters,
+            Context cx,
+            Scriptable scope) {
         int end = propertyIds == null ? 0 : propertyIds.length;
         for (int i = 0; i != end; ++i) {
             Object id = propertyIds[i];
@@ -4901,7 +4922,6 @@ public class ScriptRuntime {
                 so.setGetterOrSetter(key, index == null ? 0 : index, getterOrSetter, isSetter);
             }
         }
-        return object;
     }
 
     public static boolean isArrayObject(Object obj) {
