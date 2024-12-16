@@ -1778,7 +1778,7 @@ public abstract class ScriptableObject
         }
 
         replacedSlot.replaceWith(newSlot);
-        var replacedDesc = replacedSlot.buildPropertyDescriptor(cx);
+        ScriptableObject replacedDesc = replacedSlot.buildPropertyDescriptor(cx);
 
         checkPropertyChangeForSlot(name, existing, replacedDesc);
         return replacedSlot;

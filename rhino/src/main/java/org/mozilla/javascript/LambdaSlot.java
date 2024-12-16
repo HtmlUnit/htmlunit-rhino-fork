@@ -24,7 +24,7 @@ public class LambdaSlot extends Slot {
 
     @Override
     LambdaSlot copySlot() {
-        var newSlot = new LambdaSlot(this);
+        LambdaSlot newSlot = new LambdaSlot(this);
         newSlot.value = value;
         newSlot.getter = getter;
         newSlot.setter = setter;

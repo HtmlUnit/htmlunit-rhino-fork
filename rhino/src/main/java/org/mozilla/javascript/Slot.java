@@ -26,7 +26,7 @@ public class Slot implements Serializable {
     }
 
     Slot copySlot() {
-        var newSlot = new Slot(this);
+        Slot newSlot = new Slot(this);
         newSlot.next = null;
         newSlot.orderedNext = null;
         return newSlot;

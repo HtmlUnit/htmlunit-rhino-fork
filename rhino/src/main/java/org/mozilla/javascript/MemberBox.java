@@ -121,12 +121,12 @@ final class MemberBox implements Serializable {
     }
 
     boolean isSameGetterFunction(Object function) {
-        var f = asGetterFunction == null ? Undefined.instance : asGetterFunction;
+        Object f = asGetterFunction == null ? Undefined.instance : asGetterFunction;
         return ScriptRuntime.shallowEq(function, f);
     }
 
     boolean isSameSetterFunction(Object function) {
-        var f = asSetterFunction == null ? Undefined.instance : asSetterFunction;
+        Object f = asSetterFunction == null ? Undefined.instance : asSetterFunction;
         return ScriptRuntime.shallowEq(function, f);
     }
 

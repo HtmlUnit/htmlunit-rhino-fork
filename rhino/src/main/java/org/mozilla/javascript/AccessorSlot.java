@@ -20,7 +20,7 @@ public class AccessorSlot extends Slot {
 
     @Override
     AccessorSlot copySlot() {
-        var newSlot = new AccessorSlot(this);
+        AccessorSlot newSlot = new AccessorSlot(this);
         newSlot.value = value;
         newSlot.getter = getter;
         newSlot.setter = setter;
