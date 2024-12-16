@@ -25,6 +25,13 @@ public class Slot implements Serializable {
         this.attributes = (short) attributes;
     }
 
+    Slot copySlot() {
+        var newSlot = new Slot(this);
+        newSlot.next = null;
+        newSlot.orderedNext = null;
+        return newSlot;
+    }
+
     /**
      * Return true if this is a base-class "Slot". Sadly too much code breaks if we try to do this
      * any other way.
@@ -119,5 +126,20 @@ public class Slot implements Serializable {
     /** Same for the "getter." */
     Function getGetterFunction(String name, Scriptable scope) {
         return null;
+    }
+
+    /**
+     * Compare the JavaScript function that represents the "setter" to the provided Object. We do
+     * this to avoid generating a new function object when it might not be required. Specifically,
+     * if we have a cached funciion object that has not yet been generated then we don't have to
+     * generate it because it cannot be the same as the provided function.
+     */
+    boolean isSameSetterFunction(Object function) {
+        return false;
+    }
+
+    /** Same for the "getter" function. */
+    boolean isSameGetterFunction(Object function) {
+        return false;
     }
 }

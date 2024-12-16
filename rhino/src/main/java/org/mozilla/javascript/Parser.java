@@ -41,6 +41,7 @@ import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.GeneratorExpression;
 import org.mozilla.javascript.ast.GeneratorExpressionLoop;
+import org.mozilla.javascript.ast.GeneratorMethodDefinition;
 import org.mozilla.javascript.ast.IdeErrorReporter;
 import org.mozilla.javascript.ast.IfStatement;
 import org.mozilla.javascript.ast.InfixExpression;
@@ -133,6 +134,7 @@ public class Parser {
     private Comment currentJsDocComment;
 
     protected int nestingOfFunction;
+    protected int nestingOfFunctionParams;
     private LabeledStatement currentLabel;
     private boolean inDestructuringAssignment;
     protected boolean inUseStrictDirective;
@@ -140,6 +142,7 @@ public class Parser {
     // The following are per function variables and should be saved/restored
     // during function parsing.  See PerFunctionVariables class below.
     ScriptNode currentScriptOrFn;
+    private boolean insideMethod;
     Scope currentScope;
     private int endFlags;
     private boolean inForInit; // bound temporarily during forStatement()
@@ -479,8 +482,12 @@ public class Parser {
         return ts.eof();
     }
 
-    boolean insideFunction() {
+    boolean insideFunctionBody() {
         return nestingOfFunction != 0;
+    }
+
+    boolean insideFunctionParams() {
+        return nestingOfFunctionParams != 0;
     }
 
     void pushScope(Scope scope) {
@@ -773,152 +780,163 @@ public class Parser {
     }
 
     private void parseFunctionParams(FunctionNode fnNode) throws IOException {
-        if (matchToken(Token.RP, true)) {
-            fnNode.setRp(ts.tokenBeg - fnNode.getPosition());
-            return;
-        }
-        // Would prefer not to call createDestructuringAssignment until codegen,
-        // but the symbol definitions have to happen now, before body is parsed.
-        Map<String, Node> destructuring = null;
-        Map<String, AstNode> destructuringDefault = null;
-
-        Set<String> paramNames = new HashSet<>();
-        do {
-            int tt = peekToken();
-            if (tt == Token.RP) {
-                if (fnNode.hasRestParameter()) {
-                    // Error: parameter after rest parameter
-                    reportError("msg.parm.after.rest", ts.tokenBeg, ts.tokenEnd - ts.tokenBeg);
-                }
-
-                fnNode.putIntProp(Node.TRAILING_COMMA, 1);
-                break;
+        ++nestingOfFunctionParams;
+        try {
+            if (matchToken(Token.RP, true)) {
+                fnNode.setRp(ts.tokenBeg - fnNode.getPosition());
+                return;
             }
-            if (tt == Token.LB || tt == Token.LC) {
-                if (fnNode.hasRestParameter()) {
-                    // Error: parameter after rest parameter
-                    reportError("msg.parm.after.rest", ts.tokenBeg, ts.tokenEnd - ts.tokenBeg);
-                }
+            // Would prefer not to call createDestructuringAssignment until codegen,
+            // but the symbol definitions have to happen now, before body is parsed.
+            Map<String, Node> destructuring = null;
+            Map<String, AstNode> destructuringDefault = null;
 
-                AstNode expr = destructuringAssignExpr();
-                if (destructuring == null) {
-                    destructuring = new HashMap<>();
-                }
-
-                if (expr instanceof Assignment) {
-                    // We have default arguments inside destructured function parameters
-                    // eg: f([x = 1] = [2]) { ... }, transform this into:
-                    // f(x) {
-                    //      if ($1 == undefined)
-                    //          var $1 = [2];
-                    //      if (x == undefined)
-                    //          if (($1[0]) == undefined)
-                    //              var x = 1;
-                    //          else
-                    //              var x = $1[0];
-                    // }
-                    // fnNode.addParam(name)
-                    AstNode lhs = ((Assignment) expr).getLeft(); // [x = 1]
-                    AstNode rhs = ((Assignment) expr).getRight(); // [2]
-                    markDestructuring(lhs);
-                    fnNode.addParam(lhs);
-                    String pname = currentScriptOrFn.getNextTempName();
-                    defineSymbol(Token.LP, pname, false);
-                    if (destructuringDefault == null) {
-                        destructuringDefault = new HashMap<>();
-                    }
-                    destructuring.put(pname, lhs);
-                    destructuringDefault.put(pname, rhs);
-                } else {
-                    markDestructuring(expr);
-                    fnNode.addParam(expr);
-                    // Destructuring assignment for parameters: add a dummy
-                    // parameter name, and add a statement to the body to initialize
-                    // variables from the destructuring assignment
-                    String pname = currentScriptOrFn.getNextTempName();
-                    defineSymbol(Token.LP, pname, false);
-                    destructuring.put(pname, expr);
-                }
-            } else {
-                boolean wasRest = false;
-                int restStartLineno = -1, restStartColumn = -1;
-                if (tt == Token.DOTDOTDOT) {
+            Set<String> paramNames = new HashSet<>();
+            do {
+                int tt = peekToken();
+                if (tt == Token.RP) {
                     if (fnNode.hasRestParameter()) {
                         // Error: parameter after rest parameter
                         reportError("msg.parm.after.rest", ts.tokenBeg, ts.tokenEnd - ts.tokenBeg);
                     }
 
-                    fnNode.setHasRestParameter(true);
-                    wasRest = true;
-                    consumeToken();
-                    restStartLineno = lineNumber();
-                    restStartColumn = columnNumber();
+                    fnNode.putIntProp(Node.TRAILING_COMMA, 1);
+                    break;
                 }
-
-                if (mustMatchToken(Token.NAME, "msg.no.parm", true)) {
-                    if (!wasRest && fnNode.hasRestParameter()) {
+                if (tt == Token.LB || tt == Token.LC) {
+                    if (fnNode.hasRestParameter()) {
                         // Error: parameter after rest parameter
                         reportError("msg.parm.after.rest", ts.tokenBeg, ts.tokenEnd - ts.tokenBeg);
                     }
 
-                    Name paramNameNode = createNameNode();
-                    if (wasRest) {
-                        paramNameNode.setLineColumnNumber(restStartLineno, restStartColumn);
-                    }
-                    Comment jsdocNodeForName = getAndResetJsDoc();
-                    if (jsdocNodeForName != null) {
-                        paramNameNode.setJsDocNode(jsdocNodeForName);
-                    }
-                    fnNode.addParam(paramNameNode);
-                    String paramName = ts.getString();
-                    defineSymbol(Token.LP, paramName);
-                    if (this.inUseStrictDirective) {
-                        if ("eval".equals(paramName) || "arguments".equals(paramName)) {
-                            reportError("msg.bad.id.strict", paramName);
-                        }
-                        if (paramNames.contains(paramName))
-                            addError("msg.dup.param.strict", paramName);
-                        paramNames.add(paramName);
+                    AstNode expr = destructuringAssignExpr();
+                    if (destructuring == null) {
+                        destructuring = new HashMap<>();
                     }
 
-                    if (matchToken(Token.ASSIGN, true)) {
-                        if (compilerEnv.getLanguageVersion() >= Context.VERSION_ES6) {
-                            fnNode.putDefaultParams(paramName, assignExpr());
-                        } else {
-                            reportError("msg.default.args");
+                    if (expr instanceof Assignment) {
+                        // We have default arguments inside destructured function parameters
+                        // eg: f([x = 1] = [2]) { ... }, transform this into:
+                        // f(x) {
+                        //      if ($1 == undefined)
+                        //          var $1 = [2];
+                        //      if (x == undefined)
+                        //          if (($1[0]) == undefined)
+                        //              var x = 1;
+                        //          else
+                        //              var x = $1[0];
+                        // }
+                        // fnNode.addParam(name)
+                        AstNode lhs = ((Assignment) expr).getLeft(); // [x = 1]
+                        AstNode rhs = ((Assignment) expr).getRight(); // [2]
+                        markDestructuring(lhs);
+                        fnNode.addParam(lhs);
+                        String pname = currentScriptOrFn.getNextTempName();
+                        defineSymbol(Token.LP, pname, false);
+                        if (destructuringDefault == null) {
+                            destructuringDefault = new HashMap<>();
                         }
+                        destructuring.put(pname, lhs);
+                        destructuringDefault.put(pname, rhs);
+                    } else {
+                        markDestructuring(expr);
+                        fnNode.addParam(expr);
+                        // Destructuring assignment for parameters: add a dummy
+                        // parameter name, and add a statement to the body to initialize
+                        // variables from the destructuring assignment
+                        String pname = currentScriptOrFn.getNextTempName();
+                        defineSymbol(Token.LP, pname, false);
+                        destructuring.put(pname, expr);
                     }
                 } else {
-                    fnNode.addParam(makeErrorNode());
-                }
-            }
-        } while (matchToken(Token.COMMA, true));
+                    boolean wasRest = false;
+                    int restStartLineno = -1, restStartColumn = -1;
+                    if (tt == Token.DOTDOTDOT) {
+                        if (fnNode.hasRestParameter()) {
+                            // Error: parameter after rest parameter
+                            reportError(
+                                    "msg.parm.after.rest", ts.tokenBeg, ts.tokenEnd - ts.tokenBeg);
+                        }
 
-        if (destructuring != null) {
-            Node destructuringNode = new Node(Token.COMMA);
-            // Add assignment helper for each destructuring parameter
-            for (Map.Entry<String, Node> param : destructuring.entrySet()) {
-                AstNode defaultValue = null;
-                if (destructuringDefault != null) {
-                    defaultValue = destructuringDefault.get(param.getKey());
-                }
-                Node assign =
-                        createDestructuringAssignment(
-                                Token.VAR,
-                                param.getValue(),
-                                createName(param.getKey()),
-                                defaultValue);
-                destructuringNode.addChildToBack(assign);
-            }
-            fnNode.putProp(Node.DESTRUCTURING_PARAMS, destructuringNode);
-        }
+                        fnNode.setHasRestParameter(true);
+                        wasRest = true;
+                        consumeToken();
+                        restStartLineno = lineNumber();
+                        restStartColumn = columnNumber();
+                    }
 
-        if (mustMatchToken(Token.RP, "msg.no.paren.after.parms", true)) {
-            fnNode.setRp(ts.tokenBeg - fnNode.getPosition());
+                    if (mustMatchToken(Token.NAME, "msg.no.parm", true)) {
+                        if (!wasRest && fnNode.hasRestParameter()) {
+                            // Error: parameter after rest parameter
+                            reportError(
+                                    "msg.parm.after.rest", ts.tokenBeg, ts.tokenEnd - ts.tokenBeg);
+                        }
+
+                        Name paramNameNode = createNameNode();
+                        if (wasRest) {
+                            paramNameNode.setLineColumnNumber(restStartLineno, restStartColumn);
+                        }
+                        Comment jsdocNodeForName = getAndResetJsDoc();
+                        if (jsdocNodeForName != null) {
+                            paramNameNode.setJsDocNode(jsdocNodeForName);
+                        }
+                        fnNode.addParam(paramNameNode);
+                        String paramName = ts.getString();
+                        defineSymbol(Token.LP, paramName);
+                        if (this.inUseStrictDirective) {
+                            if ("eval".equals(paramName) || "arguments".equals(paramName)) {
+                                reportError("msg.bad.id.strict", paramName);
+                            }
+                            if (paramNames.contains(paramName))
+                                addError("msg.dup.param.strict", paramName);
+                            paramNames.add(paramName);
+                        }
+
+                        if (matchToken(Token.ASSIGN, true)) {
+                            if (compilerEnv.getLanguageVersion() >= Context.VERSION_ES6) {
+                                fnNode.putDefaultParams(paramName, assignExpr());
+                            } else {
+                                reportError("msg.default.args");
+                            }
+                        }
+                    } else {
+                        fnNode.addParam(makeErrorNode());
+                    }
+                }
+            } while (matchToken(Token.COMMA, true));
+
+            if (destructuring != null) {
+                Node destructuringNode = new Node(Token.COMMA);
+                // Add assignment helper for each destructuring parameter
+                for (Map.Entry<String, Node> param : destructuring.entrySet()) {
+                    AstNode defaultValue = null;
+                    if (destructuringDefault != null) {
+                        defaultValue = destructuringDefault.get(param.getKey());
+                    }
+                    Node assign =
+                            createDestructuringAssignment(
+                                    Token.VAR,
+                                    param.getValue(),
+                                    createName(param.getKey()),
+                                    defaultValue);
+                    destructuringNode.addChildToBack(assign);
+                }
+                fnNode.putProp(Node.DESTRUCTURING_PARAMS, destructuringNode);
+            }
+
+            if (mustMatchToken(Token.RP, "msg.no.paren.after.parms", true)) {
+                fnNode.setRp(ts.tokenBeg - fnNode.getPosition());
+            }
+        } finally {
+            --nestingOfFunctionParams;
         }
     }
 
     private FunctionNode function(int type) throws IOException {
+        return function(type, false);
+    }
+
+    private FunctionNode function(int type, boolean isMethodDefiniton) throws IOException {
         boolean isGenerator = false;
         int syntheticType = type;
         int baseLineno = lineNumber(); // line number where source starts
@@ -976,6 +994,7 @@ public class Parser {
         }
 
         FunctionNode fnNode = new FunctionNode(functionSourceStart, name);
+        fnNode.setMethodDefinition(isMethodDefiniton);
         fnNode.setFunctionType(type);
         if (isGenerator) {
             fnNode.setIsES6Generator();
@@ -985,6 +1004,8 @@ public class Parser {
         fnNode.setJsDocNode(getAndResetJsDoc());
 
         PerFunctionVariables savedVars = new PerFunctionVariables(fnNode);
+        boolean wasInsideMethod = insideMethod;
+        insideMethod = isMethodDefiniton;
         try {
             parseFunctionParams(fnNode);
             AstNode body = parseFunctionBody(type, fnNode);
@@ -1002,6 +1023,7 @@ public class Parser {
             }
         } finally {
             savedVars.restore();
+            insideMethod = wasInsideMethod;
         }
 
         if (memberExprNode != null) {
@@ -1050,6 +1072,8 @@ public class Parser {
         Set<String> paramNames = new HashSet<>();
 
         PerFunctionVariables savedVars = new PerFunctionVariables(fnNode);
+        // Intentionally not overwriting "insideMethod" - we want to propagate this from the parent
+        // function or scope
         try {
             if (params instanceof ParenthesizedExpression) {
                 fnNode.setParens(0, params.getLength());
@@ -1394,7 +1418,7 @@ public class Parser {
                 // We have not consumed any token yet, so the position would be invalid
                 lineno = ts.getLineno();
                 column = ts.getTokenColumn();
-                pn = new ExpressionStatement(expr(false), !insideFunction());
+                pn = new ExpressionStatement(expr(false), !insideFunctionBody());
                 pn.setLineColumnNumber(lineno, column);
                 break;
         }
@@ -2070,7 +2094,7 @@ public class Parser {
     }
 
     private AstNode returnOrYield(int tt, boolean exprContext) throws IOException {
-        if (!insideFunction()) {
+        if (!insideFunctionBody()) {
             reportError(tt == Token.RETURN ? "msg.bad.return" : "msg.bad.yield");
         }
         consumeToken();
@@ -2117,7 +2141,7 @@ public class Parser {
             if (nowAllSet(before, endFlags, Node.END_RETURNS | Node.END_RETURNS_VALUE))
                 addStrictWarning("msg.return.inconsistent", "", pos, end - pos);
         } else {
-            if (!insideFunction()) reportError("msg.bad.yield");
+            if (!insideFunctionBody()) reportError("msg.bad.yield");
             endFlags |= Node.END_YIELDS;
             ret = new Yield(pos, end - pos, e, yieldStar);
             setRequiresActivation();
@@ -2129,7 +2153,7 @@ public class Parser {
         }
 
         // see if we are mixing yields and value returns.
-        if (insideFunction()
+        if (insideFunctionBody()
                 && nowAllSet(before, endFlags, Node.END_YIELDS | Node.END_RETURNS_VALUE)) {
             FunctionNode fn = (FunctionNode) currentScriptOrFn;
             if (!fn.isES6Generator()) {
@@ -2225,7 +2249,7 @@ public class Parser {
         AstNode expr = expr(false);
 
         if (expr.getType() != Token.LABEL) {
-            AstNode n = new ExpressionStatement(expr, !insideFunction());
+            AstNode n = new ExpressionStatement(expr, !insideFunctionBody());
             n.setLineColumnNumber(expr.getLineno(), expr.getColumn());
             return n;
         }
@@ -2239,7 +2263,7 @@ public class Parser {
             currentFlaggedToken |= TI_CHECK_LABEL;
             expr = expr(false);
             if (expr.getType() != Token.LABEL) {
-                stmt = new ExpressionStatement(expr, !insideFunction());
+                stmt = new ExpressionStatement(expr, !insideFunctionBody());
                 autoInsertSemicolon(stmt);
                 break;
             }
@@ -2388,7 +2412,7 @@ public class Parser {
                 pn.setBody(expr);
                 if (isStatement) {
                     // let expression in statement context
-                    ExpressionStatement es = new ExpressionStatement(pn, !insideFunction());
+                    ExpressionStatement es = new ExpressionStatement(pn, !insideFunctionBody());
                     es.setLineColumnNumber(pn.getLineno(), pn.getColumn());
                     return es;
                 }
@@ -3071,6 +3095,11 @@ public class Parser {
      */
     private AstNode propertyAccess(int tt, AstNode pn, boolean isOptionalChain) throws IOException {
         if (pn == null) codeBug();
+        if (pn.getType() == Token.SUPER && isOptionalChain) {
+            reportError("msg.optional.super");
+            return makeErrorNode();
+        }
+
         int memberTypeFlags = 0,
                 lineno = lineNumber(),
                 dotPos = ts.tokenBeg,
@@ -3385,12 +3414,28 @@ public class Parser {
             case Token.THIS:
             case Token.FALSE:
             case Token.TRUE:
-                consumeToken();
-                pos = ts.tokenBeg;
-                end = ts.tokenEnd;
-                KeywordLiteral keywordLiteral = new KeywordLiteral(pos, end - pos, tt);
-                keywordLiteral.setLineColumnNumber(lineNumber(), columnNumber());
-                return keywordLiteral;
+                {
+                    consumeToken();
+                    pos = ts.tokenBeg;
+                    end = ts.tokenEnd;
+                    KeywordLiteral keywordLiteral = new KeywordLiteral(pos, end - pos, tt);
+                    keywordLiteral.setLineColumnNumber(lineNumber(), columnNumber());
+                    return keywordLiteral;
+                }
+
+            case Token.SUPER:
+                if (((insideFunctionParams() || insideFunctionBody()) && insideMethod)
+                        || compilerEnv.isAllowSuper()) {
+                    consumeToken();
+                    pos = ts.tokenBeg;
+                    end = ts.tokenEnd;
+                    KeywordLiteral keywordLiteral = new KeywordLiteral(pos, end - pos, tt);
+                    keywordLiteral.setLineColumnNumber(lineNumber(), columnNumber());
+                    return keywordLiteral;
+                } else {
+                    reportError("msg.super.shorthand.function");
+                }
+                break;
 
             case Token.TEMPLATE_LITERAL:
                 consumeToken();
@@ -3771,6 +3816,11 @@ public class Parser {
                 if (pname instanceof Name || pname instanceof StringLiteral) {
                     // For complicated reasons, parsing a name does not advance the token
                     pname.setLineColumnNumber(lineNumber(), columnNumber());
+                } else if (pname instanceof GeneratorMethodDefinition) {
+                    // Same as above
+                    ((GeneratorMethodDefinition) pname)
+                            .getMethodName()
+                            .setLineColumnNumber(lineNumber(), columnNumber());
                 }
 
                 // This code path needs to handle both destructuring object
@@ -3816,13 +3866,22 @@ public class Parser {
                         propertyName = null;
                     } else {
                         propertyName = ts.getString();
-                        ObjectProperty objectProp = methodDefinition(ppos, pname, entryKind);
+                        // short-hand method definition
+                        ObjectProperty objectProp =
+                                methodDefinition(
+                                        ppos,
+                                        pname,
+                                        entryKind,
+                                        pname instanceof GeneratorMethodDefinition);
                         pname.setJsDocNode(jsdocNode);
                         elems.add(objectProp);
                     }
                 } else {
                     pname.setJsDocNode(jsdocNode);
                     elems.add(plainProperty(pname, tt));
+                }
+                if (pname instanceof GeneratorMethodDefinition && entryKind != METHOD_ENTRY) {
+                    reportError("msg.bad.prop");
                 }
             }
 
@@ -3915,6 +3974,22 @@ public class Parser {
                 }
                 break;
 
+            case Token.MUL:
+                if (compilerEnv.getLanguageVersion() >= Context.VERSION_ES6) {
+                    int pos = ts.tokenBeg;
+                    nextToken();
+                    int lineno = lineNumber();
+                    int column = columnNumber();
+                    pname = objliteralProperty();
+
+                    pname = new GeneratorMethodDefinition(pos, ts.tokenEnd - pos, pname);
+                    pname.setLineColumnNumber(lineno, column);
+                } else {
+                    reportError("msg.bad.prop");
+                    return null;
+                }
+                break;
+
             default:
                 if (compilerEnv.isReservedKeywordAsIdentifier()
                         && TokenStream.isKeyword(
@@ -3963,9 +4038,9 @@ public class Parser {
         return pn;
     }
 
-    private ObjectProperty methodDefinition(int pos, AstNode propName, int entryKind)
-            throws IOException {
-        FunctionNode fn = function(FunctionNode.FUNCTION_EXPRESSION);
+    private ObjectProperty methodDefinition(
+            int pos, AstNode propName, int entryKind, boolean isGenerator) throws IOException {
+        FunctionNode fn = function(FunctionNode.FUNCTION_EXPRESSION, true);
         // We've already parsed the function name, so fn should be anonymous.
         Name name = fn.getFunctionName();
         if (name != null && name.length() != 0) {
@@ -3984,6 +4059,9 @@ public class Parser {
             case METHOD_ENTRY:
                 pn.setIsNormalMethod();
                 fn.setFunctionIsNormalMethod();
+                if (isGenerator) {
+                    fn.setIsES6Generator();
+                }
                 break;
         }
         int end = getNodeEnd(fn);
@@ -4111,7 +4189,7 @@ public class Parser {
     }
 
     protected void checkActivationName(String name, int token) {
-        if (!insideFunction()) {
+        if (!insideFunctionBody()) {
             return;
         }
         boolean activation = false;
@@ -4136,7 +4214,7 @@ public class Parser {
     }
 
     protected void setRequiresActivation() {
-        if (insideFunction()) {
+        if (insideFunctionBody()) {
             ((FunctionNode) currentScriptOrFn).setRequiresActivation();
         }
     }
@@ -4149,7 +4227,7 @@ public class Parser {
     }
 
     protected void setIsGenerator() {
-        if (insideFunction()) {
+        if (insideFunctionBody()) {
             ((FunctionNode) currentScriptOrFn).setIsGenerator();
         }
     }
@@ -4498,6 +4576,8 @@ public class Parser {
         } else if (id instanceof NumberLiteral) {
             double n = ((NumberLiteral) id).getNumber();
             key = ScriptRuntime.getIndexObject(n);
+        } else if (id instanceof GeneratorMethodDefinition) {
+            key = getPropKey(((GeneratorMethodDefinition) id).getMethodName());
         } else {
             key = null; // Filled later
         }
@@ -4778,6 +4858,10 @@ public class Parser {
             if (!compilerEnv.isIdeMode())
                 throw errorReporter.runtimeError(msg, sourceURI, baseLineno, null, 0);
         }
+    }
+
+    public void setSourceURI(String sourceURI) {
+        this.sourceURI = sourceURI;
     }
 
     public interface CurrentPositionReporter {

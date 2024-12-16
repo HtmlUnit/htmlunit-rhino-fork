@@ -18,6 +18,17 @@ public class AccessorSlot extends Slot {
         super(oldSlot);
     }
 
+    @Override
+    AccessorSlot copySlot() {
+        var newSlot = new AccessorSlot(this);
+        newSlot.value = value;
+        newSlot.getter = getter;
+        newSlot.setter = setter;
+        newSlot.next = null;
+        newSlot.orderedNext = null;
+        return newSlot;
+    }
+
     // The Getter and Setter may each be of a different type (JavaScript function, Java
     // function, or neither). So, use an abstraction to distinguish them.
     Getter getter;
@@ -115,10 +126,34 @@ public class AccessorSlot extends Slot {
         return getter.asGetterFunction(name, scope);
     }
 
+    @Override
+    boolean isSameGetterFunction(Object function) {
+        if (function == Scriptable.NOT_FOUND) {
+            return true;
+        }
+        if (getter == null) {
+            return ScriptRuntime.shallowEq(Undefined.instance, function);
+        }
+        return getter.isSameGetterFunction(function);
+    }
+
+    @Override
+    boolean isSameSetterFunction(Object function) {
+        if (function == Scriptable.NOT_FOUND) {
+            return true;
+        }
+        if (setter == null) {
+            return ScriptRuntime.shallowEq(Undefined.instance, function);
+        }
+        return setter.isSameSetterFunction(function);
+    }
+
     interface Getter extends Serializable {
         Object getValue(Scriptable start);
 
         Function asGetterFunction(final String name, final Scriptable scope);
+
+        boolean isSameGetterFunction(Object getter);
     }
 
     /** This is a Getter that delegates to a Java function via a MemberBox. */
@@ -142,6 +177,11 @@ public class AccessorSlot extends Slot {
         @Override
         public Function asGetterFunction(String name, Scriptable scope) {
             return member.asGetterFunction(name, scope);
+        }
+
+        @Override
+        public boolean isSameGetterFunction(Object function) {
+            return member.isSameGetterFunction(function);
         }
     }
 
@@ -170,12 +210,20 @@ public class AccessorSlot extends Slot {
         public Function asGetterFunction(String name, Scriptable scope) {
             return target instanceof Function ? (Function) target : null;
         }
+
+        @Override
+        public boolean isSameGetterFunction(Object function) {
+            return ScriptRuntime.shallowEq(
+                    target instanceof Function ? (Function) target : Undefined.instance, function);
+        }
     }
 
     interface Setter extends Serializable {
         boolean setValue(Object value, Scriptable owner, Scriptable start);
 
         Function asSetterFunction(final String name, final Scriptable scope);
+
+        boolean isSameSetterFunction(Object getter);
     }
 
     /** Invoke the setter on this slot via reflection using MemberBox. */
@@ -210,6 +258,11 @@ public class AccessorSlot extends Slot {
         public Function asSetterFunction(String name, Scriptable scope) {
             return member.asSetterFunction(name, scope);
         }
+
+        @Override
+        public boolean isSameSetterFunction(Object function) {
+            return member.isSameSetterFunction(function);
+        }
     }
 
     /**
@@ -237,6 +290,12 @@ public class AccessorSlot extends Slot {
         @Override
         public Function asSetterFunction(String name, Scriptable scope) {
             return target instanceof Function ? (Function) target : null;
+        }
+
+        @Override
+        public boolean isSameSetterFunction(Object function) {
+            return ScriptRuntime.shallowEq(
+                    target instanceof Function ? (Function) target : Undefined.instance, function);
         }
     }
 }

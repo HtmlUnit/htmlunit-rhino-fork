@@ -963,7 +963,11 @@ final class NativeProxy extends ScriptableObject implements Callable, Constructa
                 Object value = ScriptableObject.getProperty(trapResult, "value");
                 int attributes =
                         applyDescriptorToAttributeBitset(
-                                DONTENUM | READONLY | PERMANENT, trapResult);
+                                DONTENUM | READONLY | PERMANENT,
+                                getProperty(trapResult, "enumerable"),
+                                getProperty(trapResult, "writable"),
+                                getProperty(trapResult, "configurable"));
+
 
                 ScriptableObject desc =
                         ScriptableObject.buildDataDescriptor(target, value, attributes);

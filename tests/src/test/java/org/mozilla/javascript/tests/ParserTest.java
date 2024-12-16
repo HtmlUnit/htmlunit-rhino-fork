@@ -33,6 +33,7 @@ import org.mozilla.javascript.ast.ExpressionStatement;
 import org.mozilla.javascript.ast.ForLoop;
 import org.mozilla.javascript.ast.FunctionCall;
 import org.mozilla.javascript.ast.FunctionNode;
+import org.mozilla.javascript.ast.GeneratorMethodDefinition;
 import org.mozilla.javascript.ast.IfStatement;
 import org.mozilla.javascript.ast.InfixExpression;
 import org.mozilla.javascript.ast.LabeledStatement;
@@ -48,11 +49,15 @@ import org.mozilla.javascript.ast.Scope;
 import org.mozilla.javascript.ast.StringLiteral;
 import org.mozilla.javascript.ast.SwitchCase;
 import org.mozilla.javascript.ast.SwitchStatement;
+import org.mozilla.javascript.ast.TemplateCharacters;
+import org.mozilla.javascript.ast.TemplateLiteral;
 import org.mozilla.javascript.ast.TryStatement;
 import org.mozilla.javascript.ast.UpdateExpression;
 import org.mozilla.javascript.ast.VariableDeclaration;
 import org.mozilla.javascript.ast.VariableInitializer;
 import org.mozilla.javascript.ast.WithStatement;
+import org.mozilla.javascript.ast.XmlFragment;
+import org.mozilla.javascript.ast.XmlLiteral;
 import org.mozilla.javascript.testing.TestErrorReporter;
 
 public class ParserTest {
@@ -1203,14 +1208,52 @@ public class ParserTest {
     }
 
     @Test
-    public void testParseUnicodeMultibyteCharacter() {
+    public void parseUnicodeMultibyteCharacter() {
         AstRoot root = parse("\uD842\uDFB7");
         AstNode first = ((ExpressionStatement) root.getFirstChild()).getExpression();
         assertEquals("𠮷", first.getString());
     }
 
     @Test
-    public void testParseUnicodeIdentifierPartWhichIsNotJavaIdentifierPart() {
+    public void parseMultibyteCharacter_StringLiteral() {
+        AstRoot root = parse("'\uD83C\uDF1F'");
+        StringLiteral first =
+                (StringLiteral) ((ExpressionStatement) root.getFirstChild()).getExpression();
+        assertEquals(4, first.getLength());
+        assertEquals("'🌟'", first.getValue(true));
+    }
+
+    @Test
+    public void parseMultibyteCharacter_TemplateLiteral() {
+        AstRoot root = parse("`\uD83C\uDF1F`");
+        TemplateLiteral first =
+                (TemplateLiteral) ((ExpressionStatement) root.getFirstChild()).getExpression();
+        TemplateCharacters templateCharacter = (TemplateCharacters) first.getElement(0);
+        assertEquals(2, templateCharacter.getLength());
+        assertEquals("🌟", templateCharacter.getValue());
+        assertEquals(4, first.getLength());
+    }
+
+    @Test
+    public void parseMultibyteCharacter_XMLLiteral() {
+        AstRoot root = parse("<xml>\uD83C\uDF1F</xml>");
+        XmlLiteral first =
+                (XmlLiteral) ((ExpressionStatement) root.getFirstChild()).getExpression();
+        XmlFragment fragment = first.getFragments().get(0);
+        assertEquals(13, fragment.getLength());
+        assertEquals("<xml>🌟</xml>", fragment.toSource());
+    }
+
+    @Test
+    public void parseMultibyteCharacter_Comment() {
+        AstRoot root = parse("/*\uD83C\uDF1F*/");
+        Comment comment = root.getComments().first();
+        assertEquals(6, comment.getLength());
+        assertEquals("/*🌟*/", comment.getValue());
+    }
+
+    @Test
+    public void parseUnicodeIdentifierPartWhichIsNotJavaIdentifierPart() {
         // On the JDK 11 I'm using, Character.isUnicodeIdentifierPart(U+9FEB) returns true
         // but Character.isJavaIdentifierPart(U+9FEB) returns false. On a JDK 17 results
         // seem to vary, but I think it's enough to verify that TokenStream uses
@@ -1400,6 +1443,27 @@ public class ParserTest {
         assertEquals("g", f.getName());
         assertTrue(f.isGenerator());
         assertTrue(f.isES6Generator());
+    }
+
+    @Test
+    public void memberFunctionGenerator() {
+        environment.setLanguageVersion(Context.VERSION_ES6);
+        AstNode root = parse("o = { *g() { return true; } }");
+        ExpressionStatement expr = (ExpressionStatement) root.getFirstChild();
+        assertTrue(expr.getExpression() instanceof Assignment);
+        assertTrue(((Assignment) expr.getExpression()).getRight() instanceof ObjectLiteral);
+        ObjectLiteral obj = (ObjectLiteral) ((Assignment) expr.getExpression()).getRight();
+        assertEquals(1, obj.getElements().size());
+        ObjectProperty g = obj.getElements().get(0);
+
+        assertTrue(g.getLeft() instanceof GeneratorMethodDefinition);
+        assertLineColumnAre(0, 7, g.getLeft());
+        AstNode genMethodName = ((GeneratorMethodDefinition) g.getLeft()).getMethodName();
+        assertTrue(genMethodName instanceof Name);
+        assertLineColumnAre(0, 8, genMethodName);
+
+        assertTrue(g.getRight() instanceof FunctionNode);
+        assertTrue(((FunctionNode) g.getRight()).isES6Generator());
     }
 
     @Test
