@@ -568,8 +568,7 @@ public class NativeObject extends IdScriptableObject implements Map {
                     }
 
                     ScriptableObject obj = ensureScriptableObject(arg);
-                    boolean status = obj.preventExtensions();
-                    if (!status) {
+                    if (!obj.preventExtensions()) {
                         throw ScriptRuntime.typeError("Object.preventExtensions is not allowed");
                     }
                     return obj;

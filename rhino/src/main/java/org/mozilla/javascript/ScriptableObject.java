@@ -1597,8 +1597,8 @@ public abstract class ScriptableObject
     /**
      * Defines a property on an object.
      *
-     * <p>Based on [[DefineOwnProperty]] from 8.12.10 of the spec.
-     * see <a href="https://tc39.es/ecma262/#table-essential-internal-methods">[[DefineOwnProperty]]</a>
+     * <p>Based on [[DefineOwnProperty]] from 8.12.10 of the spec. see <a
+     * href="https://tc39.es/ecma262/#table-essential-internal-methods">[[DefineOwnProperty]]</a>
      *
      * @param cx the current Context
      * @param id the name/index of the property
@@ -1973,6 +1973,13 @@ public abstract class ScriptableObject
             return (ScriptableObject) ((Delegator) arg).getDelegee();
         }
         throw ScriptRuntime.typeErrorById("msg.arg.not.object", ScriptRuntime.typeof(arg));
+    }
+
+    protected static ScriptableObject ensureScriptableObjectButNotSymbol(Object arg) {
+        if (arg instanceof Symbol) {
+            throw ScriptRuntime.typeErrorById("msg.arg.not.object", ScriptRuntime.typeof(arg));
+        }
+        return ensureScriptableObject(arg);
     }
 
     /**
