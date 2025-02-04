@@ -35,6 +35,7 @@ import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.debug.DebuggableScript;
 import org.mozilla.javascript.debug.Debugger;
 import org.mozilla.javascript.xml.XMLLib;
+import org.mozilla.javascript.xml.XMLLoader;
 
 /**
  * This class represents the runtime context of an executing script.
@@ -2355,11 +2356,19 @@ public class Context implements Closeable {
      * <p>The default implementation uses the implementation provided by this <code>Context</code>'s
      * {@link ContextFactory}.
      *
+     * <p>This is no longer used in E4X -- an implementation is only provided for backward
+     * compatibility.
+     *
      * @return An XMLLib.Factory. Should not return <code>null</code> if {@link #FEATURE_E4X} is
      *     enabled. See {@link #hasFeature}.
      */
+    @Deprecated
     public XMLLib.Factory getE4xImplementationFactory() {
-        return getFactory().getE4xImplementationFactory();
+        XMLLoader loader = ScriptRuntime.loadOneServiceImplementation(XMLLoader.class);
+        if (loader != null) {
+            return loader.getFactory();
+        }
+        return null;
     }
 
     /**
@@ -2719,6 +2728,9 @@ public class Context implements Closeable {
 
     RegExpProxy getRegExpProxy() {
         if (regExpProxy == null) {
+            // HtmlUnit use the old way...
+            // regExpProxy = ScriptRuntime.loadOneServiceImplementation(RegExpProxy.class);
+
             Class<?> cl = Kit.classOrNull("org.mozilla.javascript.regexp.RegExpImpl");
             if (cl != null) {
                 regExpProxy = (RegExpProxy) Kit.newInstanceOrNull(cl);
