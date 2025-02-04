@@ -398,15 +398,6 @@ public class Context implements Closeable {
     /**
      * Special to HtmlUnit's Rhino fork.
      *
-     * <p>Indicates that function is defined even before its declaration, inside a block.
-     *
-     * <p>By default {@link #hasFeature(int)} returns false.
-     */
-    public static final int FEATURE_HTMLUNIT_FUNCTION_DECLARED_FORWARD_IN_BLOCK = 103;
-
-    /**
-     * Special to HtmlUnit's Rhino fork.
-     *
      * <p>Indicates that {@code MemberBox.toString()} contains property name.
      *
      * <p>By default {@link #hasFeature(int)} returns false.

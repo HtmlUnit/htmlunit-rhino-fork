@@ -70,34 +70,6 @@ public class NodeTransformer {
             Scope scope,
             boolean createScopeObjects,
             boolean inStrictMode) {
-        if (parent instanceof Scope
-                && Context.getContext().hasFeature(Context.FEATURE_HTMLUNIT_FUNCTION_DECLARED_FORWARD_IN_BLOCK)) {
-            // Make sure that all "Name" children are at the start of all siblings
-            Node lastInitialName = null;
-            boolean initial = true;
-            Node node = parent.getFirstChild();
-            while (node != null) {
-                if (node instanceof Name) {
-                    if (initial) {
-                        lastInitialName =  node;
-                    }
-                    else {
-                        parent.removeChild(node);
-                        if (lastInitialName == null)  {
-                            parent.addChildToFront(node);
-                        }
-                        else {
-                            parent.addChildAfter(node, lastInitialName);
-                        }
-                        lastInitialName = node;
-                    }
-                }
-                else {
-                    initial = false;
-                }
-                node = node.getNext();
-            }
-        }
         Node node = null;
         siblingLoop:
         for (; ; ) {
