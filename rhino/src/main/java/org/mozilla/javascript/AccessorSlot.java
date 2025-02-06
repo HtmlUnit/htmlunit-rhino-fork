@@ -243,9 +243,14 @@ public class AccessorSlot extends Slot {
             // XXX: cache tag since it is already calculated in
             // defineProperty ?
             Class<?> valueType = pTypes[pTypes.length - 1];
+            /* HtmlUnit
             boolean isNullable = member.argNullability[pTypes.length - 1];
+            HtmlUnit */
             int tag = FunctionObject.getTypeTag(valueType);
+            /* HtmlUnit
             Object actualArg = FunctionObject.convertArg(cx, start, value, tag, isNullable);
+            HtmlUnit */
+            Object actualArg = FunctionObject.convertArg(cx, start, value, tag);
 
             if (member.delegateTo == null) {
                 member.invoke(start, new Object[] {actualArg});
