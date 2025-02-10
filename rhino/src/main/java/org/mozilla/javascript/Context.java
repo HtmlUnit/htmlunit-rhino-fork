@@ -35,7 +35,6 @@ import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.debug.DebuggableScript;
 import org.mozilla.javascript.debug.Debugger;
 import org.mozilla.javascript.xml.XMLLib;
-import org.mozilla.javascript.xml.XMLLoader;
 
 /**
  * This class represents the runtime context of an executing script.
@@ -415,6 +414,11 @@ public class Context implements Closeable {
 
     public static final String languageVersionProperty = "language version";
     public static final String errorReporterProperty = "error reporter";
+
+    /* HtmlUnit use the old way
+    private static final RegExpLoader regExpLoader =
+            ScriptRuntime.loadOneServiceImplementation(RegExpLoader.class);
+    HtmlUnit */
 
     /**
      * Convenient value to use as zero-length array of objects.
@@ -2355,9 +2359,8 @@ public class Context implements Closeable {
      */
     @Deprecated
     public XMLLib.Factory getE4xImplementationFactory() {
-        XMLLoader loader = ScriptRuntime.loadOneServiceImplementation(XMLLoader.class);
-        if (loader != null) {
-            return loader.getFactory();
+        if (ScriptRuntime.xmlLoaderImpl != null) {
+            return ScriptRuntime.xmlLoaderImpl.getFactory();
         }
         return null;
     }
@@ -2718,10 +2721,13 @@ public class Context implements Closeable {
     }
 
     RegExpProxy getRegExpProxy() {
-        if (regExpProxy == null) {
-            // HtmlUnit use the old way...
-            // regExpProxy = ScriptRuntime.loadOneServiceImplementation(RegExpProxy.class);
+        /* HtmlUnit use the old way...
+        if (regExpProxy == null && regExpLoader != null) {
+            regExpProxy = regExpLoader.newProxy();
+        }
+        HtmlUnit */
 
+        if (regExpProxy == null) {
             Class<?> cl = Kit.classOrNull("org.mozilla.javascript.regexp.RegExpImpl");
             if (cl != null) {
                 regExpProxy = (RegExpProxy) Kit.newInstanceOrNull(cl);

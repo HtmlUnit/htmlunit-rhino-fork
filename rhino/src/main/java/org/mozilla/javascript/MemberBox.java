@@ -37,6 +37,11 @@ final class MemberBox implements Serializable {
     transient Function asSetterFunction;
     transient Object delegateTo;
 
+   	/* HtmlUnit
+    private static final NullabilityDetector nullDetector =
+            ScriptRuntime.loadOneServiceImplementation(NullabilityDetector.class);
+    HtmlUnit */
+
     MemberBox(Method method) {
         init(method);
     }
@@ -48,28 +53,24 @@ final class MemberBox implements Serializable {
     private void init(Method method) {
         this.memberObject = method;
         this.argTypes = method.getParameterTypes();
-    	/* HtmlUnit
-        NullabilityDetector detector =
-                ScriptRuntime.loadOneServiceImplementation(NullabilityDetector.class);
+        /* HtmlUnit
         this.argNullability =
-                detector == null
+                nullDetector == null
                         ? new boolean[method.getParameters().length]
-                        : detector.getParameterNullability(method);
-    	HtmlUnit */
+                        : nullDetector.getParameterNullability(method);
+        HtmlUnit */
         this.vararg = method.isVarArgs();
     }
 
     private void init(Constructor<?> constructor) {
         this.memberObject = constructor;
         this.argTypes = constructor.getParameterTypes();
-    	/* HtmlUnit
-        NullabilityDetector detector =
-                ScriptRuntime.loadOneServiceImplementation(NullabilityDetector.class);
+        /* HtmlUnit
         this.argNullability =
-                detector == null
+                nullDetector == null
                         ? new boolean[constructor.getParameters().length]
-                        : detector.getParameterNullability(constructor);
-    	HtmlUnit */
+                        : nullDetector.getParameterNullability(constructor);
+        HtmlUnit */
         this.vararg = constructor.isVarArgs();
     }
 

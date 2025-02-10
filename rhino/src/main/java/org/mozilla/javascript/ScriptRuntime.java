@@ -204,9 +204,8 @@ public class ScriptRuntime {
                 scope, "Continuation", "org.mozilla.javascript.NativeContinuation", sealed, true);
 
         if (cx.hasFeature(Context.FEATURE_E4X)) {
-            XMLLoader loader = loadOneServiceImplementation(XMLLoader.class);
-            if (loader != null) {
-                loader.load(scope, sealed);
+            if (xmlLoaderImpl != null) {
+                xmlLoaderImpl.load(scope, sealed);
             }
         }
 
@@ -5681,4 +5680,7 @@ public class ScriptRuntime {
 
     public static final Object[] emptyArgs = new Object[0];
     public static final String[] emptyStrings = new String[0];
+
+    static final XMLLoader xmlLoaderImpl =
+            ScriptRuntime.loadOneServiceImplementation(XMLLoader.class);
 }
