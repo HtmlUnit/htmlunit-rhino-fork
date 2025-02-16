@@ -12,7 +12,7 @@ dependencies {
     implementation project(':rhino-xml')
 
     testImplementation project(':testutils')
-    testImplementation("com.tngtech.archunit:archunit-junit4:1.3.0") {
+    testImplementation("com.tngtech.archunit:archunit-junit4:1.4.0") {
         exclude group: 'junit'
     }
     testImplementation("org.slf4j:slf4j-simple:2.0.16")
@@ -59,6 +59,13 @@ test {
         }
         systemProperty 'updateTest262properties', System.getProperty('updateTest262properties')
     }
+
+    System.properties.each { k,v->
+        if (k.startsWith("rhino.")) {
+            systemProperty k, v
+        }
+    }
+
 
     jacoco {
         // These particular tests produce Jacoco exceptions because of their size
