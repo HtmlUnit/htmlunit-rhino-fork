@@ -2818,7 +2818,7 @@ public class NativeRegExp extends IdScriptableObject {
     private Object js_SymbolMatch(
             Context cx, Scriptable scope, Scriptable thisScriptable, Object[] args) {
         // See ECMAScript spec 22.2.6.8
-        var thisObj = ScriptableObject.ensureScriptableObject(thisScriptable);
+        ScriptableObject thisObj = ScriptableObject.ensureScriptableObject(thisScriptable);
 
         String string = ScriptRuntime.toString(args.length > 0 ? args[0] : Undefined.instance);
         String flags = ScriptRuntime.toString(ScriptRuntime.getObjectProp(thisObj, "flags", cx));
