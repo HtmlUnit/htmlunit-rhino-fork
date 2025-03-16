@@ -1,14 +1,14 @@
 package org.mozilla.javascript.tests.es6;
 
 import org.junit.Test;
-import org.mozilla.javascript.tests.Utils;
+import org.mozilla.javascript.testutils.Utils;
 
 public class NativeProxyTest {
 
     @Test
     public void testToString() {
         Utils.assertWithAllModes_ES6(
-                "function Proxy() {\n\t[native code, arity=2]\n}\n", "Proxy.toString()");
+                "function Proxy() {\n\t[native code]\n}\n", "Proxy.toString()");
 
         Utils.assertWithAllModes_ES6(
                 "[object Object]", "Object.prototype.toString.call(new Proxy({}, {}))");

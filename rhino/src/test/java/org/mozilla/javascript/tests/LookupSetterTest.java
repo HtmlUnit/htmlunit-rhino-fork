@@ -11,6 +11,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.testutils.Utils;
 
 public class LookupSetterTest {
     private final String defineSetterAndGetterX =
@@ -44,9 +45,7 @@ public class LookupSetterTest {
 
     @Test
     public void lookedUpGetter_toString() throws Exception {
-        test(
-                "function s() {\n\t[native code, arity=0]\n}\n",
-                "new Foo().__lookupGetter__('s').toString()");
+        test("function s() {\n\t[native code]\n}\n", "new Foo().__lookupGetter__('s').toString()");
     }
 
     @Test
@@ -85,9 +84,7 @@ public class LookupSetterTest {
 
     @Test
     public void lookedUpSetter_toString() throws Exception {
-        test(
-                "function s() {\n\t[native code, arity=0]\n}\n",
-                "new Foo().__lookupSetter__('s').toString()");
+        test("function s() {\n\t[native code]\n}\n", "new Foo().__lookupSetter__('s').toString()");
     }
 
     @Test
