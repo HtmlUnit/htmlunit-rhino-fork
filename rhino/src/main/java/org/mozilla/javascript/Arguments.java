@@ -32,12 +32,13 @@ class Arguments extends IdScriptableObject {
         NativeFunction f = activation.function;
         calleeObj = f;
 
-        int version = f.getLanguageVersion();
-        if (version <= Context.VERSION_1_3 && version != Context.VERSION_DEFAULT) {
-            callerObj = null;
-        } else {
-            callerObj = NOT_FOUND;
-        }
+        // HtmlUnit
+        // int version = f.getLanguageVersion();
+        // if (version <= Context.VERSION_1_3 && version != Context.VERSION_DEFAULT) {
+        //     callerObj = null;
+        // } else {
+        //     callerObj = NOT_FOUND;
+        // }
 
         defineProperty(
                 SymbolKey.ITERATOR,
@@ -57,7 +58,7 @@ class Arguments extends IdScriptableObject {
         lengthObj = original.lengthObj;
         calleeObj = original.calleeObj;
 
-        callerObj = original.callerObj;
+        /* HtmlUnit callerObj = original.callerObj; */
     }
 
     @Override
@@ -182,8 +183,11 @@ class Arguments extends IdScriptableObject {
 
     private static final int Id_callee = 1,
             Id_length = 2,
+            /* HtmlUnit
             Id_caller = 3,
             MAX_INSTANCE_ID = Id_caller;
+            */
+            MAX_INSTANCE_ID = Id_length;
 
     @Override
     protected int getMaxInstanceId() {
@@ -200,16 +204,18 @@ class Arguments extends IdScriptableObject {
             case "length":
                 id = Id_length;
                 break;
+            /* HtmlUnit
             case "caller":
                 id = Id_caller;
                 break;
+            */
             default:
                 id = 0;
                 break;
         }
         Context cx = Context.getContext();
         if (cx.isStrictMode()) {
-            if (id == Id_callee || id == Id_caller) {
+            if (id == Id_callee /* HtmlUnit || id == Id_caller */) {
                 return super.findInstanceIdInfo(s);
             }
         }
@@ -221,9 +227,11 @@ class Arguments extends IdScriptableObject {
             case Id_callee:
                 attr = calleeAttr;
                 break;
+            /* HtmlUnit
             case Id_caller:
                 attr = callerAttr;
                 break;
+            */
             case Id_length:
                 attr = lengthAttr;
                 break;
@@ -240,8 +248,10 @@ class Arguments extends IdScriptableObject {
                 return "callee";
             case Id_length:
                 return "length";
+            /* HtmlUnit
             case Id_caller:
                 return "caller";
+            */
         }
         return null;
     }
@@ -253,6 +263,7 @@ class Arguments extends IdScriptableObject {
                 return calleeObj;
             case Id_length:
                 return lengthObj;
+            /* HtmlUnit
             case Id_caller:
                 {
                     Object value = callerObj;
@@ -266,6 +277,7 @@ class Arguments extends IdScriptableObject {
                     }
                     return value;
                 }
+            */
         }
         return super.getInstanceIdValue(id);
     }
@@ -279,9 +291,11 @@ class Arguments extends IdScriptableObject {
             case Id_length:
                 lengthObj = value;
                 return;
+            /* HtmlUnit
             case Id_caller:
                 callerObj = (value != null) ? value : UniqueTag.NULL_VALUE;
                 return;
+            */
         }
         super.setInstanceIdValue(id, value);
     }
@@ -295,9 +309,11 @@ class Arguments extends IdScriptableObject {
             case Id_length:
                 lengthAttr = attr;
                 return;
+            /* HtmlUnit
             case Id_caller:
                 callerAttr = attr;
                 return;
+            */
         }
         super.setInstanceIdAttributes(id, attr);
     }
@@ -417,13 +433,15 @@ class Arguments extends IdScriptableObject {
         if (!cx.isStrictMode()) {
             return;
         }
+        /* HtmlUnit
         setGetterOrSetter("caller", 0, new ThrowTypeError("caller"), true);
         setGetterOrSetter("caller", 0, new ThrowTypeError("caller"), false);
+        setAttributes("caller", DONTENUM | PERMANENT);
+        callerObj = null;
+        */
         setGetterOrSetter("callee", 0, new ThrowTypeError("callee"), true);
         setGetterOrSetter("callee", 0, new ThrowTypeError("callee"), false);
-        setAttributes("caller", DONTENUM | PERMANENT);
         setAttributes("callee", DONTENUM | PERMANENT);
-        callerObj = null;
         calleeObj = null;
     }
 
@@ -447,11 +465,11 @@ class Arguments extends IdScriptableObject {
     // In addition if callerObj == NULL_VALUE, it tags null for scripts, as
     // initial callerObj == null means access to caller arguments available
     // only in JS <= 1.3 scripts
-    private Object callerObj;
+    /* HtmlUnit private Object callerObj; */
     private Object calleeObj;
     private Object lengthObj;
 
-    private int callerAttr = DONTENUM;
+    /* HtmlUnit private int callerAttr = DONTENUM; */
     private int calleeAttr = DONTENUM;
     private int lengthAttr = DONTENUM;
 
