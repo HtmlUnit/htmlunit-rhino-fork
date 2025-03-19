@@ -2802,7 +2802,7 @@ public class NativeRegExp extends IdScriptableObject {
         }
     }
 
-    private static boolean matchRegExp(
+    static boolean matchRegExp(
             Context cx,
             REGlobalData gData,
             RECompiled re,
