@@ -439,14 +439,18 @@ class Arguments extends IdScriptableObject {
         setAttributes("caller", DONTENUM | PERMANENT);
         callerObj = null;
         */
-        setGetterOrSetter("callee", 0, new ThrowTypeError("callee"), true);
-        setGetterOrSetter("callee", 0, new ThrowTypeError("callee"), false);
+        setGetterOrSetter("callee", 0, ThrowTypeError.callee, true);
+        setGetterOrSetter("callee", 0, ThrowTypeError.callee, false);
         setAttributes("callee", DONTENUM | PERMANENT);
         calleeObj = null;
     }
 
     private static class ThrowTypeError extends BaseFunction {
         private static final long serialVersionUID = -744615873947395749L;
+
+        // HtmlUnit
+        static final ThrowTypeError callee = new ThrowTypeError("callee");
+
         private String propertyName;
 
         ThrowTypeError(String propertyName) {
