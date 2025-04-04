@@ -3705,6 +3705,7 @@ public final class Interpreter extends Icode implements Evaluator {
 
     private static void enterFrame(
             Context cx, CallFrame frame, Object[] args, boolean continuationRestart) {
+        // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
         if (frame.parentFrame != null && !frame.parentFrame.fnOrScript.isScript()) {
             frame.fnOrScript.defaultPut("caller", frame.parentFrame.fnOrScript);
             frame.fnOrScript.setAttributes("caller", ScriptableObject.DONTENUM);
@@ -3715,6 +3716,7 @@ public final class Interpreter extends Icode implements Evaluator {
                 frame.fnOrScript.setArguments((Arguments) arguments);
             }
         }
+        // end HtmlUnit
 
         boolean usesActivation = frame.idata.itsNeedsActivation;
         boolean isDebugged = frame.debuggerFrame != null;

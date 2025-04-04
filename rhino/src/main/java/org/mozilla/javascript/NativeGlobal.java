@@ -23,11 +23,13 @@ import org.mozilla.javascript.xml.XMLLib;
 public class NativeGlobal implements Serializable {
     static final long serialVersionUID = 6080442165748707530L;
 
+    // HtmlUnit
     private static abstract class SerializableConstructableWithInjectableCtor implements SerializableConstructable {
         // We need a reference to the LambdaFunction, so we use this "lateBound"
         // trick. It ain't great, but it's the only idea I have.
         Function lateBoundCtor;
     }
+    // HtmlUnit
 
     public static void init(Context cx, Scriptable scope, boolean sealed) {
         defineGlobalFunction(

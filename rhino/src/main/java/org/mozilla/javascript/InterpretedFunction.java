@@ -17,6 +17,7 @@ final class InterpretedFunction extends NativeFunction implements Script {
     SecurityController securityController;
     Object securityDomain;
 
+    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
     private Arguments arguments;
 
     private InterpretedFunction(InterpreterData idata, Object staticSecurityDomain) {
@@ -203,6 +204,7 @@ final class InterpretedFunction extends NativeFunction implements Script {
     }
 
     @Override
+    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
     public Object get(final String name, final Scriptable start) {
         if (start == this && "arguments".equals(name)) {
             return this.arguments;

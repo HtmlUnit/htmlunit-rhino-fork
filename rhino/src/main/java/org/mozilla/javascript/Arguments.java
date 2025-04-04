@@ -48,6 +48,7 @@ class Arguments extends IdScriptableObject {
                 ScriptableObject.DONTENUM);
     }
 
+    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
     public Arguments(final Arguments original) {
         this.activation = original.activation;
 
@@ -57,8 +58,6 @@ class Arguments extends IdScriptableObject {
         args = original.args;
         lengthObj = original.lengthObj;
         calleeObj = original.calleeObj;
-
-        /* HtmlUnit callerObj = original.callerObj; */
     }
 
     @Override

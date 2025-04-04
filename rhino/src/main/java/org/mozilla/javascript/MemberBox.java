@@ -132,13 +132,19 @@ final class MemberBox implements Serializable {
 
     @Override
     public String toString() {
+        // HtmlUnit
         Context context = Context.getCurrentContext();
         if (!context.hasFeature(Context.FEATURE_HTMLUNIT_MEMBERBOX_NAME)) {
             return "function () { [native code] }";
         }
+        // end HtmlUnit
+
         String name = memberObject.getName();
+
+        // HtmlUnit
         name = Character.toLowerCase(name.charAt(3)) + name.substring(4);
         return "function " + name + "() {\n    [native code]\n}";
+       // end HtmlUnit
     }
 
     boolean isSameGetterFunction(Object function) {
@@ -271,6 +277,7 @@ final class MemberBox implements Serializable {
             } while ((e instanceof InvocationTargetException));
             if (e instanceof ContinuationPending) throw (ContinuationPending) e;
 
+            // HtmlUnit
             if (e instanceof RhinoException) throw Context.throwAsScriptRuntimeEx(e);
             else throw new RuntimeException("Exception invoking " + method.getName(), e);
         } catch (IllegalArgumentException iae) {
@@ -291,6 +298,7 @@ final class MemberBox implements Serializable {
                             + builder
                             + "]",
                     iae);
+            // end HtmlUnit
         } catch (Exception ex) {
             throw Context.throwAsScriptRuntimeEx(ex);
         }
