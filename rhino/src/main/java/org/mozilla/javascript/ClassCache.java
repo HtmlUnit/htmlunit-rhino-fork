@@ -76,7 +76,7 @@ public class ClassCache implements Serializable {
         ClassCache cache = (ClassCache) ScriptableObject.getTopScopeValue(scope, AKEY);
         if (cache == null) {
             // we expect this to not happen frequently, so computing top scope twice is acceptable
-            var topScope = ScriptableObject.getTopLevelScope(scope);
+            Scriptable topScope = ScriptableObject.getTopLevelScope(scope);
             if (!(topScope instanceof ScriptableObject)) {
                 // Note: it's originally a RuntimeException, the super class of
                 // IllegalArgumentException, so this will not break error catching
