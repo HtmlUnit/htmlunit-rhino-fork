@@ -2738,9 +2738,12 @@ public class ScriptRuntime {
 
     private static Callable getNameFunctionAndThisInner(
             String name, Context cx, Scriptable scope, boolean isOptionalChainingCall) {
+        // HtmlUnit hack for indirect eval() calls
         if ("eval".equals(name)) {
             lastEvalTopCalled_ = true;
         }
+        // end HtmlUnit
+
         Scriptable parent = scope.getParentScope();
         if (parent == null) {
             Object result = topScopeName(cx, scope, name);
@@ -2873,9 +2876,12 @@ public class ScriptRuntime {
             Context cx,
             Scriptable scope,
             boolean isOptionalChainingCall) {
+        // HtmlUnit hack for indirect eval() calls
         if ("eval".equals(property)) {
             lastEvalTopCalled_ = false;
         }
+        // end HtmlUnit
+
         Scriptable thisObj = toObjectOrNull(cx, obj, scope);
         return getPropFunctionAndThisHelper(obj, property, cx, thisObj, isOptionalChainingCall);
     }
@@ -3023,6 +3029,7 @@ public class ScriptRuntime {
     }
 
     /**
+     * HtmlUnit hack for indirect eval() calls
      * This indicates whether last call of "eval" was at the top scope (i.e. "eval()") or not (i.e.
      * "scope.eval()"), as each one has different behavior.
      *
@@ -3051,9 +3058,11 @@ public class ScriptRuntime {
 
         if (callType == Node.SPECIALCALL_EVAL) {
             if (thisObj.getParentScope() == null && NativeGlobal.isEvalFunction(fun)) {
+                // HtmlUnit hack for indirect eval() calls
                 if (!lastEvalTopCalled_) {
                     scope = thisObj;
                 }
+                // end HtmlUnit
                 return evalSpecial(cx, scope, callerThis, args, filename, lineNumber);
             }
         } else if (callType == Node.SPECIALCALL_WITH) {
@@ -3162,6 +3171,8 @@ public class ScriptRuntime {
     }
 
     static Object[] getApplyArguments(Context cx, Object arg1) {
+        // HtmlUnit
+        // if (arg1 == null || Undefined.isUndefined(arg1)) {
         if (arg1 == null || Undefined.isUndefined(arg1) || arg1 == ScriptRuntime.emptyArgs) {
             return ScriptRuntime.emptyArgs;
         } else if (arg1 instanceof Scriptable && isArrayLike((Scriptable) arg1)) {
