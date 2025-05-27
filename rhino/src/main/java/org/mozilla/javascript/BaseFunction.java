@@ -529,11 +529,17 @@ public class BaseFunction extends IdScriptableObject implements Function {
         if (!justbody) {
             sb.append("function ");
             sb.append(getFunctionName());
+            // HtmlUnit
+            // sb.append("() {\n\t");
             sb.append("() {\n    ");
+            // end HtmlUnit
         }
         sb.append("[native code]\n");
         if (!justbody) {
+            // HtmlUnit
+            // sb.append("}\n");
             sb.append("}");
+            // end HtmlUnit
         }
         return sb.toString();
     }
