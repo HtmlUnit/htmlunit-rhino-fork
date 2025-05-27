@@ -34,12 +34,12 @@ class NativeScript extends BaseFunction {
                         NativeScript::js_constructorCall,
                         NativeScript::js_constructor);
 
-        var proto = new NativeScript(null);
+        NativeScript proto = new NativeScript(null);
         proto.setPrototypeProperty(null);
         obj.setPrototypeProperty(proto);
 
-        var function = (Scriptable) ScriptableObject.getProperty(scope, "Function");
-        var functionProto = (Scriptable) ScriptableObject.getProperty(function, "prototype");
+        Scriptable function = (Scriptable) ScriptableObject.getProperty(scope, "Function");
+        Scriptable functionProto = (Scriptable) ScriptableObject.getProperty(function, "prototype");
         proto.setPrototype(functionProto);
 
         defineMethod(obj, scope, "toString", 0, NativeScript::js_toString);

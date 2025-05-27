@@ -33,7 +33,7 @@ class NativeRegExpCtor {
         // We have to keep parameter types to match lazy evaluation.
         ScriptableObject scope = (ScriptableObject) scopeArg;
 
-        var ctor =
+        LambdaConstructor ctor =
                 new LambdaConstructor(
                         scope,
                         "RegExp",

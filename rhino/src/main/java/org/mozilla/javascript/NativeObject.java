@@ -44,7 +44,7 @@ public class NativeObject extends ScriptableObject implements Map {
                     }
                 };
 
-        var proto = new NativeObject();
+        NativeObject proto = new NativeObject();
         ctor.setPrototypeProperty(proto);
         proto.defineProperty("constructor", ctor, DONTENUM);
 

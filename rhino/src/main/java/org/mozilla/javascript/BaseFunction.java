@@ -36,7 +36,7 @@ public class BaseFunction extends ScriptableObject implements Function {
                         BaseFunction::js_constructorCall,
                         BaseFunction::js_constructor);
 
-        var proto =
+        LambdaFunction proto =
                 new LambdaFunction(
                         scope, "", 0, null, (lcx, lscope, lthisObj, largs) -> Undefined.instance);
 
@@ -117,14 +117,14 @@ public class BaseFunction extends ScriptableObject implements Function {
     }
 
     static Object initAsGeneratorFunction(Scriptable scope, boolean sealed) {
-        var proto = new NativeObject();
+        NativeObject proto = new NativeObject();
 
-        var function = (Scriptable) ScriptableObject.getProperty(scope, FUNCTION_CLASS);
-        var functionProto = (Scriptable) ScriptableObject.getProperty(function, "prototype");
+        Scriptable function = (Scriptable) ScriptableObject.getProperty(scope, FUNCTION_CLASS);
+        Scriptable functionProto = (Scriptable) ScriptableObject.getProperty(function, "prototype");
         proto.setPrototype(functionProto);
 
-        var iterator = (Scriptable) ScriptableObject.getProperty(scope, "Iterator");
-        var iteratorPrototype = ScriptableObject.getProperty(iterator, "prototype");
+        Scriptable iterator = (Scriptable) ScriptableObject.getProperty(scope, "Iterator");
+        Object iteratorPrototype = ScriptableObject.getProperty(iterator, "prototype");
         ScriptableObject.putProperty(proto, "prototype", iteratorPrototype);
 
         LambdaConstructor ctor =
@@ -325,7 +325,7 @@ public class BaseFunction extends ScriptableObject implements Function {
     }
 
     static boolean isApplyOrCall(KnownBuiltInFunction f) {
-        var tag = f.getTag();
+        Object tag = f.getTag();
         return tag == APPLY_TAG || tag == CALL_TAG;
     }
 

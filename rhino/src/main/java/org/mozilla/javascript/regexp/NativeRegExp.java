@@ -20,6 +20,7 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Kit;
+import org.mozilla.javascript.LambdaConstructor;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptRuntime;
@@ -148,7 +149,7 @@ public class NativeRegExp extends IdScriptableObject {
         proto.setParentScope(scope);
         proto.setPrototype(getObjectPrototype(scope));
 
-        var ctor = NativeRegExpCtor.init(cx, scope, sealed);
+        LambdaConstructor ctor = NativeRegExpCtor.init(cx, scope, sealed);
         // Bug #324006: ECMA-262 15.10.6.1 says "The initial value of
         // RegExp.prototype.constructor is the builtin RegExp constructor."
         proto.defineProperty("constructor", ctor, ScriptableObject.DONTENUM);
