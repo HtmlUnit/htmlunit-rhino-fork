@@ -838,35 +838,10 @@ public abstract class IdScriptableObject extends ScriptableObject implements IdF
         return ensureType(obj, clazz, f.getFunctionName());
     }
 
-    @SuppressWarnings("unchecked")
-    protected static <T> T ensureType(Object obj, Class<T> clazz, String functionName) {
-        if (clazz.isInstance(obj)) {
-            return (T) obj;
-        }
-        if (obj == null) {
-            throw ScriptRuntime.typeErrorById(
-                    "msg.incompat.call.details", functionName, "null", clazz.getName());
-        }
-        throw ScriptRuntime.typeErrorById(
-                "msg.incompat.call.details",
-                functionName,
-                obj.getClass().getName(),
-                clazz.getName());
-    }
-
     private IdFunctionObject newIdFunction(
             Object tag, int id, String name, int arity, Scriptable scope) {
-        // HtmlUnit disable this check because we always use VERSION_ES6
-        // and this creates many many expensive calls to Context.getCurrentContext();
-        //
-        // IdFunctionObject function = null;
-        // if (Context.getContext().getLanguageVersion() < Context.VERSION_ES6) {
-        //    function = new IdFunctionObject(this, tag, id, name, arity, scope);
-        // } else {
-        //     function = new IdFunctionObjectES6(this, tag, id, name, arity, scope);
-        // }
-
-        IdFunctionObject function = new IdFunctionObjectES6(this, tag, id, name, arity, scope);
+        IdFunctionObject function = null;
+        function = new IdFunctionObject(this, tag, id, name, arity, scope);
 
         if (isSealed()) {
             function.sealObject();

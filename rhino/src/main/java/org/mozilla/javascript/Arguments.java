@@ -454,7 +454,6 @@ class Arguments extends IdScriptableObject {
 
         ThrowTypeError(String propertyName) {
             this.propertyName = propertyName;
-            super.setInstanceIdAttributes(BaseFunction.Id_name, PERMANENT | READONLY | DONTENUM);
         }
 
         @Override
