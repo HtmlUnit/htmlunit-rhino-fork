@@ -477,7 +477,7 @@ public class BaseFunction extends ScriptableObject implements Function {
         setAttributes("prototype", DONTENUM | PERMANENT | READONLY);
     }
 
-    protected Scriptable getClassPrototype() {
+    public Scriptable getClassPrototype() {
         Object protoVal = getPrototypeProperty();
         if (protoVal instanceof Scriptable) {
             return (Scriptable) protoVal;
