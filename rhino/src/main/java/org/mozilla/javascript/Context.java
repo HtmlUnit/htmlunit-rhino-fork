@@ -476,8 +476,6 @@ public class Context implements Closeable {
      * <p>The current Context is per-thread; this method looks up the Context associated with the
      * current thread.
      *
-     * <p>
-     *
      * @return the Context associated with the current thread, or null if no context is associated
      *     with the current thread.
      * @see ContextFactory#enterContext()
@@ -1676,8 +1674,6 @@ public class Context implements Closeable {
     /**
      * Create an array with a specified initial length.
      *
-     * <p>
-     *
      * @param scope the scope to create the object in
      * @param length the initial length (JavaScript arrays may have additional properties added
      *     dynamically).
@@ -1753,8 +1749,6 @@ public class Context implements Closeable {
      * Convert the value to a JavaScript String value.
      *
      * <p>See ECMA 9.8.
-     *
-     * <p>
      *
      * @param value a JavaScript value
      * @return the corresponding String value converted using the ECMA rules
@@ -2213,8 +2207,6 @@ public class Context implements Closeable {
 
     /**
      * Put a value that can later be retrieved using a given key.
-     *
-     * <p>
      *
      * @param key the key used to index the value
      * @param value the value to save
