@@ -975,7 +975,7 @@ public abstract class IdScriptableObject extends ScriptableObject implements IdF
             int id = (info & 0xFFFF);
             Object value = getInstanceIdValue(id);
             int attr = (info >>> 16);
-            var slot = new Slot(name, 0, attr);
+            Slot slot = new Slot(name, 0, attr);
             slot.value = value;
             return slot;
         }
@@ -984,7 +984,7 @@ public abstract class IdScriptableObject extends ScriptableObject implements IdF
             if (id != 0) {
                 Object value = prototypeValues.get(id);
                 int attr = prototypeValues.getAttributes(id);
-                var slot = new Slot(name, 0, attr);
+                Slot slot = new Slot(name, 0, attr);
                 slot.value = value;
                 return slot;
             }
@@ -1008,7 +1008,7 @@ public abstract class IdScriptableObject extends ScriptableObject implements IdF
             if (id != 0) {
                 Object value = prototypeValues.get(id);
                 int attr = prototypeValues.getAttributes(id);
-                var slot = new Slot(key, 0, attr);
+                Slot slot = new Slot(key, 0, attr);
                 slot.value = value;
                 return slot;
             }

@@ -2883,6 +2883,12 @@ public class ScriptRuntime {
 
     private static LookupResult getNameAndThisInner(
             String name, Context cx, Scriptable scope, boolean isOptionalChainingCall) {
+        // HtmlUnit hack for indirect eval() calls
+        if ("eval".equals(name)) {
+            lastEvalTopCalled_ = true;
+        }
+        // end HtmlUnit
+
         Scriptable parent = scope.getParentScope();
         if (parent == null) {
             Object result = topScopeName(cx, scope, name);
@@ -3130,6 +3136,12 @@ public class ScriptRuntime {
             Context cx,
             Scriptable scope,
             boolean isOptionalChainingCall) {
+        // HtmlUnit hack for indirect eval() calls
+        if ("eval".equals(property)) {
+            lastEvalTopCalled_ = false;
+        }
+        // end HtmlUnit
+
         Scriptable thisObj = toObjectOrNull(cx, obj, scope);
         return getPropAndThisHelper(obj, property, cx, thisObj, isOptionalChainingCall);
     }
