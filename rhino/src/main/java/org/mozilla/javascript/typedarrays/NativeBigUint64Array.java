@@ -90,8 +90,8 @@ public class NativeBigUint64Array extends NativeTypedArrayView<BigInteger> {
             return BigInteger.valueOf(base);
         } else {
             // Do it in two parts
-            var lsw = BigInteger.valueOf(base & 0xffffffff);
-            var msw = BigInteger.valueOf((base >> 32) & 0xffffffff).shiftLeft(32);
+            BigInteger lsw = BigInteger.valueOf(base & 0xffffffff);
+            BigInteger msw = BigInteger.valueOf((base >> 32) & 0xffffffff).shiftLeft(32);
             return msw.add(lsw);
         }
     }
@@ -101,7 +101,7 @@ public class NativeBigUint64Array extends NativeTypedArrayView<BigInteger> {
         if (checkIndex(index)) {
             return Undefined.instance;
         }
-        var val = ScriptRuntime.toBigInt(c);
+        BigInteger val = ScriptRuntime.toBigInt(c);
 
         long base = val.longValue();
 

@@ -94,7 +94,7 @@ public class NativeBigInt64Array extends NativeTypedArrayView<BigInteger> {
         if (checkIndex(index)) {
             return Undefined.instance;
         }
-        var val = ScriptRuntime.toBigInt(c);
+        BigInteger val = ScriptRuntime.toBigInt(c);
 
         long base = val.longValue();
 

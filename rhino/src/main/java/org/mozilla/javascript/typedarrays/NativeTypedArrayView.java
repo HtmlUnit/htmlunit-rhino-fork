@@ -160,7 +160,7 @@ public abstract class NativeTypedArrayView<T> extends NativeArrayBufferView
 
         LambdaConstructor ta = (LambdaConstructor) s.getAssociatedValue(TYPED_ARRAY_TAG);
         if (ta == null) {
-            var proto = (ScriptableObject) cx.newObject(s);
+            ScriptableObject proto = (ScriptableObject) cx.newObject(s);
             ta =
                     new LambdaConstructor(
                             s,
