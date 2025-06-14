@@ -211,7 +211,7 @@ public class NativeSet extends ScriptableObject {
         // been replaced. Since we're not fully constructed yet, create a dummy instance
         // so that we can get our own prototype.
         ScriptableObject dummy = ensureScriptableObject(cx.newObject(scope, set.getClassName()));
-        var addCall = ScriptRuntime.getPropAndThis(dummy.getPrototype(), "add", cx, scope);
+        ScriptRuntime.LookupResult addCall = ScriptRuntime.getPropAndThis(dummy.getPrototype(), "add", cx, scope);
         Callable add = addCall.getCallable();
 
         // Finally, run through all the iterated values and add them!

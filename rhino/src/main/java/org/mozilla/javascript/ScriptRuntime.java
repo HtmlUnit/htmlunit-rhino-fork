@@ -2827,7 +2827,7 @@ public class ScriptRuntime {
      *
      * @deprecated use {@link #getNameAndThis(String, Context, Scriptable)}
      */
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Callable getNameFunctionAndThis(String name, Context cx, Scriptable scope) {
         return getNameFunctionAndThisInner(name, cx, scope, false);
     }
@@ -2835,7 +2835,7 @@ public class ScriptRuntime {
     /**
      * @deprecated use {@link #getNameAndThisOptional(String, Context, Scriptable)}
      */
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Callable getNameFunctionAndThisOptional(
             String name, Context cx, Scriptable scope) {
         return getNameFunctionAndThisInner(name, cx, scope, true);
@@ -2941,7 +2941,7 @@ public class ScriptRuntime {
      *
      * @deprecated use {@link #getElemAndThis(Object, Object, Context, Scriptable)}
      */
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Callable getElemFunctionAndThis(
             Object obj, Object elem, Context cx, Scriptable scope) {
         return getElemFunctionAndThisInner(obj, elem, cx, scope, false);
@@ -2950,7 +2950,7 @@ public class ScriptRuntime {
     /**
      * @deprecated use {@link #getElemAndThisOptional(Object, Object, Context, Scriptable)}
      */
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Callable getElemFunctionAndThisOptional(
             Object obj, Object elem, Context cx, Scriptable scope) {
         return getElemFunctionAndThisInner(obj, elem, cx, scope, true);
@@ -3071,7 +3071,7 @@ public class ScriptRuntime {
      *
      * @deprecated Use {@link #getPropAndThis(Object, String, Context, Scriptable)} instead
      */
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Callable getPropFunctionAndThis(
             Object obj, String property, Context cx, Scriptable scope) {
         return getPropFunctionAndThisInner(obj, property, cx, scope, false);
@@ -3080,7 +3080,7 @@ public class ScriptRuntime {
     /**
      * @deprecated Use {@link #getPropAndThis(Object, String, Context, Scriptable)} instead
      */
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Callable getPropFunctionAndThisOptional(
             Object obj, String property, Context cx, Scriptable scope) {
         return getPropFunctionAndThisInner(obj, property, cx, scope, true);
@@ -3214,7 +3214,7 @@ public class ScriptRuntime {
     /**
      * @deprecated Use {@link #getValueAndThisOptional(Object, Context)} instead
      */
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Callable getValueFunctionAndThisOptional(Object value, Context cx) {
         return getValueFunctionAndThisInner(value, cx, true);
     }
@@ -5945,21 +5945,21 @@ public class ScriptRuntime {
         return value;
     }
 
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     private static void storeScriptable(Context cx, Scriptable value) {
         // The previously stored scratchScriptable should be consumed
         if (cx.scratchScriptable != null) throw new IllegalStateException();
         cx.scratchScriptable = value;
     }
 
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static Scriptable lastStoredScriptable(Context cx) {
         Scriptable result = cx.scratchScriptable;
         cx.scratchScriptable = null;
         return result;
     }
 
-    @Deprecated(since = "1.8.1", forRemoval = true)
+    @Deprecated
     public static void discardLastStoredScriptable(Context cx) {
         if (cx.scratchScriptable == null) throw new IllegalStateException();
         cx.scratchScriptable = null;

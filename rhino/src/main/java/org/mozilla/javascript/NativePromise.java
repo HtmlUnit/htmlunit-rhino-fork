@@ -242,7 +242,7 @@ public class NativePromise extends ScriptableObject {
             IteratorLikeIterable.Itr iterator,
             Scriptable thisObj,
             Capability cap) {
-        var resolve = ScriptRuntime.getPropAndThis(thisObj, "resolve", cx, scope);
+        ScriptRuntime.LookupResult resolve = ScriptRuntime.getPropAndThis(thisObj, "resolve", cx, scope);
 
         // Manually iterate for exception handling purposes
         while (true) {
@@ -270,7 +270,7 @@ public class NativePromise extends ScriptableObject {
 
             // And then call "then" on it.
             // Logic in the resolution function ensures we don't deliver duplicate results
-            var thenFunc = ScriptRuntime.getPropAndThis(nextPromise, "then", cx, scope);
+            ScriptRuntime.LookupResult thenFunc = ScriptRuntime.getPropAndThis(nextPromise, "then", cx, scope);
             thenFunc.call(cx, scope, new Object[] {cap.resolve, cap.reject});
         }
     }
@@ -356,7 +356,7 @@ public class NativePromise extends ScriptableObject {
         Object arg = (args.length > 0 ? args[0] : Undefined.instance);
         Scriptable coercedThis = ScriptRuntime.toObject(cx, scope, thisObj);
         // No guarantee that the caller didn't change the prototype of "then"!
-        var thenFunc = ScriptRuntime.getPropAndThis(coercedThis, "then", cx, scope);
+        ScriptRuntime.LookupResult thenFunc = ScriptRuntime.getPropAndThis(coercedThis, "then", cx, scope);
         return thenFunc.call(cx, scope, new Object[] {Undefined.instance, arg});
     }
 
@@ -380,7 +380,7 @@ public class NativePromise extends ScriptableObject {
             thenFinally = makeThenFinally(scope, constructor, callableOnFinally);
             catchFinally = makeCatchFinally(scope, constructor, callableOnFinally);
         }
-        var thenFunc = ScriptRuntime.getPropAndThis(thisObj, "then", cx, scope);
+        ScriptRuntime.LookupResult thenFunc = ScriptRuntime.getPropAndThis(thisObj, "then", cx, scope);
         return thenFunc.call(cx, scope, new Object[] {thenFinally, catchFinally});
     }
 
@@ -405,7 +405,7 @@ public class NativePromise extends ScriptableObject {
                                     Undefined.SCRIPTABLE_UNDEFINED,
                                     ScriptRuntime.emptyArgs);
                     Object promise = resolveInternal(cx, scope, constructor, result);
-                    var thenFunc = ScriptRuntime.getPropAndThis(promise, "then", cx, scope);
+                    ScriptRuntime.LookupResult thenFunc = ScriptRuntime.getPropAndThis(promise, "then", cx, scope);
                     return thenFunc.call(cx, scope, new Object[] {valueThunk});
                 });
     }
@@ -432,7 +432,7 @@ public class NativePromise extends ScriptableObject {
                                     Undefined.SCRIPTABLE_UNDEFINED,
                                     ScriptRuntime.emptyArgs);
                     Object promise = resolveInternal(cx, scope, constructor, result);
-                    var thenFunc = ScriptRuntime.getPropAndThis(promise, "then", cx, scope);
+                    ScriptRuntime.LookupResult thenFunc = ScriptRuntime.getPropAndThis(promise, "then", cx, scope);
                     return thenFunc.call(cx, scope, new Object[] {reasonThrower});
                 });
     }
@@ -728,7 +728,7 @@ public class NativePromise extends ScriptableObject {
             int index = 0;
             // Do this first because we should catch any exception before
             // invoking the iterator.
-            var resolve = ScriptRuntime.getPropAndThis(thisObj, "resolve", topCx, topScope);
+            ScriptRuntime.LookupResult resolve = ScriptRuntime.getPropAndThis(thisObj, "resolve", topCx, topScope);
 
             // Iterate manually because we need to catch exceptions in a special way.
             while (true) {
@@ -806,7 +806,7 @@ public class NativePromise extends ScriptableObject {
                 remainingElements++;
 
                 // Call "then" on the promise with the resolution func
-                var thenFunc = ScriptRuntime.getPropAndThis(nextPromise, "then", topCx, topScope);
+                ScriptRuntime.LookupResult thenFunc = ScriptRuntime.getPropAndThis(nextPromise, "then", topCx, topScope);
                 thenFunc.call(topCx, topScope, new Object[] {resolveFunc, rejectFunc});
                 index++;
             }
@@ -841,7 +841,7 @@ public class NativePromise extends ScriptableObject {
             int index = 0;
             // Do this first because we should catch any exception before
             // invoking the iterator.
-            var resolve = ScriptRuntime.getPropAndThis(thisObj, "resolve", topCx, topScope);
+            ScriptRuntime.LookupResult resolve = ScriptRuntime.getPropAndThis(thisObj, "resolve", topCx, topScope);
 
             // Iterate manually because we need to catch exceptions in a special way.
             while (true) {
@@ -898,7 +898,7 @@ public class NativePromise extends ScriptableObject {
                 remainingElements++;
 
                 // Call "then" on the promise with the resolution func
-                var thenFunc = ScriptRuntime.getPropAndThis(nextPromise, "then", topCx, topScope);
+                ScriptRuntime.LookupResult thenFunc = ScriptRuntime.getPropAndThis(nextPromise, "then", topCx, topScope);
                 thenFunc.call(topCx, topScope, new Object[] {capability.resolve, rejectFunc});
                 index++;
             }

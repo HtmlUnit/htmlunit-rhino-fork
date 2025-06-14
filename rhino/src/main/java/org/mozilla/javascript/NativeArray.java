@@ -999,7 +999,7 @@ public class NativeArray extends ScriptableObject implements List {
 
                     } else {
                         if (toLocale) {
-                            var fun =
+                            ScriptRuntime.LookupResult fun =
                                     ScriptRuntime.getPropAndThis(elem, "toLocaleString", cx, scope);
                             elem = fun.call(cx, scope, ScriptRuntime.emptyArgs);
                         }

@@ -619,7 +619,7 @@ public final class IRFactory {
         Node mexpr = decompileFunctionHeader(fn);
         int index = parser.currentScriptOrFn.addFunction(fn);
 
-        var savedStrict = outerScopeIsStrict;
+        boolean savedStrict = outerScopeIsStrict;
         outerScopeIsStrict |= fn.isInStrictMode();
         Parser.PerFunctionVariables savedVars = parser.createPerFunctionVariables(fn);
         try {

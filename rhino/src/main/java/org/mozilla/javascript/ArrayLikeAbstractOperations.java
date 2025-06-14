@@ -274,7 +274,7 @@ public class ArrayLikeAbstractOperations {
     static void defineElem(Context cx, Scriptable target, long index, Object value) {
         if (!(target instanceof NativeArray && ((NativeArray) target).getDenseOnly())
                 && target instanceof ScriptableObject) {
-            var so = (ScriptableObject) target;
+            ScriptableObject so = (ScriptableObject) target;
             ScriptableObject desc = new NativeObject();
             desc.defineProperty("value", value, 0);
             desc.defineProperty("writable", Boolean.TRUE, 0);
@@ -377,7 +377,7 @@ public class ArrayLikeAbstractOperations {
 
     public static ElementComparator getSortComparatorFromArguments(
             Context cx, Scriptable scope, Object[] args) {
-        var compareFunc = ScriptRuntime.getValueAndThis(args[0], cx);
+        ScriptRuntime.LookupResult compareFunc = ScriptRuntime.getValueAndThis(args[0], cx);
         Callable compare = compareFunc.getCallable();
         Scriptable compareThis = compareFunc.getThis();
         final Object[] cmpBuf = new Object[2]; // Buffer for cmp arguments
