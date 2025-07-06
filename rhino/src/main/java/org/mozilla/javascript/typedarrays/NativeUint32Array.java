@@ -10,6 +10,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.LambdaConstructor;
 import org.mozilla.javascript.ScriptRuntimeES6;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 
 /**
@@ -61,6 +62,7 @@ public class NativeUint32Array extends NativeTypedArrayView<Long> {
         ScriptRuntimeES6.addSymbolSpecies(cx, scope, constructor);
         if (sealed) {
             constructor.sealObject();
+            ((ScriptableObject) constructor.getPrototypeProperty()).sealObject();
         }
         return constructor;
     }
@@ -85,10 +87,10 @@ public class NativeUint32Array extends NativeTypedArrayView<Long> {
 
     @Override
     protected Object js_set(int index, Object c) {
+        long val = Conversions.toUint32(c);
         if (checkIndex(index)) {
             return Undefined.instance;
         }
-        long val = Conversions.toUint32(c);
         ByteIo.writeUint32(
                 arrayBuffer.buffer, (index * BYTES_PER_ELEMENT) + offset, val, useLittleEndian());
         return null;

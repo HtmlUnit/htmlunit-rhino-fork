@@ -12,13 +12,14 @@ import org.mozilla.javascript.LambdaConstructor;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.ScriptRuntimeES6;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 
 /**
  * An array view that stores 64-bit quantities and implements the JavaScript "Float64Array"
  * interface. It also implements List&lt;Double&gt; for direct manipulation in Java.
  */
-public class NativeBigUint64Array extends NativeTypedArrayView<BigInteger> {
+public class NativeBigUint64Array extends NativeBigIntArrayView {
     private static final long serialVersionUID = -1255405650050639335L;
 
     private static final String CLASS_NAME = "BigUint64Array";
@@ -63,6 +64,7 @@ public class NativeBigUint64Array extends NativeTypedArrayView<BigInteger> {
         ScriptRuntimeES6.addSymbolSpecies(cx, scope, constructor);
         if (sealed) {
             constructor.sealObject();
+            ((ScriptableObject) constructor.getPrototypeProperty()).sealObject();
         }
         return constructor;
     }
@@ -98,10 +100,10 @@ public class NativeBigUint64Array extends NativeTypedArrayView<BigInteger> {
 
     @Override
     protected Object js_set(int index, Object c) {
+        BigInteger val = ScriptRuntime.toBigInt(c);
         if (checkIndex(index)) {
             return Undefined.instance;
         }
-        BigInteger val = ScriptRuntime.toBigInt(c);
 
         long base = val.longValue();
 

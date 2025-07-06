@@ -11,6 +11,7 @@ import org.mozilla.javascript.LambdaConstructor;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.ScriptRuntimeES6;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 
 /**
@@ -62,6 +63,7 @@ public class NativeInt32Array extends NativeTypedArrayView<Integer> {
         ScriptRuntimeES6.addSymbolSpecies(cx, scope, constructor);
         if (sealed) {
             constructor.sealObject();
+            ((ScriptableObject) constructor.getPrototypeProperty()).sealObject();
         }
         return constructor;
     }
@@ -86,10 +88,10 @@ public class NativeInt32Array extends NativeTypedArrayView<Integer> {
 
     @Override
     protected Object js_set(int index, Object c) {
+        int val = ScriptRuntime.toInt32(c);
         if (checkIndex(index)) {
             return Undefined.instance;
         }
-        int val = ScriptRuntime.toInt32(c);
         ByteIo.writeInt32(
                 arrayBuffer.buffer, (index * BYTES_PER_ELEMENT) + offset, val, useLittleEndian());
         return null;

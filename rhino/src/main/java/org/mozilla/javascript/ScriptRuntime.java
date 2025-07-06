@@ -243,7 +243,6 @@ public class ScriptRuntime {
             new LazilyLoadedCtor(scope, "Uint32Array", sealed, true, NativeUint32Array::init);
             new LazilyLoadedCtor(scope, "BigInt64Array", sealed, true, NativeBigInt64Array::init);
             new LazilyLoadedCtor(scope, "BigUint64Array", sealed, true, NativeBigUint64Array::init);
-            new LazilyLoadedCtor(scope, "Uint32Array", sealed, true, NativeUint32Array::init);
             new LazilyLoadedCtor(scope, "Float32Array", sealed, true, NativeFloat32Array::init);
             new LazilyLoadedCtor(scope, "Float64Array", sealed, true, NativeFloat64Array::init);
             new LazilyLoadedCtor(scope, "DataView", sealed, true, NativeDataView::init);
@@ -823,12 +822,12 @@ public class ScriptRuntime {
         }
         double integerIndex = toInteger(val);
         if (integerIndex < 0) {
-            throw rangeError("index out of range");
+            throw rangeErrorById("msg.out.of.range.index", integerIndex);
         }
         // ToLength
         double index = Math.min(integerIndex, NativeNumber.MAX_SAFE_INTEGER);
         if (integerIndex != index) {
-            throw rangeError("index out of range");
+            throw rangeErrorById("msg.out.of.range.index", integerIndex);
         }
         return (int) index;
     }
