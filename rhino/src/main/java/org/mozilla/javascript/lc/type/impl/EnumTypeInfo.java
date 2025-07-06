@@ -1,5 +1,6 @@
 package org.mozilla.javascript.lc.type.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 public class EnumTypeInfo extends ClassTypeInfo {
@@ -22,7 +23,8 @@ public class EnumTypeInfo extends ClassTypeInfo {
     @Override
     public List<Object> enumConstants() {
         if (constants == null) {
-            constants = List.of(asClass().getEnumConstants());
+            // HtmlUnit constants = List.of(asClass().getEnumConstants());
+            constants = Collections.singletonList(asClass().getEnumConstants());
         }
 
         return constants;

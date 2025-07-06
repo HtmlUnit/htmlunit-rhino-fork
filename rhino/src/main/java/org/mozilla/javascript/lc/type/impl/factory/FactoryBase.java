@@ -2,6 +2,7 @@ package org.mozilla.javascript.lc.type.impl.factory;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.List;
 import org.mozilla.javascript.lc.type.ParameterizedTypeInfo;
@@ -29,12 +30,12 @@ public interface FactoryBase extends TypeInfoFactory {
 
     @Override
     default TypeInfo create(WildcardType wildcardType) {
-        var upper = wildcardType.getUpperBounds();
+        Type[] upper = wildcardType.getUpperBounds();
         if (upper.length != 0 && upper[0] != Object.class) {
             return create(upper[0]);
         }
 
-        var lower = wildcardType.getLowerBounds();
+        Type[] lower = wildcardType.getLowerBounds();
         if (lower.length != 0) {
             return create(lower[0]);
         }

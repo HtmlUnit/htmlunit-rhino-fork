@@ -15,7 +15,7 @@ public final class ParameterizedTypeInfoImpl extends TypeInfoBase implements Par
     public ParameterizedTypeInfoImpl(TypeInfo rawType, List<TypeInfo> params) {
         this.rawType = rawType;
         this.params = params;
-        for (var param : params) { // implicit null check on `params`
+        for (TypeInfo param : params) { // implicit null check on `params`
             Objects.requireNonNull(param);
         }
     }
@@ -35,7 +35,7 @@ public final class ParameterizedTypeInfoImpl extends TypeInfoBase implements Par
         if (index < 0 || index >= params.size()) {
             return TypeInfo.NONE;
         }
-        var got = params.get(index);
+        TypeInfo got = params.get(index);
         return got == TypeInfo.OBJECT ? TypeInfo.NONE : got;
     }
 
@@ -79,7 +79,7 @@ public final class ParameterizedTypeInfoImpl extends TypeInfoBase implements Par
     @Override
     public void collectComponentClass(Consumer<Class<?>> collector) {
         rawType.collectComponentClass(collector);
-        for (var param : params) {
+        for (TypeInfo param : params) {
             param.collectComponentClass(collector);
         }
     }

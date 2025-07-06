@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import org.mozilla.javascript.commonjs.module.ModuleScope;
 import org.mozilla.javascript.lc.type.TypeInfo;
 import org.mozilla.javascript.lc.type.TypeInfoFactory;
@@ -80,7 +81,7 @@ public class FunctionObject extends BaseFunction {
      * @see org.mozilla.javascript.Scriptable
      */
     public FunctionObject(String name, Member methodOrConstructor, Scriptable scope) {
-        var typeInfoFactory = TypeInfoFactory.get(this);
+        TypeInfoFactory typeInfoFactory = TypeInfoFactory.get(this);
 
         if (methodOrConstructor instanceof Constructor) {
             member = new MemberBox((Constructor<?>) methodOrConstructor, typeInfoFactory);
@@ -91,14 +92,14 @@ public class FunctionObject extends BaseFunction {
         }
         String methodName = member.getName();
         this.functionName = name;
-        var types = member.getArgTypes();
+        List<TypeInfo> types = member.getArgTypes();
         int arity = types.size();
         if (arity == 5 && (types.get(2).isArray() || types.get(3).isArray())) {
             // Either variable args or an error.
-            if (types.get(1).isArray()) {
+            if (types.get(2).isArray()) {
                 if (!isStatic
                         || types.get(0).isNot(Context.class)
-                        || types.get(1) isNot(ScriptableClass) // HtmlUnit scope
+                        || types.get(1).isNot(Scriptable.class) // HtmlUnit scope
                         || types.get(2).isNot(Object[].class)
                         || types.get(3).isNot(Function.class)
                         || types.get(4).isNot(boolean.class)) {
@@ -108,7 +109,7 @@ public class FunctionObject extends BaseFunction {
             } else {
                 if (!isStatic
                         || types.get(0).isNot(Context.class)
-                        || types.get(1) isNot(ScriptableClass) // HtmlUnit scope
+                        || types.get(1).isNot(Scriptable.class) // HtmlUnit scope
                         || types.get(2).isNot(Scriptable.class)
                         || types.get(3).isNot(Object[].class)
                         || types.get(4).isNot(Function.class)) {
@@ -169,9 +170,32 @@ public class FunctionObject extends BaseFunction {
     }
 
     public static Object convertArg(Context cx, Scriptable scope, Object arg, int typeTag) {
-        return convertArg(cx, scope, arg, typeTag, false);
+        /* HtmlUnit preserve the old code */
+
+        switch (typeTag) {
+            case JAVA_STRING_TYPE:
+                if (arg instanceof String) return arg;
+                return ScriptRuntime.toString(arg);
+            case JAVA_INT_TYPE:
+                if (arg instanceof Integer) return arg;
+                return Integer.valueOf(ScriptRuntime.toInt32(arg));
+            case JAVA_BOOLEAN_TYPE:
+                if (arg instanceof Boolean) return arg;
+                return ScriptRuntime.toBoolean(arg) ? Boolean.TRUE : Boolean.FALSE;
+            case JAVA_DOUBLE_TYPE:
+                if (arg instanceof Double) return arg;
+                return Double.valueOf(ScriptRuntime.toNumber(arg));
+            case JAVA_SCRIPTABLE_TYPE:
+                return ScriptRuntime.toObjectOrNull(cx, arg, scope);
+            case JAVA_OBJECT_TYPE:
+                if (arg instanceof ConsString) return arg.toString();
+                return arg;
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
+    /* HtmlUnit
     public static Object convertArg(
             Context cx, Scriptable scope, Object arg, int typeTag, boolean isNullable) {
         switch (typeTag) {
@@ -204,6 +228,7 @@ public class FunctionObject extends BaseFunction {
                 throw new IllegalArgumentException();
         }
     }
+    HtmlUnit */
 
     /**
      * Return the value defined by the method used to construct the object (number of parameters of
@@ -347,7 +372,7 @@ public class FunctionObject extends BaseFunction {
         if (tag == JAVA_UNSUPPORTED_TYPE) {
             throw Context.reportRuntimeErrorById("msg.cant.convert", desired.getName());
         }
-        return convertArg(cx, scope, arg, tag, false);
+        return convertArg(cx, scope, arg, tag /* HtmlUnit, false */);
     }
 
     /**
@@ -422,7 +447,7 @@ public class FunctionObject extends BaseFunction {
                 for (int i = 0; i != parmsLength; ++i) {
                     Object arg = args[i];
                     Object converted =
-                            convertArg(cx, scope, arg, typeTags[i], member.argNullability[i]);
+                            convertArg(cx, scope, arg, typeTags[i] /* HtmlUnit, member.argNullability[i] HtmlUnit */);
                     if (arg != converted) {
                         if (invokeArgs == args) {
                             invokeArgs = args.clone();
@@ -437,7 +462,7 @@ public class FunctionObject extends BaseFunction {
                 for (int i = 0; i != parmsLength; ++i) {
                     Object arg = (i < argsLength) ? args[i] : Undefined.instance;
                     invokeArgs[i] =
-                            convertArg(cx, scope, arg, typeTags[i], member.argNullability[i]);
+                            convertArg(cx, scope, arg, typeTags[i] /* HtmlUnit , member.argNullability[i] HtmlUnit */);
                 }
             }
 
@@ -497,7 +522,7 @@ public class FunctionObject extends BaseFunction {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         if (parmsLength > 0) {
-            var types = member.getArgTypes();
+            List<TypeInfo> types = member.getArgTypes();
             typeTags = new byte[parmsLength];
             for (int i = 0; i != parmsLength; ++i) {
                 typeTags[i] = (byte) types.get(i).getTypeTag();

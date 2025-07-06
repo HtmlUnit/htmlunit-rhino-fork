@@ -25,7 +25,7 @@ public interface ParameterizedTypeInfo extends TypeInfo {
 
     @Override
     default TypeInfo param(int index) {
-        final var params = params();
+        final List<TypeInfo> params = params();
         return index >= 0 && index < params.size() ? params.get(index) : TypeInfo.NONE;
     }
 

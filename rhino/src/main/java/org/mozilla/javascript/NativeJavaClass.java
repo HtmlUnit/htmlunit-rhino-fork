@@ -8,7 +8,9 @@ package org.mozilla.javascript;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Map;
+import org.mozilla.javascript.lc.type.TypeInfo;
 
 /**
  * This class reflects Java classes into the JavaScript environment, mainly for constructors and
@@ -189,7 +191,7 @@ public class NativeJavaClass extends NativeJavaObject implements Function {
     }
 
     static Object constructInternal(Object[] args, MemberBox ctor) {
-        var argTypes = ctor.getArgTypes();
+        List<TypeInfo> argTypes = ctor.getArgTypes();
 
         if (ctor.vararg) {
             // marshall the explicit parameter
@@ -211,7 +213,7 @@ public class NativeJavaClass extends NativeJavaObject implements Function {
                         Context.jsToJava(args[args.length - 1], argTypes.get(argTypes.size() - 1));
             } else {
                 // marshall the variable parameter
-                var componentType = argTypes.get(argTypes.size() - 1).getComponentType();
+                TypeInfo componentType = argTypes.get(argTypes.size() - 1).getComponentType();
                 varArgs = componentType.newArray(args.length - argTypes.size() + 1);
                 for (int i = 0; i < Array.getLength(varArgs); i++) {
                     Object value = Context.jsToJava(args[argTypes.size() - 1 + i], componentType);

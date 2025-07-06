@@ -625,8 +625,8 @@ public class NativeJavaObject implements Scriptable, SymbolScriptable, Wrapper, 
                     // to the target (component) type.
                     NativeArray array = (NativeArray) value;
                     long length = array.getLength();
-                    var componentType = type.getComponentType();
-                    var result = componentType.newArray((int) length);
+                    TypeInfo componentType = type.getComponentType();
+                    Object result = componentType.newArray((int) length);
                     for (int i = 0; i < length; ++i) {
                         try {
                             Array.set(

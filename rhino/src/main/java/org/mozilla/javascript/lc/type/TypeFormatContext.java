@@ -1,5 +1,6 @@
 package org.mozilla.javascript.lc.type;
 
+import java.util.Iterator;
 import org.mozilla.javascript.lc.type.impl.ClassSignatureFormatContext;
 
 /**
@@ -25,7 +26,7 @@ public interface TypeFormatContext {
         type.rawType().append(this, builder);
 
         builder.append('<');
-        var iterator = type.params().iterator();
+        Iterator<TypeInfo> iterator = type.params().iterator();
         if (iterator.hasNext()) {
             iterator.next().append(this, builder);
             while (iterator.hasNext()) {

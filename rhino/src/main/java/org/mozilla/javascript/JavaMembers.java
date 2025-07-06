@@ -21,6 +21,7 @@ import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -141,7 +142,7 @@ class JavaMembers {
             // main setter. Otherwise, let the NativeJavaMethod decide which
             // setter to use:
             if (bp.setters == null || value == null) {
-                var setType = bp.setter.getArgTypes().get(0);
+                TypeInfo setType = bp.setter.getArgTypes().get(0);
                 Object[] args = {Context.jsToJava(value, setType)};
                 try {
                     bp.setter.invoke(javaObject, args);
@@ -216,10 +217,10 @@ class JavaMembers {
             return "()";
         }
 
-        var builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
         builder.append('(');
-        var iter = argTypes.iterator();
+        Iterator<TypeInfo> iter = argTypes.iterator();
         if (iter.hasNext()) {
             builder.append(javaSignature(iter.next().asClass()));
             while (iter.hasNext()) {
@@ -437,7 +438,7 @@ class JavaMembers {
         // We reflect methods first, because we want overloaded field/method
         // names to be allocated to the NativeJavaMethod before the field
         // gets in the way.
-        var typeFactory = TypeInfoFactory.get(scope);
+        TypeInfoFactory typeFactory = TypeInfoFactory.get(scope);
 
         Method[] methods = discoverAccessibleMethods(cl, includeProtected, includePrivate);
         for (Method method : methods) {
@@ -614,7 +615,7 @@ class JavaMembers {
                         if (getter != null) {
                             // We have a getter. Now, do we have a matching
                             // setter?
-                            var type = getter.getReturnType();
+                            TypeInfo type = getter.getReturnType();
                             setter = extractSetMethod(type, njmSet.methods, isStatic);
                         } else {
                             // No getter, find any set method
@@ -714,7 +715,7 @@ class JavaMembers {
             // Does getter method have an empty parameter list with a return
             // value (eg. a getSomething() or isSomething())?
             if (method.getArgTypes().isEmpty() && (!isStatic || method.isStatic())) {
-                var type = method.getReturnType();
+                TypeInfo type = method.getReturnType();
                 if (!type.isVoid()) {
                     return method;
                 }
@@ -735,7 +736,7 @@ class JavaMembers {
         MemberBox acceptableMatch = null;
         for (MemberBox method : methods) {
             if (!isStatic || method.isStatic()) {
-                var argTypes = method.getArgTypes();
+                List<TypeInfo> argTypes = method.getArgTypes();
                 if (argTypes.size() == 1) {
                     if (type.is(argTypes.get(0).asClass())) {
                         // perfect match, no need to continue scanning

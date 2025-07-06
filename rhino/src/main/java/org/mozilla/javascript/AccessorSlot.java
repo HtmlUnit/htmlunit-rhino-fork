@@ -1,6 +1,8 @@
 package org.mozilla.javascript;
 
 import java.io.Serializable;
+import java.util.List;
+import org.mozilla.javascript.lc.type.TypeInfo;
 
 /**
  * This is a specialization of Slot to store various types of values that are retrieved dynamically
@@ -239,13 +241,14 @@ public class AccessorSlot extends Slot {
         @Override
         public boolean setValue(Object value, Scriptable owner, Scriptable start) {
             Context cx = Context.getContext();
-            var pTypes = member.getArgTypes();
+            List<TypeInfo> pTypes = member.getArgTypes();
             // XXX: cache tag since it is already calculated in
             // defineProperty ?
-            var valueType = pTypes.get(pTypes.size() - 1);
-            boolean isNullable = member.argNullability[pTypes.size() - 1];
+            TypeInfo valueType = pTypes.get(pTypes.size() - 1);
+            // HtmlUnit boolean isNullable = member.argNullability[pTypes.size() - 1];
             int tag = valueType.getTypeTag();
-            Object actualArg = FunctionObject.convertArg(cx, start, value, tag, isNullable);
+            // HtmlUnit Object actualArg = FunctionObject.convertArg(cx, start, value, tag, isNullable);
+            Object actualArg = FunctionObject.convertArg(cx, start, value, tag);
 
             if (member.delegateTo == null) {
                 member.invoke(start, new Object[] {actualArg});

@@ -114,7 +114,8 @@ public interface TypeInfoFactory extends Serializable {
      * @see TypeInfo#consolidate(Map)
      */
     default Map<VariableTypeInfo, TypeInfo> getConsolidationMapping(Class<?> from) {
-        return Map.of();
+        // HtmlUnit return Map.of();
+        return (Map<VariableTypeInfo, TypeInfo>) Collections.EMPTY_MAP;
     }
 
     /// helpers
@@ -151,8 +152,8 @@ public interface TypeInfoFactory extends Serializable {
         if (types.length == 0) {
             return EMPTY_ARRAY;
         }
-        final var len = types.length;
-        final var arr = new TypeInfo[len];
+        final int len = types.length;
+        final TypeInfo[] arr = new TypeInfo[len];
         for (int i = 0; i < len; i++) {
             arr[i] = create(types[i]);
         }
@@ -162,11 +163,14 @@ public interface TypeInfoFactory extends Serializable {
     default <T extends Type> List<TypeInfo> createList(T[] types) {
         switch (types.length) {
             case 0:
-                return List.of();
+                // HtmlUnit return List.of();
+                return (List<TypeInfo>) Collections.EMPTY_LIST;
             case 1:
-                return List.of(create(types[0]));
+                // HtmlUnit return List.of(create(types[0]));
+                return Collections.singletonList(create(types[0]));
             case 2:
-                return List.of(create(types[0]), create(types[1]));
+                // HtmlUnit return List.of(create(types[0]), create(types[1]));
+                return Collections.unmodifiableList(Arrays.asList(create(types[0]), create(types[1])));
             default:
                 // List.of(createArray(types)) will cause one more array copying
                 return Collections.unmodifiableList(Arrays.asList(createArray(types)));
@@ -289,7 +293,7 @@ public interface TypeInfoFactory extends Serializable {
                 (TypeInfoFactory) ScriptableObject.getTopScopeValue(scope, "TypeInfoFactory");
         if (got == null) {
             // we expect this to not happen frequently, so computing top scope twice is acceptable
-            var topScope = ScriptableObject.getTopLevelScope(scope);
+            Scriptable topScope = ScriptableObject.getTopLevelScope(scope);
             if (!(topScope instanceof ScriptableObject)) {
                 // Note: it's originally a RuntimeException, the super class of
                 // IllegalArgumentException, so this will not break error catching

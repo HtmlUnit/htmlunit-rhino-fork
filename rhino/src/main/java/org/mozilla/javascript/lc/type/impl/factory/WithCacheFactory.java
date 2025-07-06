@@ -33,7 +33,7 @@ public abstract class WithCacheFactory implements FactoryBase {
 
     @Override
     public TypeInfo create(Class<?> clazz) {
-        final var predefined = TypeInfoFactory.matchPredefined(clazz);
+        final TypeInfo predefined = TypeInfoFactory.matchPredefined(clazz);
         if (predefined != null) {
             return predefined;
         } else if (clazz.isArray()) {

@@ -10,7 +10,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.mozilla.javascript.lc.type.TypeInfo;
 import org.mozilla.javascript.lc.type.TypeInfoFactory;
 
 /**
@@ -137,7 +139,7 @@ public class NativeJavaMethod extends BaseFunction {
         }
 
         MemberBox meth = methods[index];
-        var argTypes = meth.getArgTypes();
+        List<TypeInfo> argTypes = meth.getArgTypes();
 
         if (meth.vararg) {
             // marshall the explicit parameters
@@ -159,7 +161,7 @@ public class NativeJavaMethod extends BaseFunction {
                         Context.jsToJava(args[args.length - 1], argTypes.get(argTypes.size() - 1));
             } else {
                 // marshall the variable parameters
-                var componentType = argTypes.get(argTypes.size() - 1).getComponentType();
+                TypeInfo componentType = argTypes.get(argTypes.size() - 1).getComponentType();
                 varArgs = componentType.newArray(args.length - argTypes.size() + 1);
                 for (int i = 0; i < Array.getLength(varArgs); i++) {
                     Object value = Context.jsToJava(args[argTypes.size() - 1 + i], componentType);
@@ -437,16 +439,16 @@ public class NativeJavaMethod extends BaseFunction {
             int[] computedWeights1,
             MemberBox member2,
             int[] computedWeights2) {
-        final var types1 = member1.getArgTypes();
-        final var types2 = member2.getArgTypes();
+        final List<TypeInfo> types1 = member1.getArgTypes();
+        final List<TypeInfo> types2 = member2.getArgTypes();
 
         int totalPreference = 0;
         for (int j = 0; j < args.length; j++) {
-            final var type1 =
+            final TypeInfo type1 =
                     member1.vararg && j >= types1.size()
                             ? types1.get(types1.size() - 1)
                             : types1.get(j);
-            final var type2 =
+            final TypeInfo type2 =
                     member2.vararg && j >= types2.size()
                             ? types2.get(types2.size() - 1)
                             : types2.get(j);
@@ -507,8 +509,8 @@ public class NativeJavaMethod extends BaseFunction {
      * @see NativeJavaObject#canConvert(Object, org.mozilla.javascript.lc.type.TypeInfo)
      */
     static int[] failFastConversionWeights(Object[] args, MemberBox member) {
-        final var argTypes = member.getArgTypes();
-        var typeLen = argTypes.size();
+        final List<TypeInfo> argTypes = member.getArgTypes();
+        int typeLen = argTypes.size();
         if (member.vararg) {
             typeLen--;
             if (typeLen > args.length) {
@@ -521,7 +523,7 @@ public class NativeJavaMethod extends BaseFunction {
         }
         final int[] weights = new int[typeLen];
         for (int i = 0; i < typeLen; i++) {
-            final var weight = NativeJavaObject.getConversionWeight(args[i], argTypes.get(i));
+            final int weight = NativeJavaObject.getConversionWeight(args[i], argTypes.get(i));
             if (weight >= NativeJavaObject.CONVERSION_NONE) {
                 if (debug) {
                     printDebug("Rejecting (args can't convert) ", member, args);
