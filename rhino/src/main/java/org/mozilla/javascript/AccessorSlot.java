@@ -31,8 +31,8 @@ public class AccessorSlot extends Slot {
 
     // The Getter and Setter may each be of a different type (JavaScript function, Java
     // function, or neither). So, use an abstraction to distinguish them.
-    Getter getter;
-    Setter setter;
+    /* Htmlunit transient */ Getter getter;
+    /* Htmlunit transient */ Setter setter;
 
     @Override
     boolean isValueSlot() {
@@ -239,18 +239,13 @@ public class AccessorSlot extends Slot {
         @Override
         public boolean setValue(Object value, Scriptable owner, Scriptable start) {
             Context cx = Context.getContext();
-            Class<?>[] pTypes = member.argTypes;
+            var pTypes = member.getArgTypes();
             // XXX: cache tag since it is already calculated in
             // defineProperty ?
-            Class<?> valueType = pTypes[pTypes.length - 1];
-            /* HtmlUnit
-            boolean isNullable = member.argNullability[pTypes.length - 1];
-            HtmlUnit */
-            int tag = FunctionObject.getTypeTag(valueType);
-            /* HtmlUnit
+            var valueType = pTypes.get(pTypes.size() - 1);
+            boolean isNullable = member.argNullability[pTypes.size() - 1];
+            int tag = valueType.getTypeTag();
             Object actualArg = FunctionObject.convertArg(cx, start, value, tag, isNullable);
-            HtmlUnit */
-            Object actualArg = FunctionObject.convertArg(cx, start, value, tag);
 
             if (member.delegateTo == null) {
                 member.invoke(start, new Object[] {actualArg});
