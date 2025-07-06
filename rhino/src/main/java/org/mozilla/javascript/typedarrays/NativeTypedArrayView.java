@@ -858,7 +858,7 @@ public abstract class NativeTypedArrayView<T> extends NativeArrayBufferView
 
         long count = Math.max(end - begin, 0);
 
-        var a = self.typedArraySpeciesCreate(cx, scope, new Object[] {count}, "slice");
+        NativeTypedArrayView<?> a = self.typedArraySpeciesCreate(cx, scope, new Object[] {count}, "slice");
 
         if (count > 0) {
             if (self.isTypedArrayOutOfBounds()) {
