@@ -419,10 +419,11 @@ public class NativeRegExp extends IdScriptableObject {
                     pc += INDEX_LEN;
                     char lowSurrogate = (char) getIndex(regexp.program, pc);
                     pc += INDEX_LEN;
-                    System.out.println(
-                            "UCSPFLAT1: "
-                                    + Character.toString(
-                                            Character.toCodePoint(highSurrogate, lowSurrogate)));
+                    StringBuilder sb = new StringBuilder()
+                                                .append("UCSPFLAT1: ")
+                                                .append(highSurrogate)
+                                                .append(lowSurrogate);
+                    System.out.println(sb);
                     break;
                 case REOP_CLASS:
                     int classIndex = getIndex(regexp.program, pc);
