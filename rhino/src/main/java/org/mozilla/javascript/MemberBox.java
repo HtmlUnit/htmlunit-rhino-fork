@@ -110,7 +110,7 @@ final class MemberBox implements Serializable {
     }
 
     public NullabilityDetector.NullabilityAccessor getArgNullability() {
-        var got = this.argNullability;
+        NullabilityDetector.NullabilityAccessor got = this.argNullability;
         if (got == null) {
             // synchronization is optional, because `getParameterNullability(...)` will always
             // give `NullabilityAccessor` with same behaviour, which is because arg nullability
