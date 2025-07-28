@@ -2582,9 +2582,9 @@ public final class Interpreter extends Icode implements Evaluator {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
             state.indexReg = frame.idata.itsICode[frame.pc++];
-            var varAttributes = frame.varSource.stackAttributes;
-            var vars = frame.varSource.stack;
-            var varDbls = frame.varSource.sDbl;
+            byte[] varAttributes = frame.varSource.stackAttributes;
+            Object[] vars = frame.varSource.stack;
+            double[] varDbls = frame.varSource.sDbl;
             if (!frame.useActivation) {
                 if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                     throw Context.reportRuntimeErrorById(
@@ -2611,9 +2611,9 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoSetConstVar extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            var varAttributes = frame.varSource.stackAttributes;
-            var vars = frame.varSource.stack;
-            var varDbls = frame.varSource.sDbl;
+            byte[] varAttributes = frame.varSource.stackAttributes;
+            Object[] vars = frame.varSource.stack;
+            double[] varDbls = frame.varSource.sDbl;
             if (!frame.useActivation) {
                 if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                     throw Context.reportRuntimeErrorById(
@@ -2649,9 +2649,9 @@ public final class Interpreter extends Icode implements Evaluator {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
             state.indexReg = frame.idata.itsICode[frame.pc++];
-            var varAttributes = frame.varSource.stackAttributes;
-            var vars = frame.varSource.stack;
-            var varDbls = frame.varSource.sDbl;
+            byte[] varAttributes = frame.varSource.stackAttributes;
+            Object[] vars = frame.varSource.stack;
+            double[] varDbls = frame.varSource.sDbl;
             if (!frame.useActivation) {
                 if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                     vars[state.indexReg] = frame.stack[state.stackTop];
@@ -2670,9 +2670,9 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoSetVar extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            var varAttributes = frame.varSource.stackAttributes;
-            var vars = frame.varSource.stack;
-            var varDbls = frame.varSource.sDbl;
+            byte[] varAttributes = frame.varSource.stackAttributes;
+            Object[] vars = frame.varSource.stack;
+            double[] varDbls = frame.varSource.sDbl;
             if (!frame.useActivation) {
                 if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                     vars[state.indexReg] = frame.stack[state.stackTop];
@@ -2692,8 +2692,8 @@ public final class Interpreter extends Icode implements Evaluator {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
             state.indexReg = frame.idata.itsICode[frame.pc++];
-            var vars = frame.varSource.stack;
-            var varDbls = frame.varSource.sDbl;
+            Object[] vars = frame.varSource.stack;
+            double[] varDbls = frame.varSource.sDbl;
             ++state.stackTop;
             if (!frame.useActivation) {
                 frame.stack[state.stackTop] = vars[state.indexReg];
@@ -2709,8 +2709,8 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoGetVar extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            var vars = frame.varSource.stack;
-            var varDbls = frame.varSource.sDbl;
+            Object[] vars = frame.varSource.stack;
+            double[] varDbls = frame.varSource.sDbl;
             ++state.stackTop;
             if (!frame.useActivation) {
                 frame.stack[state.stackTop] = vars[state.indexReg];
@@ -2726,9 +2726,9 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoVarIncDec extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            var varAttributes = frame.varSource.stackAttributes;
-            var vars = frame.varSource.stack;
-            var varDbls = frame.varSource.sDbl;
+            byte[] varAttributes = frame.varSource.stackAttributes;
+            Object[] vars = frame.varSource.stack;
+            double[] varDbls = frame.varSource.sDbl;
             // indexReg : varindex
             ++state.stackTop;
             int incrDecrMask = frame.idata.itsICode[frame.pc];
