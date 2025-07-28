@@ -1816,7 +1816,7 @@ public final class Interpreter extends Icode implements Evaluator {
                     // exception handler
                     int op = iCode[frame.pc++];
 
-                    var insn = instructionObjs[-MIN_ICODE + op];
+                    InstructionClass insn = instructionObjs[-MIN_ICODE + op];
 
                     nextState = insn.execute(cx, frame, state, op);
                 } while (nextState == null);
