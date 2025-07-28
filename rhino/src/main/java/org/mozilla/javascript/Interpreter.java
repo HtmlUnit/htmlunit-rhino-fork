@@ -1373,6 +1373,76 @@ public final class Interpreter extends Icode implements Evaluator {
     static {
         instructionObjs = new InstructionClass[Token.LAST_BYTECODE_TOKEN + 1 - MIN_ICODE];
         int base = -MIN_ICODE;
+        instructionObjs[base + Icode_ZERO] = new DoZero();
+        instructionObjs[base + Icode_ONE] = new DoOne();
+        instructionObjs[base + Token.NULL] = new DoNull();
+        instructionObjs[base + Token.THIS] = new DoThis();
+        instructionObjs[base + Token.SUPER] = new DoSuper();
+        instructionObjs[base + Token.THISFN] = new DoThisFunction();
+        instructionObjs[base + Token.FALSE] = new DoFalse();
+        instructionObjs[base + Token.TRUE] = new DoTrue();
+        instructionObjs[base + Icode_UNDEF] = new DoUndef();
+        instructionObjs[base + Token.ENTERWITH] = new DoEnterWith();
+        instructionObjs[base + Token.LEAVEWITH] = new DoLeaveWith();
+        instructionObjs[base + Token.CATCH_SCOPE] = new DoCatchScope();
+        instructionObjs[base + Token.ENUM_INIT_KEYS] = new DoEnumInit();
+        instructionObjs[base + Token.ENUM_INIT_VALUES] = new DoEnumInit();
+        instructionObjs[base + Token.ENUM_INIT_ARRAY] = new DoEnumInit();
+        instructionObjs[base + Token.ENUM_INIT_VALUES_IN_ORDER] = new DoEnumInit();
+        instructionObjs[base + Token.ENUM_INIT_VALUES_IN_ORDER] = new DoEnumInit();
+        instructionObjs[base + Token.ENUM_NEXT] = new DoEnumOp();
+        instructionObjs[base + Token.ENUM_ID] = new DoEnumOp();
+        instructionObjs[base + Token.REF_SPECIAL] = new DoRefSpecial();
+        instructionObjs[base + Token.REF_MEMBER] = new DoRefMember();
+        instructionObjs[base + Token.REF_NS_MEMBER] = new DoRefNsMember();
+        instructionObjs[base + Token.REF_NAME] = new DoRefName();
+        instructionObjs[base + Token.REF_NS_NAME] = new DoRefNsName();
+        instructionObjs[base + Icode_SCOPE_LOAD] = new DoScopeLoad();
+        instructionObjs[base + Icode_SCOPE_SAVE] = new DoScopeSave();
+        instructionObjs[base + Icode_CLOSURE_EXPR] = new DoClosureExpr();
+        instructionObjs[base + ICode_FN_STORE_HOME_OBJECT] = new DoStoreHomeObject();
+        instructionObjs[base + Icode_CLOSURE_STMT] = new DoClosureStatement();
+        instructionObjs[base + Token.REGEXP] = new DoRegExp();
+        instructionObjs[base + Icode_TEMPLATE_LITERAL_CALLSITE] = new DoTemplateLiteralCallSite();
+        instructionObjs[base + Icode_LITERAL_NEW_OBJECT] = new DoLiteralNewObject();
+        instructionObjs[base + Icode_LITERAL_NEW_ARRAY] = new DoNewArrayLit();
+        instructionObjs[base + Icode_LITERAL_SET] = new DoLiteralSet();
+        instructionObjs[base + Icode_LITERAL_GETTER] = new DoLiteralGetter();
+        instructionObjs[base + Icode_LITERAL_SETTER] = new DoLiteralSetter();
+        instructionObjs[base + Icode_LITERAL_KEY_SET] = new DoLiteralKeySet();
+        instructionObjs[base + Token.OBJECTLIT] = new DoObjectLit();
+        instructionObjs[base + Token.ARRAYLIT] = new DoArrayLiteral();
+        instructionObjs[base + Icode_SPARE_ARRAYLIT] = new DoArrayLiteral();
+        instructionObjs[base + Icode_ENTERDQ] = new DoEnterDotQuery();
+        instructionObjs[base + Icode_LEAVEDQ] = new DoLeaveDotQuery();
+        instructionObjs[base + Token.DEFAULTNAMESPACE] = new DoDefaultNamespace();
+        instructionObjs[base + Token.ESCXMLATTR] = new DoEscXMLAttr();
+        instructionObjs[base + Token.ESCXMLTEXT] = new DoEscXMLText();
+        instructionObjs[base + Icode_DEBUGGER] = new DoDebug();
+        instructionObjs[base + Icode_LINE] = new DoLineChange();
+        instructionObjs[base + Icode_REG_IND_C0] = new DoIndexCn();
+        instructionObjs[base + Icode_REG_IND_C1] = new DoIndexCn();
+        instructionObjs[base + Icode_REG_IND_C2] = new DoIndexCn();
+        instructionObjs[base + Icode_REG_IND_C3] = new DoIndexCn();
+        instructionObjs[base + Icode_REG_IND_C4] = new DoIndexCn();
+        instructionObjs[base + Icode_REG_IND_C5] = new DoIndexCn();
+        instructionObjs[base + Icode_REG_IND1] = new DoRegIndex1();
+        instructionObjs[base + Icode_REG_IND2] = new DoRegIndex2();
+        instructionObjs[base + Icode_REG_IND4] = new DoRegIndex4();
+        instructionObjs[base + Icode_REG_STR_C0] = new DoStringCn();
+        instructionObjs[base + Icode_REG_STR_C1] = new DoStringCn();
+        instructionObjs[base + Icode_REG_STR_C2] = new DoStringCn();
+        instructionObjs[base + Icode_REG_STR_C3] = new DoStringCn();
+        instructionObjs[base + Icode_REG_STR1] = new DoRegString1();
+        instructionObjs[base + Icode_REG_STR2] = new DoRegString2();
+        instructionObjs[base + Icode_REG_STR4] = new DoRegString4();
+        instructionObjs[base + Icode_REG_BIGINT_C0] = new DoBigIntCn();
+        instructionObjs[base + Icode_REG_BIGINT_C1] = new DoBigIntCn();
+        instructionObjs[base + Icode_REG_BIGINT_C2] = new DoBigIntCn();
+        instructionObjs[base + Icode_REG_BIGINT_C3] = new DoBigIntCn();
+        instructionObjs[base + Icode_REG_BIGINT1] = new DoRegBigInt1();
+        instructionObjs[base + Icode_REG_BIGINT2] = new DoRegBigInt2();
+        instructionObjs[base + Icode_REG_BIGINT4] = new DoRegBigInt4();
     }
 
     private static Object interpretLoop(Context cx, CallFrame frame, Object throwable) {
@@ -2463,454 +2533,6 @@ public final class Interpreter extends Icode implements Evaluator {
                                                     indexReg);
                                     continue Loop;
                                 }
-                            case Icode_ZERO:
-                                ++stackTop;
-                                stack[stackTop] = Integer.valueOf(0);
-                                continue Loop;
-                            case Icode_ONE:
-                                ++stackTop;
-                                stack[stackTop] = Integer.valueOf(1);
-                                continue Loop;
-                            case Token.NULL:
-                                stack[++stackTop] = null;
-                                continue Loop;
-                            case Token.THIS:
-                                stack[++stackTop] = frame.thisObj;
-                                continue Loop;
-                            case Token.SUPER:
-                                {
-                                    // See 9.1.1.3.5 GetSuperBase
-
-                                    // If we are referring to "super", then we always have an
-                                    // activation
-                                    // (this is done in IrFactory). The home object is stored as
-                                    // part of the
-                                    // activation frame to propagate it correctly for nested
-                                    // functions.
-                                    Scriptable homeObject = getCurrentFrameHomeObject(frame);
-                                    if (homeObject == null) {
-                                        // This if is specified in the spec, but I cannot imagine
-                                        // how the home object will ever be null since `super` is
-                                        // legal _only_ in method definitions, where we do have a
-                                        // home object!
-                                        stack[++stackTop] = Undefined.instance;
-                                    } else {
-                                        stack[++stackTop] = homeObject.getPrototype();
-                                    }
-                                    continue Loop;
-                                }
-                            case Token.THISFN:
-                                stack[++stackTop] = frame.fnOrScript;
-                                continue Loop;
-                            case Token.FALSE:
-                                stack[++stackTop] = Boolean.FALSE;
-                                continue Loop;
-                            case Token.TRUE:
-                                stack[++stackTop] = Boolean.TRUE;
-                                continue Loop;
-                            case Icode_UNDEF:
-                                stack[++stackTop] = undefined;
-                                continue Loop;
-                            case Token.ENTERWITH:
-                                {
-                                    Object lhs = stack[stackTop];
-                                    if (lhs == DOUBLE_MARK)
-                                        lhs = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    --stackTop;
-                                    frame.scope = ScriptRuntime.enterWith(lhs, cx, frame.scope);
-                                    continue Loop;
-                                }
-                            case Token.LEAVEWITH:
-                                frame.scope = ScriptRuntime.leaveWith(frame.scope);
-                                continue Loop;
-                            case Token.CATCH_SCOPE:
-                                {
-                                    // stack top: exception object
-                                    // stringReg: name of exception variable
-                                    // indexReg: local for exception scope
-                                    --stackTop;
-                                    indexReg += iData.itsMaxVars;
-
-                                    boolean afterFirstScope = (iData.itsICode[frame.pc] != 0);
-                                    Throwable caughtException = (Throwable) stack[stackTop + 1];
-                                    Scriptable lastCatchScope;
-                                    if (!afterFirstScope) {
-                                        lastCatchScope = null;
-                                    } else {
-                                        lastCatchScope = (Scriptable) stack[indexReg];
-                                    }
-                                    stack[indexReg] =
-                                            ScriptRuntime.newCatchScope(
-                                                    caughtException,
-                                                    lastCatchScope,
-                                                    stringReg,
-                                                    cx,
-                                                    frame.scope);
-                                    ++frame.pc;
-                                    continue Loop;
-                                }
-                            case Token.ENUM_INIT_KEYS:
-                            case Token.ENUM_INIT_VALUES:
-                            case Token.ENUM_INIT_ARRAY:
-                            case Token.ENUM_INIT_VALUES_IN_ORDER:
-                                {
-                                    Object lhs = stack[stackTop];
-                                    if (lhs == DOUBLE_MARK)
-                                        lhs = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    --stackTop;
-                                    indexReg += iData.itsMaxVars;
-                                    int enumType =
-                                            op == Token.ENUM_INIT_KEYS
-                                                    ? ScriptRuntime.ENUMERATE_KEYS
-                                                    : op == Token.ENUM_INIT_VALUES
-                                                            ? ScriptRuntime.ENUMERATE_VALUES
-                                                            : op == Token.ENUM_INIT_VALUES_IN_ORDER
-                                                                    ? ScriptRuntime
-                                                                            .ENUMERATE_VALUES_IN_ORDER
-                                                                    : ScriptRuntime.ENUMERATE_ARRAY;
-                                    stack[indexReg] =
-                                            ScriptRuntime.enumInit(lhs, cx, frame.scope, enumType);
-                                    continue Loop;
-                                }
-                            case Token.ENUM_NEXT:
-                            case Token.ENUM_ID:
-                                {
-                                    indexReg += iData.itsMaxVars;
-                                    Object val = stack[indexReg];
-                                    ++stackTop;
-                                    stack[stackTop] =
-                                            (op == Token.ENUM_NEXT)
-                                                    ? ScriptRuntime.enumNext(val, cx)
-                                                    : ScriptRuntime.enumId(val, cx);
-                                    continue Loop;
-                                }
-                            case Token.REF_SPECIAL:
-                                {
-                                    // stringReg: name of special property
-                                    Object obj = stack[stackTop];
-                                    if (obj == DOUBLE_MARK)
-                                        obj = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    stack[stackTop] =
-                                            ScriptRuntime.specialRef(
-                                                    obj, stringReg, cx, frame.scope);
-                                    continue Loop;
-                                }
-                            case Token.REF_MEMBER:
-                                {
-                                    // indexReg: flags
-                                    stackTop = doRefMember(cx, stack, sDbl, stackTop, indexReg);
-                                    continue Loop;
-                                }
-                            case Token.REF_NS_MEMBER:
-                                {
-                                    // indexReg: flags
-                                    stackTop = doRefNsMember(cx, stack, sDbl, stackTop, indexReg);
-                                    continue Loop;
-                                }
-                            case Token.REF_NAME:
-                                {
-                                    // indexReg: flags
-                                    Object name = stack[stackTop];
-                                    if (name == DOUBLE_MARK)
-                                        name = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    stack[stackTop] =
-                                            ScriptRuntime.nameRef(name, cx, frame.scope, indexReg);
-                                    continue Loop;
-                                }
-                            case Token.REF_NS_NAME:
-                                {
-                                    // indexReg: flags
-                                    stackTop =
-                                            doRefNsName(cx, frame, stack, sDbl, stackTop, indexReg);
-                                    continue Loop;
-                                }
-                            case Icode_SCOPE_LOAD:
-                                indexReg += iData.itsMaxVars;
-                                frame.scope = (Scriptable) stack[indexReg];
-                                continue Loop;
-                            case Icode_SCOPE_SAVE:
-                                indexReg += iData.itsMaxVars;
-                                stack[indexReg] = frame.scope;
-                                continue Loop;
-                            case Icode_CLOSURE_EXPR:
-                                InterpretedFunction fn =
-                                        InterpretedFunction.createFunction(
-                                                cx, frame.scope, frame.fnOrScript, indexReg);
-                                if (fn.idata.itsFunctionType == FunctionNode.ARROW_FUNCTION) {
-                                    Scriptable homeObject = getCurrentFrameHomeObject(frame);
-                                    if (fn.idata.itsNeedsActivation) {
-                                        fn.setHomeObject(homeObject);
-                                    }
-
-                                    stack[++stackTop] =
-                                            new ArrowFunction(
-                                                    cx, frame.scope, fn, frame.thisObj, homeObject);
-                                } else {
-                                    stack[++stackTop] = fn;
-                                }
-                                continue Loop;
-                            case ICode_FN_STORE_HOME_OBJECT:
-                                {
-                                    // Stack contains: [object, keysArray, flagsArray, valuesArray,
-                                    // function]
-                                    InterpretedFunction fun = (InterpretedFunction) stack[stackTop];
-                                    Scriptable homeObject = (Scriptable) stack[stackTop - 4];
-                                    fun.setHomeObject(homeObject);
-                                    continue Loop;
-                                }
-                            case Icode_CLOSURE_STMT:
-                                initFunction(cx, frame.scope, frame.fnOrScript, indexReg);
-                                continue Loop;
-                            case Token.REGEXP:
-                                Object re = iData.itsRegExpLiterals[indexReg];
-                                stack[++stackTop] = ScriptRuntime.wrapRegExp(cx, frame.scope, re);
-                                continue Loop;
-                            case Icode_TEMPLATE_LITERAL_CALLSITE:
-                                Object[] templateLiterals = iData.itsTemplateLiterals;
-                                stack[++stackTop] =
-                                        ScriptRuntime.getTemplateLiteralCallSite(
-                                                cx, frame.scope, templateLiterals, indexReg);
-                                continue Loop;
-                            case Icode_LITERAL_NEW_OBJECT:
-                                {
-                                    // indexReg: index of constant with the keys
-                                    Object[] ids = (Object[]) iData.literalIds[indexReg];
-                                    boolean copyArray = iCode[frame.pc] != 0;
-                                    ++frame.pc;
-                                    ++stackTop;
-                                    stack[stackTop] = cx.newObject(frame.scope);
-                                    ++stackTop;
-                                    stack[stackTop] =
-                                            copyArray ? Arrays.copyOf(ids, ids.length) : ids;
-                                    ++stackTop;
-                                    stack[stackTop] = new int[ids.length];
-                                    ++stackTop;
-                                    stack[stackTop] = new Object[ids.length];
-                                    sDbl[stackTop] = 0;
-                                    continue Loop;
-                                }
-                            case Icode_LITERAL_NEW_ARRAY:
-                                // indexReg: number of values in the literal
-                                ++stackTop;
-                                stack[stackTop] = new int[indexReg];
-                                ++stackTop;
-                                stack[stackTop] = new Object[indexReg];
-                                sDbl[stackTop] = 0;
-                                continue Loop;
-                            case Icode_LITERAL_SET:
-                                {
-                                    Object value = stack[stackTop];
-                                    if (value == DOUBLE_MARK)
-                                        value = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    --stackTop;
-                                    int i = (int) sDbl[stackTop];
-                                    ((Object[]) stack[stackTop])[i] = value;
-                                    sDbl[stackTop] = i + 1;
-                                    continue Loop;
-                                }
-                            case Icode_LITERAL_GETTER:
-                                {
-                                    Object value = stack[stackTop];
-                                    --stackTop;
-                                    int i = (int) sDbl[stackTop];
-                                    ((Object[]) stack[stackTop])[i] = value;
-                                    ((int[]) stack[stackTop - 1])[i] = -1;
-                                    sDbl[stackTop] = i + 1;
-                                    continue Loop;
-                                }
-                            case Icode_LITERAL_SETTER:
-                                {
-                                    Object value = stack[stackTop];
-                                    --stackTop;
-                                    int i = (int) sDbl[stackTop];
-                                    ((Object[]) stack[stackTop])[i] = value;
-                                    ((int[]) stack[stackTop - 1])[i] = 1;
-                                    sDbl[stackTop] = i + 1;
-                                    continue Loop;
-                                }
-
-                            case Icode_LITERAL_KEY_SET:
-                                {
-                                    Object key = stack[stackTop];
-                                    if (key == DOUBLE_MARK)
-                                        key = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    --stackTop;
-                                    Object[] ids = (Object[]) stack[stackTop - 2];
-                                    int i = (int) sDbl[stackTop];
-                                    ids[i] = key;
-                                    continue Loop;
-                                }
-                            case Token.OBJECTLIT:
-                                {
-                                    Object[] values = (Object[]) stack[stackTop];
-                                    --stackTop;
-                                    int[] getterSetters = (int[]) stack[stackTop];
-                                    --stackTop;
-                                    Object[] keys = (Object[]) stack[stackTop];
-                                    --stackTop;
-                                    Scriptable object = (Scriptable) stack[stackTop];
-                                    ScriptRuntime.fillObjectLiteral(
-                                            object, keys, values, getterSetters, cx, frame.scope);
-                                    continue Loop;
-                                }
-                            case Token.ARRAYLIT:
-                            case Icode_SPARE_ARRAYLIT:
-                                {
-                                    Object[] data = (Object[]) stack[stackTop];
-                                    --stackTop;
-                                    int[] getterSetters = (int[]) stack[stackTop];
-                                    Object val;
-
-                                    int[] skipIndexces = null;
-                                    if (op == Icode_SPARE_ARRAYLIT) {
-                                        skipIndexces = (int[]) iData.literalIds[indexReg];
-                                    }
-                                    val =
-                                            ScriptRuntime.newArrayLiteral(
-                                                    data, skipIndexces, cx, frame.scope);
-
-                                    stack[stackTop] = val;
-                                    continue Loop;
-                                }
-                            case Icode_ENTERDQ:
-                                {
-                                    Object lhs = stack[stackTop];
-                                    if (lhs == DOUBLE_MARK)
-                                        lhs = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    --stackTop;
-                                    frame.scope = ScriptRuntime.enterDotQuery(lhs, frame.scope);
-                                    continue Loop;
-                                }
-                            case Icode_LEAVEDQ:
-                                {
-                                    boolean valBln = stack_boolean(frame, stackTop);
-                                    Object x = ScriptRuntime.updateDotQuery(valBln, frame.scope);
-                                    if (x != null) {
-                                        stack[stackTop] = x;
-                                        frame.scope = ScriptRuntime.leaveDotQuery(frame.scope);
-                                        frame.pc += 2;
-                                        continue Loop;
-                                    }
-                                    // reset stack and PC to code after ENTERDQ
-                                    --stackTop;
-                                    break jumplessRun;
-                                }
-                            case Token.DEFAULTNAMESPACE:
-                                {
-                                    Object value = stack[stackTop];
-                                    if (value == DOUBLE_MARK)
-                                        value = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    stack[stackTop] = ScriptRuntime.setDefaultNamespace(value, cx);
-                                    continue Loop;
-                                }
-                            case Token.ESCXMLATTR:
-                                {
-                                    Object value = stack[stackTop];
-                                    if (value != DOUBLE_MARK) {
-                                        stack[stackTop] =
-                                                ScriptRuntime.escapeAttributeValue(value, cx);
-                                    }
-                                    continue Loop;
-                                }
-                            case Token.ESCXMLTEXT:
-                                {
-                                    Object value = stack[stackTop];
-                                    if (value != DOUBLE_MARK) {
-                                        stack[stackTop] = ScriptRuntime.escapeTextValue(value, cx);
-                                    }
-                                    continue Loop;
-                                }
-                            case Icode_DEBUGGER:
-                                if (frame.debuggerFrame != null) {
-                                    frame.debuggerFrame.onDebuggerStatement(cx);
-                                }
-                                continue Loop;
-                            case Icode_LINE:
-                                frame.pcSourceLineStart = frame.pc;
-                                if (frame.debuggerFrame != null) {
-                                    int line = getIndex(iCode, frame.pc);
-                                    frame.debuggerFrame.onLineChange(cx, line);
-                                }
-                                frame.pc += 2;
-                                continue Loop;
-                            case Icode_REG_IND_C0:
-                                indexReg = 0;
-                                continue Loop;
-                            case Icode_REG_IND_C1:
-                                indexReg = 1;
-                                continue Loop;
-                            case Icode_REG_IND_C2:
-                                indexReg = 2;
-                                continue Loop;
-                            case Icode_REG_IND_C3:
-                                indexReg = 3;
-                                continue Loop;
-                            case Icode_REG_IND_C4:
-                                indexReg = 4;
-                                continue Loop;
-                            case Icode_REG_IND_C5:
-                                indexReg = 5;
-                                continue Loop;
-                            case Icode_REG_IND1:
-                                indexReg = 0xFF & iCode[frame.pc];
-                                ++frame.pc;
-                                continue Loop;
-                            case Icode_REG_IND2:
-                                indexReg = getIndex(iCode, frame.pc);
-                                frame.pc += 2;
-                                continue Loop;
-                            case Icode_REG_IND4:
-                                indexReg = getInt(iCode, frame.pc);
-                                frame.pc += 4;
-                                continue Loop;
-                            case Icode_REG_STR_C0:
-                                stringReg = strings[0];
-                                continue Loop;
-                            case Icode_REG_STR_C1:
-                                stringReg = strings[1];
-                                continue Loop;
-                            case Icode_REG_STR_C2:
-                                stringReg = strings[2];
-                                continue Loop;
-                            case Icode_REG_STR_C3:
-                                stringReg = strings[3];
-                                continue Loop;
-                            case Icode_REG_STR1:
-                                stringReg = strings[0xFF & iCode[frame.pc]];
-                                ++frame.pc;
-                                continue Loop;
-                            case Icode_REG_STR2:
-                                stringReg = strings[getIndex(iCode, frame.pc)];
-                                frame.pc += 2;
-                                continue Loop;
-                            case Icode_REG_STR4:
-                                stringReg = strings[getInt(iCode, frame.pc)];
-                                frame.pc += 4;
-                                continue Loop;
-                            case Icode_REG_BIGINT_C0:
-                                bigIntReg = bigInts[0];
-                                continue Loop;
-                            case Icode_REG_BIGINT_C1:
-                                bigIntReg = bigInts[1];
-                                continue Loop;
-                            case Icode_REG_BIGINT_C2:
-                                bigIntReg = bigInts[2];
-                                continue Loop;
-                            case Icode_REG_BIGINT_C3:
-                                bigIntReg = bigInts[3];
-                                continue Loop;
-                            case Icode_REG_BIGINT1:
-                                bigIntReg = bigInts[0xFF & iCode[frame.pc]];
-                                ++frame.pc;
-                                continue Loop;
-                            case Icode_REG_BIGINT2:
-                                bigIntReg = bigInts[getIndex(iCode, frame.pc)];
-                                frame.pc += 2;
-                                continue Loop;
-                            case Icode_REG_BIGINT4:
-                                bigIntReg = bigInts[getInt(iCode, frame.pc)];
-                                frame.pc += 4;
-                                continue Loop;
                             default:
                                 {
                                     NewState nextState;
@@ -3001,6 +2623,612 @@ public final class Interpreter extends Icode implements Evaluator {
             throwable = ex;
         }
         return new ThrowableResult(frame, throwable);
+    }
+
+    private static class DoZero extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            ++state.stackTop;
+            frame.stack[state.stackTop] = Integer.valueOf(0);
+            return null;
+        }
+    }
+
+    private static class DoOne extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            ++state.stackTop;
+            frame.stack[state.stackTop] = Integer.valueOf(1);
+            return null;
+        }
+    }
+
+    private static class DoNull extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = null;
+            return null;
+        }
+    }
+
+    private static class DoThis extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = frame.thisObj;
+            return null;
+        }
+    }
+
+    private static class DoSuper extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            // If we are referring to "super", then we always have an
+            // activation
+            // (this is done in IrFactory). The home object is stored as
+            // part of the
+            // activation frame to propagate it correctly for nested
+            // functions.
+            Scriptable homeObject = getCurrentFrameHomeObject(frame);
+            if (homeObject == null) {
+                // This if is specified in the spec, but I cannot imagine
+                // how the home object will ever be null since `super` is
+                // legal _only_ in method definitions, where we do have a
+                // home object!
+                frame.stack[++state.stackTop] = Undefined.instance;
+            } else {
+                frame.stack[++state.stackTop] = homeObject.getPrototype();
+            }
+            return null;
+        }
+    }
+
+    private static class DoThisFunction extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = frame.fnOrScript;
+            return null;
+        }
+    }
+
+    private static class DoFalse extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = Boolean.FALSE;
+            return null;
+        }
+    }
+
+    private static class DoTrue extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = Boolean.TRUE;
+            return null;
+        }
+    }
+
+    private static class DoUndef extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = undefined;
+            return null;
+        }
+    }
+
+    private static class DoEnterWith extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object lhs = frame.stack[state.stackTop];
+            if (lhs == DOUBLE_MARK) lhs = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.scope = ScriptRuntime.enterWith(lhs, cx, frame.scope);
+            state.stackTop--;
+            return null;
+        }
+    }
+
+    private static class DoLeaveWith extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.scope = ScriptRuntime.leaveWith(frame.scope);
+            return null;
+        }
+    }
+
+    private static class DoCatchScope extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+
+            // stack top: exception object
+            // state.stringReg: name of exception variable
+            // state.indexReg: local for exception scope
+            --state.stackTop;
+            state.indexReg += frame.idata.itsMaxVars;
+
+            boolean afterFirstScope = (frame.idata.itsICode[frame.pc] != 0);
+            Throwable caughtException = (Throwable) frame.stack[state.stackTop + 1];
+            Scriptable lastCatchScope;
+            if (!afterFirstScope) {
+                lastCatchScope = null;
+            } else {
+                lastCatchScope = (Scriptable) frame.stack[state.indexReg];
+            }
+            frame.stack[state.indexReg] =
+                    ScriptRuntime.newCatchScope(
+                            caughtException, lastCatchScope, state.stringReg, cx, frame.scope);
+            ++frame.pc;
+            return null;
+        }
+    }
+
+    private static class DoEnumInit extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object lhs = frame.stack[state.stackTop];
+            if (lhs == DOUBLE_MARK) lhs = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            state.indexReg += frame.idata.itsMaxVars;
+            int enumType =
+                    op == Token.ENUM_INIT_KEYS
+                            ? ScriptRuntime.ENUMERATE_KEYS
+                            : op == Token.ENUM_INIT_VALUES
+                                    ? ScriptRuntime.ENUMERATE_VALUES
+                                    : op == Token.ENUM_INIT_VALUES_IN_ORDER
+                                            ? ScriptRuntime.ENUMERATE_VALUES_IN_ORDER
+                                            : ScriptRuntime.ENUMERATE_ARRAY;
+            frame.stack[state.indexReg] = ScriptRuntime.enumInit(lhs, cx, frame.scope, enumType);
+            --state.stackTop;
+            return null;
+        }
+    }
+
+    private static class DoEnumOp extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.indexReg += frame.idata.itsMaxVars;
+            Object val = frame.stack[state.indexReg];
+            frame.stack[++state.stackTop] =
+                    (op == Token.ENUM_NEXT)
+                            ? ScriptRuntime.enumNext(val, cx)
+                            : ScriptRuntime.enumId(val, cx);
+            return null;
+        }
+    }
+
+    private static class DoRefSpecial extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            // stringReg: name of special property
+            Object obj = frame.stack[state.stackTop];
+            if (obj == DOUBLE_MARK) obj = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.stack[state.stackTop] =
+                    ScriptRuntime.specialRef(obj, state.stringReg, cx, frame.scope);
+            return null;
+        }
+    }
+
+    private static class DoRefMember extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object elem = frame.stack[state.stackTop];
+            if (elem == DOUBLE_MARK) elem = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            --state.stackTop;
+            Object obj = frame.stack[state.stackTop];
+            if (obj == DOUBLE_MARK) obj = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.stack[state.stackTop] = ScriptRuntime.memberRef(obj, elem, cx, state.indexReg);
+            return null;
+        }
+    }
+
+    private static class DoRefNsMember extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object elem = frame.stack[state.stackTop];
+            if (elem == DOUBLE_MARK) elem = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            --state.stackTop;
+            Object ns = frame.stack[state.stackTop];
+            if (ns == DOUBLE_MARK) ns = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            --state.stackTop;
+            Object obj = frame.stack[state.stackTop];
+            if (obj == DOUBLE_MARK) obj = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.stack[state.stackTop] =
+                    ScriptRuntime.memberRef(obj, ns, elem, cx, state.indexReg);
+            return null;
+        }
+    }
+
+    private static class DoRefName extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            // indexReg: flags
+            Object name = frame.stack[state.stackTop];
+            if (name == DOUBLE_MARK) name = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.stack[state.stackTop] =
+                    ScriptRuntime.nameRef(name, cx, frame.scope, state.indexReg);
+            return null;
+        }
+    }
+
+    private static class DoRefNsName extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object name = frame.stack[state.stackTop];
+            if (name == DOUBLE_MARK) name = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            --state.stackTop;
+            Object ns = frame.stack[state.stackTop];
+            if (ns == DOUBLE_MARK) ns = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.stack[state.stackTop] =
+                    ScriptRuntime.nameRef(ns, name, cx, frame.scope, state.indexReg);
+            return null;
+        }
+    }
+
+    private static class DoScopeLoad extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.indexReg += frame.idata.itsMaxVars;
+            frame.scope = (Scriptable) frame.stack[state.indexReg];
+            return null;
+        }
+    }
+
+    private static class DoScopeSave extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.indexReg += frame.idata.itsMaxVars;
+            frame.stack[state.indexReg] = frame.scope;
+            return null;
+        }
+    }
+
+    private static class DoClosureExpr extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            InterpretedFunction fn =
+                    InterpretedFunction.createFunction(
+                            cx, frame.scope, frame.fnOrScript, state.indexReg);
+            if (fn.idata.itsFunctionType == FunctionNode.ARROW_FUNCTION) {
+                Scriptable homeObject = getCurrentFrameHomeObject(frame);
+                if (fn.idata.itsNeedsActivation) {
+                    fn.setHomeObject(homeObject);
+                }
+
+                frame.stack[++state.stackTop] =
+                        new ArrowFunction(cx, frame.scope, fn, frame.thisObj, homeObject);
+            } else {
+                frame.stack[++state.stackTop] = fn;
+            }
+            return null;
+        }
+    }
+
+    private static class DoStoreHomeObject extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            // Stack contains: [object, keysArray, flagsArray, valuesArray,
+            // function]
+            InterpretedFunction fun = (InterpretedFunction) frame.stack[state.stackTop];
+            Scriptable homeObject = (Scriptable) frame.stack[state.stackTop - 4];
+            fun.setHomeObject(homeObject);
+            return null;
+        }
+    }
+
+    private static class DoClosureStatement extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            initFunction(cx, frame.scope, frame.fnOrScript, state.indexReg);
+            return null;
+        }
+    }
+
+    private static class DoRegExp extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object re = frame.idata.itsRegExpLiterals[state.indexReg];
+            frame.stack[++state.stackTop] = ScriptRuntime.wrapRegExp(cx, frame.scope, re);
+            return null;
+        }
+    }
+
+    private static class DoTemplateLiteralCallSite extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object[] templateLiterals = frame.idata.itsTemplateLiterals;
+            frame.stack[++state.stackTop] =
+                    ScriptRuntime.getTemplateLiteralCallSite(
+                            cx, frame.scope, templateLiterals, state.indexReg);
+            return null;
+        }
+    }
+
+    private static class DoLiteralNewObject extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            // indexReg: index of constant with the keys
+            Object[] ids = (Object[]) frame.idata.literalIds[state.indexReg];
+            boolean copyArray = frame.idata.itsICode[frame.pc] != 0;
+            ++frame.pc;
+            frame.stack[++state.stackTop] = cx.newObject(frame.scope);
+            frame.stack[++state.stackTop] = copyArray ? Arrays.copyOf(ids, ids.length) : ids;
+            frame.stack[++state.stackTop] = new int[ids.length];
+            frame.stack[++state.stackTop] = new Object[ids.length];
+            frame.sDbl[state.stackTop] = 0;
+            return null;
+        }
+    }
+
+    private static class DoNewArrayLit extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            // indexReg: number of values in the literal
+            frame.stack[++state.stackTop] = new int[state.indexReg];
+            frame.stack[++state.stackTop] = new Object[state.indexReg];
+            frame.sDbl[state.stackTop] = 0;
+            return null;
+        }
+    }
+
+    private static class DoLiteralSet extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object value = frame.stack[state.stackTop];
+            if (value == DOUBLE_MARK) value = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            int i = (int) frame.sDbl[--state.stackTop];
+            ((Object[]) frame.stack[state.stackTop])[i] = value;
+            frame.sDbl[state.stackTop] = i + 1;
+            return null;
+        }
+    }
+
+    private static class DoLiteralGetter extends InstructionClass {
+        @Override
+        NewState execute(Context cs, CallFrame frame, InterpreterState state, int op) {
+            Object value = frame.stack[state.stackTop];
+            int i = (int) frame.sDbl[--state.stackTop];
+            ((Object[]) frame.stack[state.stackTop])[i] = value;
+            ((int[]) frame.stack[--state.stackTop])[i] = -1;
+            frame.sDbl[++state.stackTop] = i + 1;
+            return null;
+        }
+    }
+
+    private static class DoLiteralSetter extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object value = frame.stack[state.stackTop];
+            int i = (int) frame.sDbl[--state.stackTop];
+            ((Object[]) frame.stack[state.stackTop])[i] = value;
+            ((int[]) frame.stack[--state.stackTop])[i] = 1;
+            frame.sDbl[++state.stackTop] = i + 1;
+            return null;
+        }
+    }
+
+    private static class DoLiteralKeySet extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object key = frame.stack[state.stackTop];
+            if (key == DOUBLE_MARK) key = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            Object[] ids = (Object[]) frame.stack[state.stackTop - 3];
+            int i = (int) frame.sDbl[--state.stackTop];
+            ids[i] = key;
+            return null;
+        }
+    }
+
+    private static class DoObjectLit extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object[] values = (Object[]) frame.stack[state.stackTop];
+            int[] getterSetters = (int[]) frame.stack[--state.stackTop];
+            Object[] keys = (Object[]) frame.stack[--state.stackTop];
+            Scriptable object = (Scriptable) frame.stack[--state.stackTop];
+            ScriptRuntime.fillObjectLiteral(object, keys, values, getterSetters, cx, frame.scope);
+            return null;
+        }
+    }
+
+    private static class DoArrayLiteral extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object[] data = (Object[]) frame.stack[state.stackTop--];
+            Object val;
+
+            int[] skipIndexces = null;
+            if (op == Icode_SPARE_ARRAYLIT) {
+                skipIndexces = (int[]) frame.idata.literalIds[state.indexReg];
+            }
+            val = ScriptRuntime.newArrayLiteral(data, skipIndexces, cx, frame.scope);
+
+            frame.stack[state.stackTop] = val;
+            return null;
+        }
+    }
+
+    private static class DoEnterDotQuery extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object lhs = frame.stack[state.stackTop];
+            if (lhs == DOUBLE_MARK) lhs = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.scope = ScriptRuntime.enterDotQuery(lhs, frame.scope);
+            state.stackTop--;
+            return null;
+        }
+    }
+
+    private static class DoLeaveDotQuery extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            boolean valBln = stack_boolean(frame, state.stackTop);
+            Object x = ScriptRuntime.updateDotQuery(valBln, frame.scope);
+            if (x != null) {
+                frame.stack[state.stackTop] = x;
+                frame.scope = ScriptRuntime.leaveDotQuery(frame.scope);
+                frame.pc += 2;
+                return null;
+            }
+            // reset stack and PC to code after ENTERDQ
+            --state.stackTop;
+            return BREAK_JUMPLESSRUN;
+        }
+    }
+
+    private static class DoDefaultNamespace extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object value = frame.stack[state.stackTop];
+            if (value == DOUBLE_MARK) value = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+            frame.stack[state.stackTop] = ScriptRuntime.setDefaultNamespace(value, cx);
+            return null;
+        }
+    }
+
+    private static class DoEscXMLAttr extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object value = frame.stack[state.stackTop];
+            if (value != DOUBLE_MARK) {
+                frame.stack[state.stackTop] = ScriptRuntime.escapeAttributeValue(value, cx);
+            }
+            return null;
+        }
+    }
+
+    private static class DoEscXMLText extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object value = frame.stack[state.stackTop];
+            if (value != DOUBLE_MARK) {
+                frame.stack[state.stackTop] = ScriptRuntime.escapeTextValue(value, cx);
+            }
+            return null;
+        }
+    }
+
+    private static class DoDebug extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            if (frame.debuggerFrame != null) {
+                frame.debuggerFrame.onDebuggerStatement(cx);
+            }
+            return null;
+        }
+    }
+
+    private static class DoLineChange extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.pcSourceLineStart = frame.pc;
+            if (frame.debuggerFrame != null) {
+                int line = getIndex(frame.idata.itsICode, frame.pc);
+                frame.debuggerFrame.onLineChange(cx, line);
+            }
+            frame.pc += 2;
+            return null;
+        }
+    }
+
+    private static class DoIndexCn extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.indexReg = Icode_REG_IND_C0 - op;
+            return null;
+        }
+    }
+
+    private static class DoRegIndex1 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.indexReg = 0xFF & frame.idata.itsICode[frame.pc];
+            ++frame.pc;
+            return null;
+        }
+    }
+
+    private static class DoRegIndex2 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.indexReg = getIndex(frame.idata.itsICode, frame.pc);
+            frame.pc += 2;
+            return null;
+        }
+    }
+
+    private static class DoRegIndex4 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.indexReg = getInt(frame.idata.itsICode, frame.pc);
+            frame.pc += 4;
+            return null;
+        }
+    }
+
+    private static class DoStringCn extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.stringReg = frame.idata.itsStringTable[Icode_REG_STR_C0 - op];
+            return null;
+        }
+    }
+
+    private static class DoRegString1 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.stringReg = frame.idata.itsStringTable[0xFF & frame.idata.itsICode[frame.pc]];
+            ++frame.pc;
+            return null;
+        }
+    }
+
+    private static class DoRegString2 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.stringReg = frame.idata.itsStringTable[getIndex(frame.idata.itsICode, frame.pc)];
+            frame.pc += 2;
+            return null;
+        }
+    }
+
+    private static class DoRegString4 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.stringReg = frame.idata.itsStringTable[getInt(frame.idata.itsICode, frame.pc)];
+            frame.pc += 4;
+            return null;
+        }
+    }
+
+    private static class DoBigIntCn extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.bigIntReg = frame.idata.itsBigIntTable[Icode_REG_BIGINT_C0 - op];
+            return null;
+        }
+    }
+
+    private static class DoRegBigInt1 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.bigIntReg = frame.idata.itsBigIntTable[0xFF & frame.idata.itsICode[frame.pc]];
+            ++frame.pc;
+            return null;
+        }
+    }
+
+    private static class DoRegBigInt2 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.bigIntReg = frame.idata.itsBigIntTable[getIndex(frame.idata.itsICode, frame.pc)];
+            frame.pc += 2;
+            return null;
+        }
+    }
+
+    private static class DoRegBigInt4 extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            state.bigIntReg = frame.idata.itsBigIntTable[getInt(frame.idata.itsICode, frame.pc)];
+            frame.pc += 4;
+            return null;
+        }
     }
 
     private static NewState doCallByteCode(
@@ -3690,42 +3918,6 @@ public final class Interpreter extends Icode implements Evaluator {
             stack[stackTop] = ScriptRuntime.nameIncrDecr(frame.scope, varName, cx, incrDecrMask);
         }
         ++frame.pc;
-        return stackTop;
-    }
-
-    private static int doRefMember(
-            Context cx, Object[] stack, double[] sDbl, int stackTop, int flags) {
-        Object elem = stack[stackTop];
-        if (elem == DOUBLE_MARK) elem = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-        --stackTop;
-        Object obj = stack[stackTop];
-        if (obj == DOUBLE_MARK) obj = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-        stack[stackTop] = ScriptRuntime.memberRef(obj, elem, cx, flags);
-        return stackTop;
-    }
-
-    private static int doRefNsMember(
-            Context cx, Object[] stack, double[] sDbl, int stackTop, int flags) {
-        Object elem = stack[stackTop];
-        if (elem == DOUBLE_MARK) elem = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-        --stackTop;
-        Object ns = stack[stackTop];
-        if (ns == DOUBLE_MARK) ns = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-        --stackTop;
-        Object obj = stack[stackTop];
-        if (obj == DOUBLE_MARK) obj = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-        stack[stackTop] = ScriptRuntime.memberRef(obj, ns, elem, cx, flags);
-        return stackTop;
-    }
-
-    private static int doRefNsName(
-            Context cx, CallFrame frame, Object[] stack, double[] sDbl, int stackTop, int flags) {
-        Object name = stack[stackTop];
-        if (name == DOUBLE_MARK) name = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-        --stackTop;
-        Object ns = stack[stackTop];
-        if (ns == DOUBLE_MARK) ns = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-        stack[stackTop] = ScriptRuntime.nameRef(ns, name, cx, frame.scope, flags);
         return stackTop;
     }
 
