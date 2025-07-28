@@ -2537,7 +2537,7 @@ public final class Interpreter extends Icode implements Evaluator {
                                 {
                                     NewState nextState;
 
-                                    var insn = instructionObjs[-MIN_ICODE + op];
+                                    InstructionClass insn = instructionObjs[-MIN_ICODE + op];
                                     if (insn == null) {
                                         dumpICode(iData);
                                         throw new RuntimeException(
