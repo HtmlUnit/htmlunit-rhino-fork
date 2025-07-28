@@ -2367,7 +2367,7 @@ public final class IRFactory {
                 return;
             }
 
-            var fnIndex = right.getExistingIntProp(Node.FUNCTION_PROP);
+            int fnIndex = right.getExistingIntProp(Node.FUNCTION_PROP);
             FunctionNode functionNode = parser.currentScriptOrFn.getFunctionNode(fnIndex);
             if (functionNode.getType() != 0 && functionNode.getFunctionName() == null) {
                 if (prefix != null) {
