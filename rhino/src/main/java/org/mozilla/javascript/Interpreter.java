@@ -1373,6 +1373,16 @@ public final class Interpreter extends Icode implements Evaluator {
     static {
         instructionObjs = new InstructionClass[Token.LAST_BYTECODE_TOKEN + 1 - MIN_ICODE];
         int base = -MIN_ICODE;
+        instructionObjs[base + Token.NEW] = new DoNew();
+        instructionObjs[base + Token.TYPEOF] = new DoTypeOf();
+        instructionObjs[base + Icode_TYPEOFNAME] = new DoTypeOfName();
+        instructionObjs[base + Token.STRING] = new DoString();
+        instructionObjs[base + Icode_SHORTNUMBER] = new DoShortNumber();
+        instructionObjs[base + Icode_INTNUMBER] = new DoIntNumber();
+        instructionObjs[base + Token.NUMBER] = new DoNumber();
+        instructionObjs[base + Token.BIGINT] = new DoBigInt();
+        instructionObjs[base + Token.NAME] = new DoName();
+        instructionObjs[base + Icode_NAME_INC_DEC] = new DoNameIncDec();
         instructionObjs[base + Icode_SETCONSTVAR1] = new DoSetConstVar1();
         instructionObjs[base + Icode_SETCONSTVAR] = new DoSetConstVar();
         instructionObjs[base + Icode_SETVAR1] = new DoSetVar1();
@@ -2377,115 +2387,6 @@ public final class Interpreter extends Icode implements Evaluator {
                                         break;
                                     }
                                 }
-                            case Token.NEW:
-                                {
-                                    if (instructionCounting) {
-                                        cx.instructionCount += INVOCATION_COST;
-                                    }
-                                    // stack change: function arg0 .. argN -> newResult
-                                    // indexReg: number of arguments
-                                    stackTop -= indexReg;
-
-                                    Object lhs = stack[stackTop];
-                                    if (lhs instanceof InterpretedFunction) {
-                                        InterpretedFunction f = (InterpretedFunction) lhs;
-                                        if (frame.fnOrScript.securityDomain == f.securityDomain) {
-                                            if (cx.getLanguageVersion() >= Context.VERSION_ES6
-                                                    && f.getHomeObject() != null) {
-                                                // Only methods have home objects associated with
-                                                // them
-                                                throw ScriptRuntime.typeErrorById(
-                                                        "msg.not.ctor", f.getFunctionName());
-                                            }
-
-                                            Scriptable newInstance =
-                                                    f.createObject(cx, frame.scope);
-                                            CallFrame calleeFrame =
-                                                    initFrame(
-                                                            cx,
-                                                            frame.scope,
-                                                            newInstance,
-                                                            newInstance,
-                                                            stack,
-                                                            sDbl,
-                                                            null,
-                                                            stackTop + 1,
-                                                            indexReg,
-                                                            f,
-                                                            frame);
-
-                                            stack[stackTop] = newInstance;
-                                            frame.savedStackTop = stackTop;
-                                            frame.savedCallOp = op;
-                                            return new StateContinueResult(calleeFrame, indexReg);
-                                        }
-                                    }
-                                    if (!(lhs instanceof Constructable)) {
-                                        if (lhs == DOUBLE_MARK)
-                                            lhs = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                        throw ScriptRuntime.notFunctionError(lhs);
-                                    }
-                                    Constructable ctor = (Constructable) lhs;
-
-                                    if (ctor instanceof IdFunctionObject) {
-                                        IdFunctionObject ifun = (IdFunctionObject) ctor;
-                                        if (NativeContinuation.isContinuationConstructor(ifun)) {
-                                            frame.stack[stackTop] =
-                                                    captureContinuation(
-                                                            cx, frame.parentFrame, false);
-                                            continue Loop;
-                                        }
-                                    }
-
-                                    Object[] outArgs =
-                                            getArgsArray(stack, sDbl, stackTop + 1, indexReg);
-                                    stack[stackTop] = ctor.construct(cx, frame.scope, outArgs);
-                                    continue Loop;
-                                }
-                            case Token.TYPEOF:
-                                {
-                                    Object lhs = stack[stackTop];
-                                    if (lhs == DOUBLE_MARK)
-                                        lhs = ScriptRuntime.wrapNumber(sDbl[stackTop]);
-                                    stack[stackTop] = ScriptRuntime.typeof(lhs);
-                                    continue Loop;
-                                }
-                            case Icode_TYPEOFNAME:
-                                stack[++stackTop] =
-                                        ScriptRuntime.typeofName(frame.scope, stringReg);
-                                continue Loop;
-                            case Token.STRING:
-                                stack[++stackTop] = stringReg;
-                                continue Loop;
-                            case Icode_SHORTNUMBER:
-                                ++stackTop;
-                                stack[stackTop] = DOUBLE_MARK;
-                                sDbl[stackTop] = getShort(iCode, frame.pc);
-                                frame.pc += 2;
-                                continue Loop;
-                            case Icode_INTNUMBER:
-                                ++stackTop;
-                                stack[stackTop] = DOUBLE_MARK;
-                                sDbl[stackTop] = getInt(iCode, frame.pc);
-                                frame.pc += 4;
-                                continue Loop;
-                            case Token.NUMBER:
-                                ++stackTop;
-                                stack[stackTop] = DOUBLE_MARK;
-                                sDbl[stackTop] = iData.itsDoubleTable[indexReg];
-                                continue Loop;
-                            case Token.BIGINT:
-                                stack[++stackTop] = bigIntReg;
-                                continue Loop;
-                            case Token.NAME:
-                                stack[++stackTop] = ScriptRuntime.name(cx, frame.scope, stringReg);
-                                continue Loop;
-                            case Icode_NAME_INC_DEC:
-                                stack[++stackTop] =
-                                        ScriptRuntime.nameIncrDecr(
-                                                frame.scope, stringReg, cx, iCode[frame.pc]);
-                                ++frame.pc;
-                                continue Loop;
                             default:
                                 {
                                     NewState nextState;
@@ -2576,6 +2477,156 @@ public final class Interpreter extends Icode implements Evaluator {
             throwable = ex;
         }
         return new ThrowableResult(frame, throwable);
+    }
+
+    private static class DoNew extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            if (state.instructionCounting) {
+                cx.instructionCount += INVOCATION_COST;
+            }
+            // stack change: function arg0 .. argN -> newResult
+            // state.indexReg: number of arguments
+            state.stackTop -= state.indexReg;
+
+            Object lhs = frame.stack[state.stackTop];
+            if (lhs instanceof InterpretedFunction) {
+                InterpretedFunction f = (InterpretedFunction) lhs;
+                if (frame.fnOrScript.securityDomain == f.securityDomain) {
+                    if (cx.getLanguageVersion() >= Context.VERSION_ES6
+                            && f.getHomeObject() != null) {
+                        // Only methods have home objects associated with
+                        // them
+                        throw ScriptRuntime.typeErrorById("msg.not.ctor", f.getFunctionName());
+                    }
+
+                    Scriptable newInstance = f.createObject(cx, frame.scope);
+                    CallFrame calleeFrame =
+                            initFrame(
+                                    cx,
+                                    frame.scope,
+                                    newInstance,
+                                    newInstance,
+                                    frame.stack,
+                                    frame.sDbl,
+                                    null,
+                                    state.stackTop + 1,
+                                    state.indexReg,
+                                    f,
+                                    frame);
+
+                    frame.stack[state.stackTop] = newInstance;
+                    frame.savedStackTop = state.stackTop;
+                    frame.savedCallOp = op;
+                    return new StateContinueResult(calleeFrame, state.indexReg);
+                }
+            }
+            if (!(lhs instanceof Constructable)) {
+                if (lhs == DOUBLE_MARK) lhs = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
+                throw ScriptRuntime.notFunctionError(lhs);
+            }
+            Constructable ctor = (Constructable) lhs;
+
+            if (ctor instanceof IdFunctionObject) {
+                IdFunctionObject ifun = (IdFunctionObject) ctor;
+                if (NativeContinuation.isContinuationConstructor(ifun)) {
+                    frame.stack[state.stackTop] = captureContinuation(cx, frame.parentFrame, false);
+                    return null;
+                }
+            }
+
+            Object[] outArgs =
+                    getArgsArray(frame.stack, frame.sDbl, state.stackTop + 1, state.indexReg);
+            frame.stack[state.stackTop] = ctor.construct(cx, frame.scope, outArgs);
+            return null;
+        }
+    }
+
+    private static class DoTypeOf extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            Object[] stack = frame.stack;
+            double[] sDbl = frame.sDbl;
+            Object lhs = stack[state.stackTop];
+            if (lhs == DOUBLE_MARK) lhs = ScriptRuntime.wrapNumber(sDbl[state.stackTop]);
+            stack[state.stackTop] = ScriptRuntime.typeof(lhs);
+            return null;
+        }
+    }
+
+    private static class DoTypeOfName extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = ScriptRuntime.typeofName(frame.scope, state.stringReg);
+            return null;
+        }
+    }
+
+    private static class DoString extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = state.stringReg;
+            return null;
+        }
+    }
+
+    private static class DoShortNumber extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            ++state.stackTop;
+            frame.stack[state.stackTop] = DOUBLE_MARK;
+            frame.sDbl[state.stackTop] = getShort(frame.idata.itsICode, frame.pc);
+            frame.pc += 2;
+            return null;
+        }
+    }
+
+    private static class DoIntNumber extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            ++state.stackTop;
+            frame.stack[state.stackTop] = DOUBLE_MARK;
+            frame.sDbl[state.stackTop] = getInt(frame.idata.itsICode, frame.pc);
+            frame.pc += 4;
+            return null;
+        }
+    }
+
+    private static class DoNumber extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            ++state.stackTop;
+            frame.stack[state.stackTop] = DOUBLE_MARK;
+            frame.sDbl[state.stackTop] = frame.idata.itsDoubleTable[state.indexReg];
+            return null;
+        }
+    }
+
+    private static class DoBigInt extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = state.bigIntReg;
+            return null;
+        }
+    }
+
+    private static class DoName extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] = ScriptRuntime.name(cx, frame.scope, state.stringReg);
+            return null;
+        }
+    }
+
+    private static class DoNameIncDec extends InstructionClass {
+        @Override
+        NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
+            frame.stack[++state.stackTop] =
+                    ScriptRuntime.nameIncrDecr(
+                            frame.scope, state.stringReg, cx, frame.idata.itsICode[frame.pc]);
+            ++frame.pc;
+            return null;
+        }
     }
 
     private static class DoSetConstVar1 extends InstructionClass {
