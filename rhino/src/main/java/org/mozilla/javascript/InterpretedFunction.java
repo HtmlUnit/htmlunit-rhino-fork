@@ -174,8 +174,7 @@ final class InterpretedFunction extends NativeFunction implements Script {
             return;
         }
 
-        final Context currentContext = Context.getCurrentContext();
-        if (currentContext.hasFeature(Context.FEATURE_HTMLUNIT_FN_ARGUMENTS_IS_RO_VIEW)) {
+        if (Context.getCurrentContext().hasFeature(Context.FEATURE_HTMLUNIT_FN_ARGUMENTS_IS_RO_VIEW)) {
             this.arguments = new Arguments(arguments) {
                 @Override
                 public void put(int index, Scriptable start, Object value) {
