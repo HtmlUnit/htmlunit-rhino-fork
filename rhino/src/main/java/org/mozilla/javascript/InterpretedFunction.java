@@ -159,15 +159,6 @@ final class InterpretedFunction extends NativeFunction implements Script {
         return idata.argIsConst[index];
     }
 
-    /**
-     * Provides the decompiled source of the function what is helpful
-     * while debugging.
-     */
-    @Override
-    public String toString() {
-        return decompile(2, EnumSet.noneOf(DecompilerFlag.class));
-    }
-
     void setArguments(final Arguments arguments) {
         if (arguments == null) {
             this.arguments = null;
