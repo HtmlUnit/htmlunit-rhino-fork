@@ -977,7 +977,7 @@ public final class IRFactory {
             for (AbstractObjectProperty abstractProp : elems) {
                 if (abstractProp instanceof SpreadObjectProperty) {
                     SpreadObjectProperty spreadObjectProperty = (SpreadObjectProperty) abstractProp;
-                    var transformedSpreadNode = transform(spreadObjectProperty.getSpreadNode());
+                    Node transformedSpreadNode = transform(spreadObjectProperty.getSpreadNode());
                     properties[i++] = transformedSpreadNode;
                     object.putIntProp(
                             Node.NUMBER_OF_SPREAD, object.getIntProp(Node.NUMBER_OF_SPREAD, 0) + 1);
