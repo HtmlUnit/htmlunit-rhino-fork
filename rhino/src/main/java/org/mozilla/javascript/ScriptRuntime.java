@@ -3816,6 +3816,8 @@ public class ScriptRuntime {
     }
 
     @SuppressWarnings("AndroidJdkLibsChecker")
+    // java.math.BigInteger#intValueExact() available in API-level 31
+    // https://developer.android.com/reference/java/math/BigInteger#intValueExact()
     public static Number exponentiate(Number val1, Number val2) {
         if (val1 instanceof BigInteger && val2 instanceof BigInteger) {
             if (((BigInteger) val2).signum() == -1) {
@@ -3892,6 +3894,8 @@ public class ScriptRuntime {
     }
 
     @SuppressWarnings("AndroidJdkLibsChecker")
+    // java.math.BigInteger#intValueExact() available in API-level 31
+    // https://developer.android.com/reference/java/math/BigInteger#intValueExact()
     public static Number leftShift(Number val1, Number val2) {
         if (val1 instanceof BigInteger && val2 instanceof BigInteger) {
             try {
@@ -3916,6 +3920,8 @@ public class ScriptRuntime {
     }
 
     @SuppressWarnings("AndroidJdkLibsChecker")
+    // java.math.BigInteger#intValueExact() available in API-level 31
+    // https://developer.android.com/reference/java/math/BigInteger#intValueExact()
     public static Number signedRightShift(Number val1, Number val2) {
         if (val1 instanceof BigInteger && val2 instanceof BigInteger) {
             try {

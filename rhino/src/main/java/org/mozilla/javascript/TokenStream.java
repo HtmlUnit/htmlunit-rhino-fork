@@ -114,6 +114,7 @@ class TokenStream implements Parser.CurrentPositionReporter {
                 Id_this = Token.THIS,
                 Id_true = Token.TRUE,
                 Id_typeof = Token.TYPEOF,
+                Id_undefined = Token.UNDEFINED,
                 Id_var = Token.VAR,
                 Id_void = Token.VOID,
                 Id_while = Token.WHILE,
@@ -221,6 +222,9 @@ class TokenStream implements Parser.CurrentPositionReporter {
                 break;
             case "typeof":
                 id = Id_typeof;
+                break;
+            case "undefined":
+                id = Id_undefined;
                 break;
             case "var":
                 id = Id_var;
@@ -407,6 +411,7 @@ class TokenStream implements Parser.CurrentPositionReporter {
                 Id_false = Token.FALSE,
                 Id_null = Token.NULL,
                 Id_true = Token.TRUE,
+                Id_undefined = Token.UNDEFINED,
 
                 // Non ReservedWord, but Non IdentifierName in strict mode code.
                 // 12.1.1 Static Semantics: Early Errors
@@ -556,6 +561,9 @@ class TokenStream implements Parser.CurrentPositionReporter {
             case "null":
                 id = Id_null;
                 break;
+            case "undefined":
+                id = Id_undefined;
+                break;
             case "true":
                 id = Id_true;
                 break;
@@ -577,11 +585,11 @@ class TokenStream implements Parser.CurrentPositionReporter {
         return id & 0xff;
     }
 
-    @SuppressWarnings("AndroidJdkLibsChecker")
     private static boolean isValidIdentifierName(String str) {
         int i = 0;
-        for (int c : str.codePoints().toArray()) {
-            if (i++ == 0) {
+        while (i < str.length()) {
+            int c = str.codePointAt(i);
+            if (i == 0) {
                 if (c != '$' && c != '_' && !Character.isUnicodeIdentifierStart(c)) {
                     return false;
                 }
@@ -593,6 +601,7 @@ class TokenStream implements Parser.CurrentPositionReporter {
                     return false;
                 }
             }
+            i += Character.charCount(c);
         }
         return true;
     }
