@@ -601,9 +601,8 @@ public class Global extends ImporterTopLevel {
      */
     public static Object runCommand(Context cx, Scriptable scope, Scriptable thisObj, Object[] args, Function funObj)
             throws IOException {
-        /* HtmlUnit
-        return ExecUtil.runCommand(getInstance(funObj), thisObj, args);
-        HtmlUnit */
+
+        return /* HtmlUnitExecUtil.runCommand(getInstance(funObj), thisObj, args); HtmlUnit */ null;
     }
 
     /** The seal function seals all supplied arguments. */
