@@ -3572,6 +3572,9 @@ public class ScriptRuntime {
         // mode.
         Consumer<CompilerEnvirons> compilerEnvironsProcessor =
                 compilerEnvs -> {
+                    // `eval` propagates strict mode
+                    compilerEnvs.setStrictMode(cx.isStrictMode());
+
                     // If we are inside a method, we need to allow super. Methods have the home
                     // object set and propagated via the activation (i.e. the NativeCall),
                     // but non-methods will have the home object set to null.
