@@ -232,7 +232,7 @@ public class BaseFunction extends ScriptableObject implements Function {
     }
 
     protected void createPrototypeProperty() {
-        try (var map = startCompoundOp(true)) {
+        try (CompoundOperationMap map = startCompoundOp(true)) {
             createPrototypeProperty(map);
         }
     }
@@ -285,7 +285,7 @@ public class BaseFunction extends ScriptableObject implements Function {
             boolean checkValid,
             Object key,
             int index) {
-        try (var map = builtIn.startCompoundOp(true)) {
+        try (CompoundOperationMap map = builtIn.startCompoundOp(true)) {
             return ScriptableObject.defineOrdinaryProperty(
                     (o, i, k, e, m, s) -> {
                         if (i.value != NOT_FOUND) {

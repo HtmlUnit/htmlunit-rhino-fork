@@ -58,7 +58,7 @@ test {
         systemProperty 'updateTest262properties', System.getProperty('updateTest262properties')
     }
 
-    System.properties.each { k,v->
+    System.properties.each { k, v ->
         if (k.startsWith("rhino.")) {
             systemProperty k, v
         }

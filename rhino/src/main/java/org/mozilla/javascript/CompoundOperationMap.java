@@ -39,7 +39,7 @@ public class CompoundOperationMap implements SlotMap, AutoCloseable {
     public <S extends Slot> S compute(
             SlotMapOwner owner, Object key, int index, SlotComputer<S> compute) {
         updateMap(true);
-        var res = map.compute(owner, this, key, index, compute);
+        S res = map.compute(owner, this, key, index, compute);
         touched = true;
         return res;
     }
@@ -53,7 +53,7 @@ public class CompoundOperationMap implements SlotMap, AutoCloseable {
             SlotComputer<S> compute) {
         assert (compoundOp == this);
         updateMap(true);
-        var res = map.compute(owner, this, key, index, compute);
+        S res = map.compute(owner, this, key, index, compute);
         touched = true;
         return res;
     }
@@ -73,7 +73,7 @@ public class CompoundOperationMap implements SlotMap, AutoCloseable {
     @Override
     public Slot modify(SlotMapOwner owner, Object key, int index, int attributes) {
         updateMap(true);
-        var res = map.modify(owner, key, index, attributes);
+        Slot res = map.modify(owner, key, index, attributes);
         touched = true;
         return res;
     }

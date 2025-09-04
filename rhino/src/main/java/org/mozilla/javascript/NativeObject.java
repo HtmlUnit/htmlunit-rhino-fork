@@ -536,7 +536,7 @@ public class NativeObject extends ScriptableObject implements Map {
         Scriptable s = getCompatibleObject(cx, scope, arg);
         ScriptableObject obj = ensureScriptableObject(s);
         Object[] ids;
-        try (var map = obj.startCompoundOp(false)) {
+        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, false);
         }
         for (int i = 0; i < ids.length; i++) {
@@ -551,7 +551,7 @@ public class NativeObject extends ScriptableObject implements Map {
         Scriptable s = getCompatibleObject(cx, scope, arg);
         ScriptableObject obj = ensureScriptableObject(s);
         Object[] ids;
-        try (var map = obj.startCompoundOp(false)) {
+        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         ArrayList<Object> syms = new ArrayList<>();
@@ -584,7 +584,7 @@ public class NativeObject extends ScriptableObject implements Map {
 
         ScriptableObject descs = (ScriptableObject) cx.newObject(scope);
         Object[] ids;
-        try (var map = obj.startCompoundOp(false)) {
+        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         for (Object key : ids) {
@@ -734,8 +734,8 @@ public class NativeObject extends ScriptableObject implements Map {
             Scriptable sourceObj = ScriptRuntime.toObject(cx, scope, args[i]);
             Object[] ids;
             if (sourceObj instanceof ScriptableObject) {
-                var scriptable = (ScriptableObject) sourceObj;
-                try (var map = scriptable.startCompoundOp(false)) {
+                ScriptableObject scriptable = (ScriptableObject) sourceObj;
+                try (CompoundOperationMap map = scriptable.startCompoundOp(false)) {
                     ids = scriptable.getIds(map, false, true);
                 }
             } else {

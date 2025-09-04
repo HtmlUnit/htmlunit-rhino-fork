@@ -317,7 +317,7 @@ final class NativeReflect extends ScriptableObject {
         final List<Object> symbols = new ArrayList<>();
 
         Object[] ids;
-        try (var map = target.startCompoundOp(false)) {
+        try (CompoundOperationMap map = target.startCompoundOp(false)) {
             ids = target.getIds(map, true, true);
         }
         for (Object o : ids) {

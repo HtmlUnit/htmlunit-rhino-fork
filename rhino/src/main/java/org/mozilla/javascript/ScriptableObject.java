@@ -668,7 +668,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      * @return whether the property is a getter or a setter
      */
     protected boolean isGetterOrSetter(String name, int index, boolean setter) {
-        try (var map = startCompoundOp(false)) {
+        try (CompoundOperationMap map = startCompoundOp(false)) {
             return isGetterOrSetter(map, name, index, setter);
         }
     }
@@ -770,7 +770,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      */
     @Override
     public Object[] getIds() {
-        try (var map = startCompoundOp(false)) {
+        try (CompoundOperationMap map = startCompoundOp(false)) {
             return getIds(map, false, false);
         }
     }
@@ -786,7 +786,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      */
     @Override
     public Object[] getAllIds() {
-        try (var map = startCompoundOp(false)) {
+        try (CompoundOperationMap map = startCompoundOp(false)) {
             return getIds(map, true, false);
         }
     }
@@ -1611,7 +1611,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      */
     public void defineOwnProperties(Context cx, ScriptableObject props) {
         Object[] ids;
-        try (var map = props.startCompoundOp(false)) {
+        try (CompoundOperationMap map = props.startCompoundOp(false)) {
             ids = props.getIds(map, false, true);
         }
         ScriptableObject[] descs = new ScriptableObject[ids.length];
@@ -1671,7 +1671,7 @@ public abstract class ScriptableObject extends SlotMapOwner
         // We convert the whole object to a descriptor at this point
         // because we have no good way to reliably to do so inside a
         // compound operation.
-        var info = new DescriptorInfo(desc);
+        DescriptorInfo info = new DescriptorInfo(desc);
 
         if (aSlot instanceof BuiltInSlot) {
             // 10.4.2.4 ArrayLengthSet requires we check that any new
@@ -1687,7 +1687,7 @@ public abstract class ScriptableObject extends SlotMapOwner
 
             return ((BuiltInSlot<?>) aSlot).applyNewDescriptor(id, info, checkValid, key, index);
         } else {
-            try (var map = startCompoundOp(true)) {
+            try (CompoundOperationMap map = startCompoundOp(true)) {
                 return defineOrdinaryProperty(
                         ScriptableObject::setSlotValue,
                         this,
@@ -2301,7 +2301,7 @@ public abstract class ScriptableObject extends SlotMapOwner
             }
             toInitialize.clear();
 
-            try (var map = startCompoundOp(false)) {
+            try (CompoundOperationMap map = startCompoundOp(false)) {
                 for (Slot slot : map) {
                     Object value = slot.value;
                     if (value instanceof LazilyLoadedCtor) {
@@ -3050,7 +3050,7 @@ public abstract class ScriptableObject extends SlotMapOwner
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        try (var map = startCompoundOp(false)) {
+        try (CompoundOperationMap map = startCompoundOp(false)) {
             int objectsCount = map.dirtySize();
             if (objectsCount == 0) {
                 out.writeInt(0);

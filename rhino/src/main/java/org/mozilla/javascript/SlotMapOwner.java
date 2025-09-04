@@ -92,7 +92,7 @@ public abstract class SlotMapOwner {
             S newSlot = c.compute(key, index, null, compoundOp, owner);
             if (newSlot != null) {
                 if (!compoundOp.isTouched()) {
-                    var map = new SingleEntrySlotMap(newSlot);
+                    SingleEntrySlotMap map = new SingleEntrySlotMap(newSlot);
                     owner.setMap(map);
                 } else {
                     // The map has been touched so delegate the add (can't do
@@ -332,14 +332,15 @@ public abstract class SlotMapOwner {
             } else {
                 return new ThreadSafeEmbeddedSlotMap();
             }
-        } else if (initialSize == 0) {
+        } else */
+
+        if (initialSize == 0) {
             return EMPTY_SLOT_MAP;
         } else if (initialSize > LARGE_HASH_SIZE) {
             return new HashSlotMap();
         } else {
             return new EmbeddedSlotMap();
         }
-        */
     }
 
     final SlotMap getMap() {

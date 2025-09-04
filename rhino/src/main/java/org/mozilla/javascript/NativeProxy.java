@@ -350,7 +350,7 @@ final class NativeProxy extends ScriptableObject implements Callable, Constructa
             boolean extensibleTarget = target.isExtensible();
             // don't use the provided values here we have to check all
             Object[] targetKeys;
-            try (var targetMap = target.startCompoundOp(false)) {
+            try (CompoundOperationMap targetMap = target.startCompoundOp(false)) {
                 targetKeys = target.getIds(targetMap, true, true);
             }
 
@@ -400,7 +400,7 @@ final class NativeProxy extends ScriptableObject implements Callable, Constructa
             // target is not extensible, fall back to the target call
         }
 
-        try (var targetMap = target.startCompoundOp(false)) {
+        try (CompoundOperationMap targetMap = target.startCompoundOp(false)) {
             return target.getIds(targetMap, getNonEnumerable, getSymbols);
         }
     }

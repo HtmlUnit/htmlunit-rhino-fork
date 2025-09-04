@@ -79,7 +79,7 @@ public class AbstractEcmaObjectOperations {
         if (obj.isExtensible()) return false;
 
         Object[] ids;
-        try (var map = obj.startCompoundOp(false)) {
+        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         for (Object name : ids) {
@@ -146,7 +146,7 @@ public class AbstractEcmaObjectOperations {
         }
 
         Object[] ids;
-        try (var map = obj.startCompoundOp(false)) {
+        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         for (Object key : ids) {

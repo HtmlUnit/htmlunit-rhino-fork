@@ -66,7 +66,7 @@ public interface SlotMap extends Iterable<Slot> {
      */
     default <S extends Slot> S compute(
             SlotMapOwner owner, Object key, int index, SlotComputer<S> compute) {
-        try (var mutableMap = owner.startCompoundOp(true)) {
+        try (CompoundOperationMap mutableMap = owner.startCompoundOp(true)) {
             return mutableMap.compute(owner, mutableMap, key, index, compute);
         }
     }

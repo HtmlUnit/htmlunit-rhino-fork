@@ -263,7 +263,7 @@ public class NativeArray extends ScriptableObject implements List {
 
     @Override
     public Object get(int index, Scriptable start) {
-        var slot = denseOnly ? null : getMap().query(null, index);
+        Slot slot = denseOnly ? null : getMap().query(null, index);
         if (!denseOnly && slot != null && slot.isSetterSlot()) return slot.getValue(start);
         if (dense != null && 0 <= index && index < dense.length) return dense[index];
         return slot == null ? NOT_FOUND : slot.getValue(start);
@@ -271,7 +271,7 @@ public class NativeArray extends ScriptableObject implements List {
 
     @Override
     public boolean has(int index, Scriptable start) {
-        var slot = denseOnly ? null : getMap().query(null, index);
+        Slot slot = denseOnly ? null : getMap().query(null, index);
         if (slot != null) {
             return true;
         }
@@ -346,7 +346,7 @@ public class NativeArray extends ScriptableObject implements List {
 
     @Override
     public void put(int index, Scriptable start, Object value) {
-        var slot = denseOnly ? null : getMap().query(null, index);
+        Slot slot = denseOnly ? null : getMap().query(null, index);
         if (start == this
                 && !isSealed()
                 && dense != null
@@ -385,7 +385,7 @@ public class NativeArray extends ScriptableObject implements List {
 
     @Override
     public void delete(int index) {
-        var slot = denseOnly ? null : getMap().query(null, index);
+        Slot slot = denseOnly ? null : getMap().query(null, index);
         if (dense != null
                 && 0 <= index
                 && index < dense.length
@@ -402,7 +402,7 @@ public class NativeArray extends ScriptableObject implements List {
     }
 
     public void deleteInternal(CompoundOperationMap compoundOp, int index) {
-        var slot = denseOnly ? null : compoundOp.query(null, index);
+        Slot slot = denseOnly ? null : compoundOp.query(null, index);
         if (dense != null
                 && 0 <= index
                 && index < dense.length
@@ -587,7 +587,7 @@ public class NativeArray extends ScriptableObject implements List {
             Scriptable start,
             boolean isThrow) {
         double d = ScriptRuntime.toNumber(value);
-        try (var map = builtIn.startCompoundOp(true)) {
+        try (CompoundOperationMap map = builtIn.startCompoundOp(true)) {
             builtIn.setLength(map, d);
         }
         return true;
@@ -621,7 +621,7 @@ public class NativeArray extends ScriptableObject implements List {
         Object value = info.value;
 
         if (value == NOT_FOUND) {
-            try (var map = builtIn.startCompoundOp(true)) {
+            try (CompoundOperationMap map = builtIn.startCompoundOp(true)) {
                 return ScriptableObject.defineOrdinaryProperty(
                         (o, i, k, e, m, s) -> s, builtIn, map, id, info, checkValid, key, index);
             }
@@ -634,7 +634,7 @@ public class NativeArray extends ScriptableObject implements List {
         Object writable = info.writable;
         // 10.2.4.2 9 is true by definition
 
-        try (var map = builtIn.startCompoundOp(true)) {
+        try (CompoundOperationMap map = builtIn.startCompoundOp(true)) {
             // 10.2.4.2 10-11
             if (newLength >= builtIn.length) {
                 return ScriptableObject.defineOrdinaryProperty(
@@ -940,7 +940,7 @@ public class NativeArray extends ScriptableObject implements List {
             checkNotSealed(target, null, i);
             target.deleteInternal(compoundOp, i);
         } else {
-            var strIndex = Long.toString(index);
+            String strIndex = Long.toString(index);
             checkNotSealed(target, strIndex, 0);
             compoundOp.compute(target, strIndex, 0, ScriptableObject::checkSlotRemoval);
         }
@@ -1446,7 +1446,7 @@ public class NativeArray extends ScriptableObject implements List {
                     Object[] copy = new Object[intLen];
                     System.arraycopy(na.dense, (int) begin, copy, 0, intLen);
                     nar.dense = copy;
-                    try (var map = nar.startCompoundOp(true)) {
+                    try (CompoundOperationMap map = nar.startCompoundOp(true)) {
                         nar.setLength(map, intLen);
                     }
                 } else {
