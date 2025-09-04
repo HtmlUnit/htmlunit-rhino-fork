@@ -9,7 +9,9 @@ package org.mozilla.javascript;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.mozilla.javascript.lc.type.TypeInfo;
 import org.mozilla.javascript.lc.type.TypeInfoFactory;
 
 /**
