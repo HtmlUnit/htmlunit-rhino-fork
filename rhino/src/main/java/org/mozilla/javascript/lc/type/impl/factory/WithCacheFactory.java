@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.TypeVariable;
+import java.util.HashMap;
 import java.util.Map;
 import org.mozilla.javascript.lc.type.TypeInfo;
 import org.mozilla.javascript.lc.type.TypeInfoFactory;
@@ -61,11 +62,11 @@ public abstract class WithCacheFactory implements FactoryBase {
     @Override
     public Map<VariableTypeInfo, TypeInfo> getConsolidationMapping(Class<?> from) {
         if (from == null || from == Object.class || from.isPrimitive()) {
-            return Map.of();
+            return new HashMap<>();
         }
         // no computeIfAbsent because `computeTypeReplacement(...)` will recursively call this
         // method again
-        var got = consolidationMappingCache.get(from);
+        Map<VariableTypeInfo, TypeInfo> got = consolidationMappingCache.get(from);
         if (got == null) {
             got = computeConsolidationMapping(from);
             consolidationMappingCache.put(from, got);

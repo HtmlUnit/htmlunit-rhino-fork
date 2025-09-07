@@ -3,6 +3,7 @@ package org.mozilla.javascript.lc.type.impl.factory;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,16 +60,19 @@ public interface FactoryBase extends TypeInfoFactory {
         return new ParameterizedTypeInfoImpl(base, params);
     }
 
-    private static Map<VariableTypeInfo, TypeInfo> transformMapping(
+    static Map<VariableTypeInfo, TypeInfo> transformMapping(
             Map<VariableTypeInfo, TypeInfo> mapping, Map<VariableTypeInfo, TypeInfo> transformer) {
         if (mapping.isEmpty()) {
-            return Map.of();
+            return new HashMap<>();
         } else if (mapping.size() == 1) {
-            var entry = mapping.entrySet().iterator().next();
-            return Map.of(entry.getKey(), entry.getValue().consolidate(transformer));
+            Map.Entry<VariableTypeInfo, TypeInfo> entry = mapping.entrySet().iterator().next();
+
+            Map<VariableTypeInfo, TypeInfo> result = new HashMap<>();
+            result.put(entry.getKey(), entry.getValue().consolidate(transformer));
+            return result;
         }
-        var transformed = new HashMap<>(mapping);
-        for (var entry : transformed.entrySet()) {
+        HashMap<VariableTypeInfo, TypeInfo> transformed = new HashMap<>(mapping);
+        for (Map.Entry<VariableTypeInfo, TypeInfo> entry : transformed.entrySet()) {
             entry.setValue(entry.getValue().consolidate(transformer));
         }
         return transformed;
@@ -76,37 +80,37 @@ public interface FactoryBase extends TypeInfoFactory {
 
     /** Used by {@link #getConsolidationMapping(java.lang.Class)} */
     default Map<VariableTypeInfo, TypeInfo> computeConsolidationMapping(Class<?> type) {
-        var mapping = new HashMap<VariableTypeInfo, TypeInfo>();
+        HashMap<VariableTypeInfo, TypeInfo> mapping = new HashMap<VariableTypeInfo, TypeInfo>();
 
         // in our E.class example, this will collect mapping from B<Te>, forming Tb -> Te
         extractSuperMapping(type.getGenericSuperclass(), mapping);
 
         // in our E.class example, this will collect mapping from D<String>, forming Td -> String
-        for (var genericInterface : type.getGenericInterfaces()) {
+        for (Type genericInterface : type.getGenericInterfaces()) {
             extractSuperMapping(genericInterface, mapping);
         }
 
         // extract mappings for superclasses/interfaces
         // in our E.class example, super mapping will include Ta -> Tb
-        var superMapping = getConsolidationMapping(type.getSuperclass());
+        Map<VariableTypeInfo, TypeInfo> superMapping = getConsolidationMapping(type.getSuperclass());
 
         // in our E.class example, interface mapping will include Tc -> Td
-        var interfaces = type.getInterfaces();
-        var interfaceMappings = new ArrayList<Map<VariableTypeInfo, TypeInfo>>(interfaces.length);
-        for (var interface_ : interfaces) {
+        Class<?>[] interfaces = type.getInterfaces();
+        ArrayList<Map<VariableTypeInfo, TypeInfo>> interfaceMappings = new ArrayList<Map<VariableTypeInfo, TypeInfo>>(interfaces.length);
+        for (Class<?> interface_ : interfaces) {
             interfaceMappings.add(getConsolidationMapping(interface_));
         }
 
         if (superMapping.isEmpty() && interfaceMappings.stream().allMatch(Map::isEmpty)) {
-            return Map.copyOf(mapping);
+            return new HashMap<>(mapping);
         }
 
         // transform super mapping to make it able to directly map a type to types used by E.class,
         // then merge them together
         // Example: Ta -> Tb (from `superMapping`) will be transformed by Tb -> Te (from `mapping`),
         // forming Ta -> Te
-        var merged = new HashMap<>(transformMapping(superMapping, mapping));
-        for (var interfaceMapping : interfaceMappings) {
+        HashMap<VariableTypeInfo, TypeInfo> merged = new HashMap<>(transformMapping(superMapping, mapping));
+        for (Map<VariableTypeInfo, TypeInfo> interfaceMapping : interfaceMappings) {
             merged.putAll(transformMapping(interfaceMapping, mapping));
         }
         merged.putAll(mapping);
@@ -114,21 +118,21 @@ public interface FactoryBase extends TypeInfoFactory {
         // Result: `Ta -> Te`, `Tb -> Te`, `Tc -> String`, `Td -> String`
         // This means that all type variables from superclass / interface (Ta, Tb, Tc, Td) can be
         // eliminated by applying the mapping ONCE, which will be important for performance
-        return Map.copyOf(merged);
+        return new HashMap<>(merged);
     }
 
-    private void extractSuperMapping(Type superType, Map<VariableTypeInfo, TypeInfo> pushTo) {
+    default void extractSuperMapping(Type superType, Map<VariableTypeInfo, TypeInfo> pushTo) {
         if (!(superType instanceof ParameterizedType)) {
             return;
         }
-        var parameterized = (ParameterizedType) superType;
+        ParameterizedType parameterized = (ParameterizedType) superType;
         if (!(parameterized.getRawType() instanceof Class<?>)) {
             return;
         }
-        var parent = (Class<?>) parameterized.getRawType();
+        Class<?> parent = (Class<?>) parameterized.getRawType();
 
-        final var params = parent.getTypeParameters(); // T
-        final var args = parameterized.getActualTypeArguments(); // T is mapped to
+        final TypeVariable<? extends Class<?>>[] params = parent.getTypeParameters(); // T
+        final Type[] args = parameterized.getActualTypeArguments(); // T is mapped to
 
         if (params.length != args.length) {
             throw new IllegalArgumentException(

@@ -1,6 +1,7 @@
 package org.mozilla.javascript.lc.type.impl.factory;
 
 import java.lang.reflect.TypeVariable;
+import java.util.HashMap;
 import java.util.Map;
 import org.mozilla.javascript.lc.type.TypeInfo;
 import org.mozilla.javascript.lc.type.TypeInfoFactory;
@@ -50,7 +51,7 @@ public enum NoCacheFactory implements FactoryBase {
     @Override
     public Map<VariableTypeInfo, TypeInfo> getConsolidationMapping(Class<?> from) {
         if (from == null || from == Object.class || from.isPrimitive()) {
-            return Map.of();
+            return new HashMap<>();
         }
         return computeConsolidationMapping(from);
     }
