@@ -100,7 +100,7 @@ class JavaMembers {
         Context cx = Context.getContext();
 
         if (member instanceof BeanProperty) {
-            var bean = (BeanProperty) member;
+            BeanProperty bean = (BeanProperty) member;
             if (bean.getter == null) {
                 return Scriptable.NOT_FOUND;
             }
@@ -110,7 +110,7 @@ class JavaMembers {
         Object rval;
         Class<?> type;
         try {
-            var field = (Field) member;
+            Field field = (Field) member;
             rval = field.get(isStatic ? null : javaObject);
             type = field.getType();
         } catch (Exception ex) {
@@ -555,7 +555,7 @@ class JavaMembers {
 
     private static boolean maskingExistedMember(
             boolean includePrivate, Map<String, Object> members, String beanName) {
-        var existed = members.get(beanName);
+        Object existed = members.get(beanName);
 
         if (existed == null) { // no member
             return false;
@@ -589,33 +589,33 @@ class JavaMembers {
     /** at this stage, {@code members} includes {@link NativeJavaMethod} and {@link Field} */
     private static Map<String, BeanProperty> extractBeaning(
             Map<String, Object> members, boolean isStatic, boolean includePrivate) {
-        var beans = new HashMap<String, BeanProperty>();
-        for (var entry : members.entrySet()) {
-            var name = entry.getKey();
+        HashMap<String, BeanProperty> beans = new HashMap<String, BeanProperty>();
+        for (Map.Entry<String, Object> entry : members.entrySet()) {
+            String name = entry.getKey();
 
-            var isGetBeaning = name.startsWith("get");
-            var isIsBeaning = name.startsWith("is");
-            var isSetBeaning = name.startsWith("set");
+            boolean isGetBeaning = name.startsWith("get");
+            boolean isIsBeaning = name.startsWith("is");
+            boolean isSetBeaning = name.startsWith("set");
             if (!isGetBeaning && !isIsBeaning && !isSetBeaning) {
                 continue;
             }
 
-            var nameComponent = name.substring(isIsBeaning ? 2 : 3);
+            String nameComponent = name.substring(isIsBeaning ? 2 : 3);
             if (nameComponent.isEmpty() || !(entry.getValue() instanceof NativeJavaMethod)) {
                 continue;
             }
 
-            var beanName = getBeanName(nameComponent);
+            String beanName = getBeanName(nameComponent);
             if (maskingExistedMember(includePrivate, members, beanName)) {
                 continue;
             }
 
             if (isGetBeaning || isIsBeaning) { // getter
-                var method = (NativeJavaMethod) entry.getValue();
+                NativeJavaMethod method = (NativeJavaMethod) entry.getValue();
 
-                var candidate = extractGetMethod(method.methods, isStatic);
+                MemberBox candidate = extractGetMethod(method.methods, isStatic);
                 if (candidate != null) {
-                    var bean = beans.computeIfAbsent(beanName, BeanProperty::new);
+                    BeanProperty bean = beans.computeIfAbsent(beanName, BeanProperty::new);
                     if (method.methods.length == 1) {
                         bean.getter = method;
                     } else {
@@ -623,23 +623,23 @@ class JavaMembers {
                     }
                 }
             } else { // isSetBeaning
-                var bean = beans.computeIfAbsent(beanName, BeanProperty::new);
+                BeanProperty bean = beans.computeIfAbsent(beanName, BeanProperty::new);
                 // capture all possible setters for now, actual setter will be searched later
                 bean.setter = (NativeJavaMethod) entry.getValue();
             }
         }
 
         // process setter candidates
-        for (var bean : beans.values()) {
-            var setterCandidates = bean.setter;
+        for (BeanProperty bean : beans.values()) {
+            NativeJavaMethod setterCandidates = bean.setter;
             if (setterCandidates == null) {
                 continue;
             }
 
             MemberBox match;
-            var getter = bean.getter;
+            NativeJavaMethod getter = bean.getter;
             if (getter != null) {
-                var type = getter.methods[0].getReturnType();
+                TypeInfo type = getter.methods[0].getReturnType();
                 // We have a getter. Now, do we have a setter with matching type?
                 match = extractSetMethod(type, setterCandidates.methods, isStatic);
                 if (match != null) {

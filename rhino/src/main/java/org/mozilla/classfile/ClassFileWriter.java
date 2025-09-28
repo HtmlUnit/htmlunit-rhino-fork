@@ -9,7 +9,7 @@ package org.mozilla.classfile;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.StackWalker.Option;
+// HtmlUnit import java.lang.StackWalker.Option;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -4519,6 +4519,7 @@ public class ClassFileWriter {
 
     @SuppressWarnings("AndroidJdkLibsChecker")
     private static void printOrigin() {
+        /* HtmlUnit
         StackWalker walker = StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE);
         var callerFrame =
                 walker.walk(
@@ -4527,6 +4528,7 @@ public class ClassFileWriter {
                                         .findFirst());
         var f = callerFrame.orElseThrow();
         System.err.printf("%s:%d ", f.getDeclaringClass().getSimpleName(), f.getLineNumber());
+        HtmlUnit */
     }
 
     private static final int FileHeaderConstant = 0xCAFEBABE;
