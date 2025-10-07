@@ -60,24 +60,6 @@ public interface FactoryBase extends TypeInfoFactory {
         return new ParameterizedTypeInfoImpl(base, params);
     }
 
-    static Map<VariableTypeInfo, TypeInfo> transformMapping(
-            Map<VariableTypeInfo, TypeInfo> mapping, Map<VariableTypeInfo, TypeInfo> transformer) {
-        if (mapping.isEmpty()) {
-            return new HashMap<>();
-        } else if (mapping.size() == 1) {
-            Map.Entry<VariableTypeInfo, TypeInfo> entry = mapping.entrySet().iterator().next();
-
-            Map<VariableTypeInfo, TypeInfo> result = new HashMap<>();
-            result.put(entry.getKey(), entry.getValue().consolidate(transformer));
-            return result;
-        }
-        HashMap<VariableTypeInfo, TypeInfo> transformed = new HashMap<>(mapping);
-        for (Map.Entry<VariableTypeInfo, TypeInfo> entry : transformed.entrySet()) {
-            entry.setValue(entry.getValue().consolidate(transformer));
-        }
-        return transformed;
-    }
-
     /** Used by {@link #getConsolidationMapping(java.lang.Class)} */
     default Map<VariableTypeInfo, TypeInfo> computeConsolidationMapping(Class<?> type) {
         HashMap<VariableTypeInfo, TypeInfo> mapping = new HashMap<VariableTypeInfo, TypeInfo>();
@@ -109,9 +91,9 @@ public interface FactoryBase extends TypeInfoFactory {
         // then merge them together
         // Example: Ta -> Tb (from `superMapping`) will be transformed by Tb -> Te (from `mapping`),
         // forming Ta -> Te
-        HashMap<VariableTypeInfo, TypeInfo> merged = new HashMap<>(transformMapping(superMapping, mapping));
-        for (Map<VariableTypeInfo, TypeInfo> interfaceMapping : interfaceMappings) {
-            merged.putAll(transformMapping(interfaceMapping, mapping));
+        var merged = new HashMap<>(TypeInfoFactory.transformMapping(superMapping, mapping));
+        for (var interfaceMapping : interfaceMappings) {
+            merged.putAll(TypeInfoFactory.transformMapping(interfaceMapping, mapping));
         }
         merged.putAll(mapping);
 
