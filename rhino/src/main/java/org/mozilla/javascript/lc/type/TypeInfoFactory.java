@@ -173,20 +173,22 @@ public interface TypeInfoFactory extends Serializable {
             return types;
         }
 
-        var size = types.size();
+        int size = types.size();
 
         if (size == 0) {
-            return List.of();
+            // HtmlUnit return List.of();
+            return (List<TypeInfo>) Collections.EMPTY_LIST;
         }
 
         if (size == 1) {
-            var type = types.get(0);
-            var consolidated = type.consolidate(mapping);
-            return type == consolidated ? types : List.of(consolidated);
+            TypeInfo type = types.get(0);
+            TypeInfo consolidated = type.consolidate(mapping);
+            // HtmlUnit return type == consolidated ? types : List.of(consolidated);
+            return type == consolidated ? types : Collections.singletonList(consolidated);
         }
 
-        var consolidatedTypes = new ArrayList<TypeInfo>(types.size());
-        for (var type : types) {
+        ArrayList<TypeInfo> consolidatedTypes = new ArrayList<TypeInfo>(types.size());
+        for (TypeInfo type : types) {
             consolidatedTypes.add(type.consolidate(mapping));
         }
         return consolidatedTypes;
@@ -201,13 +203,17 @@ public interface TypeInfoFactory extends Serializable {
     static Map<VariableTypeInfo, TypeInfo> transformMapping(
             Map<VariableTypeInfo, TypeInfo> mapping, Map<VariableTypeInfo, TypeInfo> transformer) {
         if (mapping.isEmpty()) {
-            return Map.of();
+            // HtmlUnit return Map.of();
+            return new HashMap<>();
         } else if (mapping.size() == 1) {
-            var entry = mapping.entrySet().iterator().next();
-            return Map.of(entry.getKey(), entry.getValue().consolidate(transformer));
+            Map.Entry<VariableTypeInfo, TypeInfo> entry = mapping.entrySet().iterator().next();
+            // HtmlUnit return Map.of(entry.getKey(), entry.getValue().consolidate(transformer));
+            Map<VariableTypeInfo, TypeInfo> result = new HashMap<>();
+            result.put(entry.getKey(), entry.getValue().consolidate(transformer));
+            return result;
         }
-        var transformed = new HashMap<>(mapping);
-        for (var entry : transformed.entrySet()) {
+        HashMap<VariableTypeInfo, TypeInfo> transformed = new HashMap<>(mapping);
+        for (Map.Entry<VariableTypeInfo, TypeInfo> entry : transformed.entrySet()) {
             entry.setValue(entry.getValue().consolidate(transformer));
         }
         return transformed;

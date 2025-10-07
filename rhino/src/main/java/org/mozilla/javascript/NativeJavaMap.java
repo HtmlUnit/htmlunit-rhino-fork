@@ -41,7 +41,7 @@ public class NativeJavaMap extends NativeJavaObject {
         assert map instanceof Map;
         this.map = (Map<Object, Object>) map;
 
-        var typeFactory = TypeInfoFactory.getOrElse(scope, TypeInfoFactory.GLOBAL);
+        TypeInfoFactory typeFactory = TypeInfoFactory.getOrElse(scope, TypeInfoFactory.GLOBAL);
         this.keyType = typeFactory.consolidateType(MapTypeVariables.K, staticType);
         this.valueType = typeFactory.consolidateType(MapTypeVariables.V, staticType);
     }
@@ -66,7 +66,7 @@ public class NativeJavaMap extends NativeJavaObject {
     public boolean has(int index, Scriptable start) {
         Context cx = Context.getCurrentContext();
         if (cx != null && cx.hasFeature(Context.FEATURE_ENABLE_JAVA_MAP_ACCESS)) {
-            var key = Integer.valueOf(index);
+            Integer key = Integer.valueOf(index);
             if (map.containsKey(key)) {
                 return true;
             }
@@ -97,7 +97,7 @@ public class NativeJavaMap extends NativeJavaObject {
     public Object get(int index, Scriptable start) {
         Context cx = Context.getCurrentContext();
         if (cx != null && cx.hasFeature(Context.FEATURE_ENABLE_JAVA_MAP_ACCESS)) {
-            var key = Integer.valueOf(index);
+            Integer key = Integer.valueOf(index);
             if (map.containsKey(key)) {
                 return cx.getWrapFactory().wrap(cx, this, map.get(key), valueType);
             }

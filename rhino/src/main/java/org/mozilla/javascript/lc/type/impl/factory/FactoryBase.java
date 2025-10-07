@@ -91,8 +91,8 @@ public interface FactoryBase extends TypeInfoFactory {
         // then merge them together
         // Example: Ta -> Tb (from `superMapping`) will be transformed by Tb -> Te (from `mapping`),
         // forming Ta -> Te
-        var merged = new HashMap<>(TypeInfoFactory.transformMapping(superMapping, mapping));
-        for (var interfaceMapping : interfaceMappings) {
+        HashMap<VariableTypeInfo, TypeInfo> merged = new HashMap<>(TypeInfoFactory.transformMapping(superMapping, mapping));
+        for (Map<VariableTypeInfo, TypeInfo> interfaceMapping : interfaceMappings) {
             merged.putAll(TypeInfoFactory.transformMapping(interfaceMapping, mapping));
         }
         merged.putAll(mapping);

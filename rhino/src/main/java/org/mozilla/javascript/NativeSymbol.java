@@ -152,7 +152,7 @@ public class NativeSymbol extends ScriptableObject implements Symbol {
         }
 
         Map<String, SymbolKey> table = getGlobalMap();
-        for (var e : table.entrySet()) {
+        for (Map.Entry<String, SymbolKey> e : table.entrySet()) {
             if (e.getValue() == sym) {
                 return e.getKey();
             }

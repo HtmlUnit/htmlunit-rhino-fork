@@ -9,6 +9,7 @@ package org.mozilla.javascript;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -42,7 +43,7 @@ public class NativeJavaMethod extends BaseFunction {
 
     NativeJavaMethod(MemberBox method, String name) {
         this.functionName = name;
-        this.methods = new MemberBox[] {method};
+        this.methods = new MemberBox[]{method};
     }
 
     @Deprecated
@@ -142,9 +143,10 @@ public class NativeJavaMethod extends BaseFunction {
 
         MemberBox meth = methods[index];
 
-        Map<VariableTypeInfo, TypeInfo> mapping = Map.of();
+        // HtmlUnit Map<VariableTypeInfo, TypeInfo> mapping = Map.of();
+        Map<VariableTypeInfo, TypeInfo> mapping = new HashMap<>();
         if (thisObj instanceof NativeJavaObject) {
-            var staticType = ((NativeJavaObject) thisObj).staticType;
+            TypeInfo staticType = ((NativeJavaObject) thisObj).staticType;
             if (staticType instanceof ParameterizedTypeInfo) {
                 mapping =
                         ((ParameterizedTypeInfo) staticType)
@@ -180,8 +182,8 @@ public class NativeJavaMethod extends BaseFunction {
             printDebug("Calling ", meth, args);
         }
 
-        var returnValue = meth.invoke(javaObject, args);
-        var returnType = meth.getReturnType();
+        Object returnValue = meth.invoke(javaObject, args);
+        TypeInfo returnType = meth.getReturnType();
 
         if (debug) {
             Class<?> actualType = (returnValue == null) ? null : returnValue.getClass();
@@ -307,7 +309,7 @@ public class NativeJavaMethod extends BaseFunction {
                         // We want to call the derived class's method.
                         if (bestFit.isStatic()
                                 && bestFit.getDeclaringClass()
-                                        .isAssignableFrom(member.getDeclaringClass())) {
+                                .isAssignableFrom(member.getDeclaringClass())) {
                             // On some JVMs, Class.getMethods will return all
                             // static methods of the class hierarchy, even if
                             // a derived class's parameters match exactly.
@@ -387,13 +389,17 @@ public class NativeJavaMethod extends BaseFunction {
                 buf.toString());
     }
 
-    /** Types are equal */
+    /**
+     * Types are equal
+     */
     private static final int PREFERENCE_EQUAL = 0;
 
     private static final int PREFERENCE_FIRST_ARG = 1;
     private static final int PREFERENCE_SECOND_ARG = 2;
 
-    /** No clear "easy" conversion */
+    /**
+     * No clear "easy" conversion
+     */
     private static final int PREFERENCE_AMBIGUOUS = 3;
 
     /**

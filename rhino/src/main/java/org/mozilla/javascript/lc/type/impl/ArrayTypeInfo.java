@@ -75,8 +75,8 @@ public final class ArrayTypeInfo extends TypeInfoBase {
 
     @Override
     public TypeInfo consolidate(Map<VariableTypeInfo, TypeInfo> mapping) {
-        var component = this.component;
-        var consolidated = component.consolidate(mapping);
+        TypeInfo component = this.component;
+        TypeInfo consolidated = component.consolidate(mapping);
         return component == consolidated ? this : new ArrayTypeInfo(consolidated);
     }
 }

@@ -66,7 +66,7 @@ final class MemberBox implements Serializable {
         this.argTypeInfos = factory.createList(method.getGenericParameterTypes());
         this.returnTypeInfo = factory.create(method.getGenericReturnType());
 
-        var mapping = factory.getConsolidationMapping(parent);
+        Map<VariableTypeInfo, TypeInfo> mapping = factory.getConsolidationMapping(parent);
         this.argTypeInfos = TypeInfoFactory.consolidateAll(this.argTypeInfos, mapping);
         this.returnTypeInfo = returnTypeInfo.consolidate(mapping);
     }
@@ -371,7 +371,7 @@ final class MemberBox implements Serializable {
         List<TypeInfo> argTypes = getArgTypes();
         int argTypesLen = argTypes.size();
         int argLen = args.length;
-        final var shouldConsolidate = !mapping.isEmpty();
+        final boolean shouldConsolidate = !mapping.isEmpty();
 
         if (!this.vararg) {
             // fast path for getter
@@ -401,7 +401,7 @@ final class MemberBox implements Serializable {
         // marshall the explicit parameters
         Object[] wrappedArgs = new Object[argTypesLen];
         for (int i = 0; i < argTypesLen - 1; i++) {
-            var argType = argTypes.get(i);
+            TypeInfo argType = argTypes.get(i);
             if (shouldConsolidate) {
                 argType = argType.consolidate(mapping);
             }
@@ -426,11 +426,11 @@ final class MemberBox implements Serializable {
         }
 
         // marshall the variable parameters
-        var lastArgType = argTypes.get(argTypesLen - 1).getComponentType();
+        TypeInfo lastArgType = argTypes.get(argTypesLen - 1).getComponentType();
         if (shouldConsolidate) {
             lastArgType = lastArgType.consolidate(mapping);
         }
-        var varArgs = lastArgType.newArray(argLen - argTypesLen + 1);
+        Object varArgs = lastArgType.newArray(argLen - argTypesLen + 1);
         for (int i = 0, arrayLen = Array.getLength(varArgs); i < arrayLen; i++) {
             Array.set(varArgs, i, Context.jsToJava(args[argTypesLen - 1 + i], lastArgType));
         }

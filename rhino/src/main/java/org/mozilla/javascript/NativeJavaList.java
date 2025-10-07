@@ -59,7 +59,7 @@ public class NativeJavaList extends NativeJavaObject {
         assert list instanceof List;
         this.list = (List<Object>) list;
 
-        var typeFactory = TypeInfoFactory.getOrElse(scope, TypeInfoFactory.GLOBAL);
+        TypeInfoFactory typeFactory = TypeInfoFactory.getOrElse(scope, TypeInfoFactory.GLOBAL);
         this.elementType = typeFactory.consolidateType(ListTypeVariables.E, staticType);
     }
 
