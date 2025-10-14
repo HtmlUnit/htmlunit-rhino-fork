@@ -96,6 +96,7 @@ public class UnicodeProperties {
         map.put("Upper", UPPERCASE);
         map.put("White_Space", WHITE_SPACE);
         map.put("space", WHITE_SPACE);
+        PROPERTY_NAMES = map;
     }
 
     // Property Value Map for General Category (canonical names and aliases)
@@ -180,6 +181,7 @@ public class UnicodeProperties {
         map.put("Zp", PARAGRAPH_SEPARATOR);
         map.put("Space_Separator", SPACE_SEPARATOR);
         map.put("Zs", SPACE_SEPARATOR);
+        PROPERTY_VALUES = map;
     }
 
     /**
