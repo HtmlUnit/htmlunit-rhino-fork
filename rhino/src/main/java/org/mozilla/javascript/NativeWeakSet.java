@@ -66,7 +66,7 @@ public class NativeWeakSet extends ScriptableObject {
 
     private static Object js_add(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
         NativeWeakSet realThis = realThis(thisObj, "add");
-        var k = NativeMap.key(args);
+        Object k = NativeMap.key(args);
         return realThis.js_add(k);
     }
 
@@ -87,7 +87,7 @@ public class NativeWeakSet extends ScriptableObject {
     private static Object js_delete(
             Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
         NativeWeakSet realThis = realThis(thisObj, "add");
-        var arg = NativeMap.key(args);
+        Object arg = NativeMap.key(args);
         return realThis.js_delete(arg);
     }
 
@@ -100,7 +100,7 @@ public class NativeWeakSet extends ScriptableObject {
 
     private static Object js_has(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
         NativeWeakSet realThis = realThis(thisObj, "add");
-        var arg = NativeMap.key(args);
+        Object arg = NativeMap.key(args);
         return realThis.js_has(arg);
     }
 

@@ -416,7 +416,7 @@ public class NativePromise extends ScriptableObject {
         Object onFinally = args.length > 0 ? args[0] : Undefined.SCRIPTABLE_UNDEFINED;
         Object thenFinally = onFinally;
         Object catchFinally = onFinally;
-        var ctor =
+        Function ctor =
                 TopLevel.getBuiltinCtor(
                         cx, ScriptableObject.getTopLevelScope(scope), TopLevel.Builtins.Promise);
         Constructable constructor =
