@@ -4732,8 +4732,10 @@ public final class Interpreter extends Icode implements Evaluator {
     }
 
     private static void exitFrame(Context cx, CallFrame frame, Object throwable) {
+        // HtmlUnit
         frame.fnOrScript.defaultPut("caller", null);
         frame.fnOrScript.setArguments(null);
+        // end HtmlUnit
 
         if (frame.idata.itsNeedsActivation) {
             ScriptRuntime.exitActivationFunction(cx);

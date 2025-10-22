@@ -59,6 +59,7 @@ class Arguments extends IdScriptableObject {
         lengthObj = original.lengthObj;
         calleeObj = original.calleeObj;
     }
+    // end HtmlUnit
 
     @Override
     public String getClassName() {
@@ -87,6 +88,7 @@ class Arguments extends IdScriptableObject {
             putIntoActivation(index, value);
         }
         synchronized (this) {
+            // HtmlUnit if (args == activation.originalArgs) {
             if (activation != null && args == activation.originalArgs) {
                 args = args.clone();
             }
@@ -132,7 +134,9 @@ class Arguments extends IdScriptableObject {
         if (cx.isStrictMode()) {
             return false;
         }
+        // HtmlUnit
         if (activation == null) return false;
+        // end HtmlUnit
 
         NativeFunction f = activation.function;
 
@@ -449,6 +453,7 @@ class Arguments extends IdScriptableObject {
 
         // HtmlUnit
         static final ThrowTypeError callee = new ThrowTypeError("callee");
+        // end HtmlUnit
 
         private String propertyName;
 

@@ -19,6 +19,7 @@ final class InterpretedFunction extends NativeFunction implements Script {
 
     // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
     private Arguments arguments;
+    // end HtmlUnit
 
     private InterpretedFunction(InterpreterData idata, Object staticSecurityDomain) {
         this.idata = idata;
@@ -159,6 +160,7 @@ final class InterpretedFunction extends NativeFunction implements Script {
         return idata.argIsConst[index];
     }
 
+    // HtmlUnit
     void setArguments(final Arguments arguments) {
         if (arguments == null) {
             this.arguments = null;
@@ -192,6 +194,7 @@ final class InterpretedFunction extends NativeFunction implements Script {
             this.arguments = arguments;
         }
     }
+    // end HtmlUnit
 
     @Override
     // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
@@ -201,6 +204,7 @@ final class InterpretedFunction extends NativeFunction implements Script {
         }
         return super.get(name, start);
     }
+    // end HtmlUnit
 
     boolean hasFunctionNamed(String name) {
         for (int f = 0; f < idata.getFunctionCount(); f++) {
