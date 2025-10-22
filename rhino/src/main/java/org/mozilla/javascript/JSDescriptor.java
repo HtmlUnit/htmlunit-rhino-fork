@@ -2,6 +2,7 @@ package org.mozilla.javascript;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -210,7 +211,7 @@ public final class JSDescriptor<T extends ScriptOrFn<T>> implements Serializable
 
     public boolean hasFunctionNamed(String name) {
         for (int f = 0; f < getFunctionCount(); f++) {
-            var functionData = getFunction(f);
+            JSDescriptor<JSFunction> functionData = getFunction(f);
             if (!functionData.declaredAsFunctionExpression()
                     && name.equals(functionData.getFunctionName())) {
                 return false;
@@ -347,7 +348,7 @@ public final class JSDescriptor<T extends ScriptOrFn<T>> implements Serializable
                 paramAndVarNames[i] = paramAndVarNames[i].intern();
             }
 
-            var result =
+            JSDescriptor<T> result =
                     new JSDescriptor<T>(
                             code.build(),
                             constructor.build(),
@@ -382,7 +383,10 @@ public final class JSDescriptor<T extends ScriptOrFn<T>> implements Serializable
             result.nestedFunctions =
                     nestedFunctions.stream()
                             .map(x -> x.build(result, consumer))
-                            .collect(Collectors.toUnmodifiableList());
+                            .collect(Collectors.collectingAndThen(
+                                    Collectors.toList(),
+                                    Collections::unmodifiableList
+                            ));
             return result;
         }
 

@@ -252,7 +252,7 @@ public final class Interpreter extends Icode implements Evaluator {
                 int argShift,
                 int argCount,
                 Scriptable homeObject) {
-            var desc = fnOrScript.getDescriptor();
+            JSDescriptor<? extends ScriptOrFn<?>> desc = fnOrScript.getDescriptor();
             if (useActivation) {
                 // Copy args to new array to pass to enterActivationFunction
                 // or debuggerFrame.onEnter
@@ -565,7 +565,7 @@ public final class Interpreter extends Icode implements Evaluator {
             String rawSource,
             boolean returnFunction) {
         CodeGenerator<?> cgen = new CodeGenerator<>();
-        var itsData = cgen.compile(compilerEnv, tree, rawSource, returnFunction);
+        JSDescriptor<? extends ScriptOrFn<?>> itsData = cgen.compile(compilerEnv, tree, rawSource, returnFunction);
         return new CompilationResult(itsData, compilerEnv.homeObject());
     }
 
@@ -578,7 +578,7 @@ public final class Interpreter extends Icode implements Evaluator {
     @Override
     @SuppressWarnings("unchecked")
     public Script createScriptObject(Object bytecode, Object staticSecurityDomain) {
-        var compilerResult = (CompilationResult<JSScript>) bytecode;
+        CompilationResult<JSScript> compilerResult = (CompilationResult<JSScript>) bytecode;
         return JSFunction.createScript(
                 compilerResult.descriptor, compilerResult.homeObject, staticSecurityDomain);
     }
@@ -592,7 +592,7 @@ public final class Interpreter extends Icode implements Evaluator {
     @SuppressWarnings("unchecked")
     public Function createFunctionObject(
             Context cx, Scriptable scope, Object bytecode, Object staticSecurityDomain) {
-        var compilerResult = (CompilationResult<JSFunction>) bytecode;
+        CompilationResult<JSFunction> compilerResult = (CompilationResult<JSFunction>) bytecode;
         return JSFunction.createFunction(
                 cx,
                 scope,
@@ -1226,7 +1226,7 @@ public final class Interpreter extends Icode implements Evaluator {
     private static void initFunction(Context cx, Scriptable scope, JSDescriptor parent, int index) {
         JSFunction fn;
         fn = JSFunction.createFunction(cx, scope, parent, index, null);
-        var desc = fn.getDescriptor();
+        JSDescriptor<JSFunction> desc = fn.getDescriptor();
         ScriptRuntime.initFunction(cx, scope, fn, desc.getFunctionType(), parent.isEvalFunction());
     }
 
@@ -1239,7 +1239,7 @@ public final class Interpreter extends Icode implements Evaluator {
             Object[] args) {
         if (!ScriptRuntime.hasTopCall(cx)) Kit.codeBug();
 
-        var desc = ifun.getDescriptor();
+        JSDescriptor desc = ifun.getDescriptor();
 
         if (cx.interpreterSecurityDomain != desc.getSecurityDomain()) {
             Object savedDomain = cx.interpreterSecurityDomain;
@@ -4971,16 +4971,16 @@ public final class Interpreter extends Icode implements Evaluator {
     }
 
     private static JSFunction createClosure(Context cx, CallFrame frame, int index) {
-        var desc = frame.fnOrScript.getDescriptor().getFunction(index);
+        JSDescriptor<JSFunction> desc = frame.fnOrScript.getDescriptor().getFunction(index);
         boolean isArrow = desc.getFunctionType() == FunctionNode.ARROW_FUNCTION;
-        var homeObject = isArrow ? frame.fnOrScript.getHomeObject() : null;
+        Scriptable homeObject = isArrow ? frame.fnOrScript.getHomeObject() : null;
         JSFunction f = new JSFunction(cx, frame.scope, desc, frame.thisObj, homeObject);
         return f;
     }
 
     private static JSFunction createMethod(
             Context cx, CallFrame frame, int index, Scriptable homeObject) {
-        var desc = frame.fnOrScript.getDescriptor().getFunction(index);
+        JSDescriptor<JSFunction> desc = frame.fnOrScript.getDescriptor().getFunction(index);
         boolean isArrow = desc.getFunctionType() == FunctionNode.ARROW_FUNCTION;
         JSFunction f = new JSFunction(cx, frame.scope, desc, frame.thisObj, homeObject);
         return f;

@@ -3571,7 +3571,7 @@ public class ScriptRuntime {
             throw new JavaScriptException("Interpreter not present", filename, lineNumber);
         }
 
-        var homeObject = scope instanceof NativeCall ? ((NativeCall) scope).getHomeObject() : null;
+        Scriptable homeObject = scope instanceof NativeCall ? ((NativeCall) scope).getHomeObject() : null;
 
         // Compile with explicit interpreter instance to force interpreter
         // mode.
@@ -4912,7 +4912,7 @@ public class ScriptRuntime {
             boolean evalScript) {
         if (cx.topCallScope == null) throw new IllegalStateException();
 
-        var desc = execObj.getDescriptor();
+        JSDescriptor desc = execObj.getDescriptor();
 
         int varCount = desc.getParamAndVarCount();
         if (varCount != 0) {
