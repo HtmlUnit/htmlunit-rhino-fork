@@ -27,7 +27,7 @@ public class ScriptRuntimeES6 {
         return val;
     }
 
-    /** Registers the symbol <code>[Symbol.species]</code> on the given constructor function. */
+    /** Registers the symbol {@code [Symbol.species]} on the given constructor function. */
     public static void addSymbolSpecies(
             Context cx, Scriptable scope, ScriptableObject constructor) {
         ScriptableObject speciesDescriptor = (ScriptableObject) cx.newObject(scope);
@@ -41,11 +41,12 @@ public class ScriptRuntimeES6 {
                         "get [Symbol.species]",
                         0,
                         (Context lcx, Scriptable lscope, Scriptable thisObj, Object[] args) ->
-                                thisObj));
+                                thisObj,
+                        false));
         constructor.defineOwnProperty(cx, SymbolKey.SPECIES, speciesDescriptor, false);
     }
 
-    /** Registers the symbol <code>[Symbol.unscopables]</code> on the given constructor function. */
+    /** Registers the symbol {@code [Symbol.unscopables]} on the given constructor function. */
     public static void addSymbolUnscopables(
             Context cx, Scriptable scope, ScriptableObject constructor, LazilyLoadedCtor value) {
         constructor.addLazilyInitializedValue(

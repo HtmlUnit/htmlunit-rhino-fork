@@ -26,8 +26,8 @@ public class InterfaceAdapter {
      * Make glue object implementing interface cl that will call the supplied JS function when
      * called. Only interfaces were all methods have the same signature is supported.
      *
-     * @return The glue object or null if <code>cl</code> is not interface or has methods with
-     *     different signatures.
+     * @return The glue object or null if {@code cl} is not interface or has methods with different
+     *     signatures.
      */
     static Object create(Context cx, Class<?> cl, ScriptableObject object) {
         if (!cl.isInterface()) throw new IllegalArgumentException();
@@ -97,7 +97,7 @@ public class InterfaceAdapter {
                         // invocation handler.
                         if (method.getDeclaringClass() == Object.class) {
                             String methodName = method.getName();
-                            if (methodName.equals("equals")) {
+                            if ("equals".equals(methodName)) {
                                 Object other = args[0];
                                 // Note: we could compare a proxy and its wrapped function
                                 // as equal here but that would break symmetry of equal().
@@ -105,10 +105,10 @@ public class InterfaceAdapter {
                                 // in ScriptableObject (see NativeJavaObject.coerceType())
                                 return Boolean.valueOf(proxy == other);
                             }
-                            if (methodName.equals("hashCode")) {
+                            if ("hashCode".equals(methodName)) {
                                 return Integer.valueOf(target.hashCode());
                             }
-                            if (methodName.equals("toString")) {
+                            if ("toString".equals(methodName)) {
                                 return "Proxy[" + target.toString() + "]";
                             }
                         }
@@ -120,10 +120,7 @@ public class InterfaceAdapter {
             proxy = c.newInstance(handler);
         } catch (InvocationTargetException ex) {
             throw Context.throwAsScriptRuntimeEx(ex);
-        } catch (IllegalAccessException ex) {
-            // Should not happen
-            throw new IllegalStateException(ex);
-        } catch (InstantiationException ex) {
+        } catch (IllegalAccessException | InstantiationException ex) {
             // Should not happen
             throw new IllegalStateException(ex);
         }
@@ -137,9 +134,9 @@ public class InterfaceAdapter {
      * @return true, if the function
      */
     private static boolean isFunctionalMethodCandidate(Method method) {
-        if (method.getName().equals("equals")
-                || method.getName().equals("hashCode")
-                || method.getName().equals("toString")) {
+        if ("equals".equals(method.getName())
+                || "hashCode".equals(method.getName())
+                || "toString".equals(method.getName())) {
             // it should be safe to ignore them as there is also a special
             // case for these methods in VMBridge_jdk18.newInterfaceProxy
             return false;

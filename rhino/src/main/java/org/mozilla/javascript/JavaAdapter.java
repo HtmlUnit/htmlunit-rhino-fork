@@ -234,8 +234,7 @@ public final class JavaAdapter implements IdFunctionCall {
             Object delegee = cl.getField("delegee").get(javaObject);
             out.writeObject(delegee);
             return;
-        } catch (IllegalAccessException e) {
-        } catch (NoSuchFieldException e) {
+        } catch (IllegalAccessException | NoSuchFieldException e) {
         }
         throw new IOException();
     }
@@ -271,10 +270,10 @@ public final class JavaAdapter implements IdFunctionCall {
         Object[] ctorArgs = {factory, delegee, self};
         try {
             return adapterClass.getConstructor(ctorParms).newInstance(ctorArgs);
-        } catch (InstantiationException e) {
-        } catch (IllegalAccessException e) {
-        } catch (InvocationTargetException e) {
-        } catch (NoSuchMethodException e) {
+        } catch (InstantiationException
+                | IllegalAccessException
+                | InvocationTargetException
+                | NoSuchMethodException e) {
         }
 
         throw new ClassNotFoundException("adapter");
@@ -689,7 +688,7 @@ public final class JavaAdapter implements IdFunctionCall {
         cfw.add(ByteCode.PUTFIELD, adapterName, "self", "Lorg/mozilla/javascript/Scriptable;");
 
         cfw.add(ByteCode.RETURN);
-        cfw.stopMethod((short) 4); // 4: this + factory + delegee + self
+        cfw.stopMethod(4); // 4: this + factory + delegee + self
     }
 
     private static void generateEmptyCtor(
@@ -741,7 +740,7 @@ public final class JavaAdapter implements IdFunctionCall {
         cfw.add(ByteCode.PUTFIELD, adapterName, "self", "Lorg/mozilla/javascript/Scriptable;");
 
         cfw.add(ByteCode.RETURN);
-        cfw.stopMethod((short) 2); // this + delegee
+        cfw.stopMethod(2); // this + delegee
     }
 
     /**

@@ -18,9 +18,7 @@ public class Kit {
     public static Class<?> classOrNull(String className) {
         try {
             return Class.forName(className);
-        } catch (ClassNotFoundException ex) {
-        } catch (SecurityException ex) {
-        } catch (LinkageError ex) {
+        } catch (ClassNotFoundException | LinkageError | SecurityException ex) {
         } catch (IllegalArgumentException e) {
             // Can be thrown if name has characters that a class name
             // can not contain
@@ -32,9 +30,7 @@ public class Kit {
     public static Class<?> classOrNull(ClassLoader loader, String className) {
         try {
             return loader.loadClass(className);
-        } catch (ClassNotFoundException ex) {
-        } catch (SecurityException ex) {
-        } catch (LinkageError ex) {
+        } catch (ClassNotFoundException | LinkageError | SecurityException ex) {
         } catch (IllegalArgumentException e) {
             // Can be thrown if name has characters that a class name
             // can not contain
@@ -70,7 +66,7 @@ public class Kit {
     }
 
     /**
-     * If character <code>c</code> is a hexadecimal digit, return <code>accumulator</code> * 16 plus
+     * If character {@code c} is a hexadecimal digit, return {@code accumulator} * 16 plus
      * corresponding number. Otherwise return -1.
      */
     public static int xDigitToInt(int c, int accumulator) {
@@ -349,8 +345,8 @@ public class Kit {
 
     /**
      * Throws RuntimeException to indicate failed assertion. The function never returns and its
-     * return type is RuntimeException only to be able to write <code>throw Kit.codeBug()</code> if
-     * plain <code>Kit.codeBug()</code> triggers unreachable code error.
+     * return type is RuntimeException only to be able to write {@code throw Kit.codeBug()} if plain
+     * {@code Kit.codeBug()} triggers unreachable code error.
      */
     public static RuntimeException codeBug() throws RuntimeException {
         RuntimeException ex = new IllegalStateException("FAILED ASSERTION");
@@ -361,8 +357,8 @@ public class Kit {
 
     /**
      * Throws RuntimeException to indicate failed assertion. The function never returns and its
-     * return type is RuntimeException only to be able to write <code>throw Kit.codeBug()</code> if
-     * plain <code>Kit.codeBug()</code> triggers unreachable code error.
+     * return type is RuntimeException only to be able to write {@code throw Kit.codeBug()} if plain
+     * {@code Kit.codeBug()} triggers unreachable code error.
      */
     public static RuntimeException codeBug(String msg) throws RuntimeException {
         msg = "FAILED ASSERTION: " + msg;

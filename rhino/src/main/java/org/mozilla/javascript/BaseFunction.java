@@ -83,8 +83,7 @@ public class BaseFunction extends ScriptableObject implements Function {
             String name,
             int length,
             SerializableCallable target) {
-        constructor.definePrototypeMethod(
-                scope, name, length, null, target, DONTENUM, DONTENUM | READONLY);
+        constructor.definePrototypeMethod(scope, name, length, target);
     }
 
     private static void defKnownBuiltInOnProto(
@@ -127,7 +126,6 @@ public class BaseFunction extends ScriptableObject implements Function {
         proto.setPrototype(functionProto);
 
         Scriptable iterator = (Scriptable) ScriptableObject.getProperty(scope, "Iterator");
-        Object iteratorPrototype = ScriptableObject.getProperty(iterator, PROTOTYPE_PROPERTY_NAME);
         ScriptableObject.putProperty(
                 proto,
                 PROTOTYPE_PROPERTY_NAME,
@@ -340,8 +338,7 @@ public class BaseFunction extends ScriptableObject implements Function {
      * Gets the value returned by calling the typeof operator on this object.
      *
      * @see ScriptableObject#getTypeOf()
-     * @return "function" or "undefined" if {@link #avoidObjectDetection()} returns <code>true
-     *     </code>
+     * @return "function" or "undefined" if {@link #avoidObjectDetection()} returns {@code true}
      */
     @Override
     public String getTypeOf() {
@@ -554,12 +551,7 @@ public class BaseFunction extends ScriptableObject implements Function {
         }
 
         Scriptable result = createObject(cx, scope);
-        if (result != null) {
-            Object val = call(cx, scope, result, args);
-            if (val instanceof Scriptable) {
-                result = (Scriptable) val;
-            }
-        } else {
+        if (result == null) {
             Object val = call(cx, scope, null, args);
             if (!(val instanceof Scriptable)) {
                 // It is program error not to return Scriptable from
@@ -583,16 +575,21 @@ public class BaseFunction extends ScriptableObject implements Function {
                     result.setParentScope(parent);
                 }
             }
+        } else {
+            Object val = call(cx, scope, result, args);
+            if (val instanceof Scriptable) {
+                result = (Scriptable) val;
+            }
         }
         return result;
     }
 
     /**
      * Creates new script object. The default implementation of {@link #construct} uses this method
-     * to to get the value for <code>thisObj</code> argument when invoking {@link #call}. The method
-     * is allowed to return <code>null</code> to indicate that {@link #call} will create a new
-     * object itself. In this case {@link #construct} will set scope and prototype on the result
-     * {@link #call} unless they are already set.
+     * to to get the value for {@code thisObj} argument when invoking {@link #call}. The method is
+     * allowed to return {@code null} to indicate that {@link #call} will create a new object
+     * itself. In this case {@link #construct} will set scope and prototype on the result {@link
+     * #call} unless they are already set.
      */
     public Scriptable createObject(Context cx, Scriptable scope) {
         Scriptable newInstance = new NativeObject();
@@ -665,8 +662,7 @@ public class BaseFunction extends ScriptableObject implements Function {
     }
 
     protected boolean hasPrototypeProperty() {
-        return (prototypeProperty != null && prototypeProperty != UniqueTag.NOT_FOUND)
-                || this instanceof JSFunction;
+        return prototypeProperty != null && prototypeProperty != UniqueTag.NOT_FOUND;
     }
 
     public Object getPrototypeProperty() {

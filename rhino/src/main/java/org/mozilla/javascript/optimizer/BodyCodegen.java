@@ -82,7 +82,7 @@ class BodyCodegen {
         }
     }
 
-    // This creates a the user-facing function that returns a NativeGenerator
+    // This creates a user-facing function that returns a NativeGenerator
     // object.
     private void generateGenerator() {
         cfw.startMethod(
@@ -185,7 +185,7 @@ class BodyCodegen {
         newTargetLocal = 2;
         variableObjectLocal = 3;
         thisObjLocal = 4;
-        localsMax = (short) 5; // number of parms + "this"
+        localsMax = 5; // number of parms + "this"
         firstFreeLocal = 5;
 
         popvLocal = -1;
@@ -540,7 +540,7 @@ class BodyCodegen {
                     if (e.getKey().getType() == Token.FINALLY) {
                         FinallyReturnPoint ret = e.getValue();
                         // the finally will jump here
-                        cfw.markLabel(ret.tableLabel, (short) 1);
+                        cfw.markLabel(ret.tableLabel, 1);
 
                         // start generating a dispatch table
                         int startSwitch = cfw.addTableSwitch(0, ret.jsrPoints.size() - 1);
@@ -2948,7 +2948,7 @@ class BodyCodegen {
          * javascript catch and finally clauses.  */
 
         int startLabel = cfw.acquireLabel();
-        cfw.markLabel(startLabel, (short) 0);
+        cfw.markLabel(startLabel, 0);
 
         Node catchTarget = node.target;
         Node finallyTarget = node.getFinally();
@@ -3382,8 +3382,8 @@ class BodyCodegen {
     /**
      * Get a FINALLY node at a point in the IR.
      *
-     * <p>This is strongly dependent on the generated IR. If the node is a TARGET, it only check the
-     * next node to see if it is a FINALLY node.
+     * <p>This is strongly dependent on the generated IR. If the node is a TARGET, it only checks
+     * the next node to see if it is a FINALLY node.
      */
     private static Node getFinallyAtTarget(Node node) {
         if (node == null) {
@@ -3510,7 +3510,7 @@ class BodyCodegen {
 
     /**
      * Generate calls to ScriptRuntime.addInstructionCount to keep track of executed instructions
-     * and call <code>observeInstructionCount()</code> if a threshold is exceeded.<br>
+     * and call {@code observeInstructionCount()} if a threshold is exceeded.<br>
      * Calculates the count from getCurrentCodeOffset - savedCodeOffset
      */
     private void addInstructionCount() {
@@ -3523,7 +3523,7 @@ class BodyCodegen {
 
     /**
      * Generate calls to ScriptRuntime.addInstructionCount to keep track of executed instructions
-     * and call <code>observeInstructionCount()</code> if a threshold is exceeded.<br>
+     * and call {@code observeInstructionCount()} if a threshold is exceeded.<br>
      * Takes the count as a parameter - used to add monitoring to loops and other blocks that don't
      * have any ops - this allows for monitoring/killing of while(true) loops and such.
      */

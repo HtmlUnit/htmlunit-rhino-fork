@@ -172,8 +172,7 @@ public class NativeArray extends ScriptableObject implements List {
             String name,
             int length,
             SerializableCallable target) {
-        constructor.defineConstructorMethod(
-                scope, name, length, null, target, DONTENUM, DONTENUM | READONLY);
+        constructor.defineConstructorMethod(scope, name, length, target);
     }
 
     private static void defineMethodOnPrototype(
@@ -182,8 +181,7 @@ public class NativeArray extends ScriptableObject implements List {
             String name,
             int length,
             SerializableCallable target) {
-        constructor.definePrototypeMethod(
-                scope, name, length, null, target, DONTENUM, DONTENUM | READONLY);
+        constructor.definePrototypeMethod(scope, name, length, target);
     }
 
     private static void exposeMethodOnConstructor(
@@ -196,14 +194,11 @@ public class NativeArray extends ScriptableObject implements List {
                 scope,
                 name,
                 length,
-                null,
                 (cx, s, thisObj, args) -> {
                     Scriptable realThis = ScriptRuntime.toObject(cx, scope, args[0]);
                     Object[] realArgs = Arrays.copyOfRange(args, 1, args.length);
                     return target.call(cx, s, realThis, realArgs);
-                },
-                DONTENUM,
-                DONTENUM | READONLY);
+                });
     }
 
     static int getMaximumInitialCapacity() {
@@ -2574,16 +2569,16 @@ public class NativeArray extends ScriptableObject implements List {
      */
     private Object[] dense;
 
-    /** True if all numeric properties are stored in <code>dense</code>. */
+    /** True if all numeric properties are stored in {@code dense}. */
     private boolean denseOnly;
 
-    /** The maximum size of <code>dense</code> that will be allocated initially. */
+    /** The maximum size of {@code dense} that will be allocated initially. */
     private static int maximumInitialCapacity = 10000;
 
-    /** The default capacity for <code>dense</code>. */
+    /** The default capacity for {@code dense}. */
     private static final int DEFAULT_INITIAL_CAPACITY = 10;
 
-    /** The factor to grow <code>dense</code> by. */
+    /** The factor to grow {@code dense} by. */
     private static final double GROW_FACTOR = 1.5;
 
     private static final int MAX_PRE_GROW_SIZE = (int) (Integer.MAX_VALUE / GROW_FACTOR);
