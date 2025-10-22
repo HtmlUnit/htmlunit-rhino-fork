@@ -77,16 +77,14 @@ public final class NativeCall extends IdScriptableObject {
             }
         }
 
-        // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
-        // we have to disable this optimization to let our hack work
-        // HtmlUnit if (requiresArgumentObject) {
+        if (requiresArgumentObject) {
             // initialize "arguments" property but only if it was not overridden by
             // the parameter with the same name
             if (!super.has("arguments", this) && !isArrow) {
                 arguments = new Arguments(this);
                 defineProperty("arguments", arguments, PERMANENT);
             }
-        // HtmlUnit }
+        }
 
         if (paramAndVarCount != 0) {
             for (int i = paramCount; i < paramAndVarCount; ++i) {

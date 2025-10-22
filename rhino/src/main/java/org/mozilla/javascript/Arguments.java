@@ -48,19 +48,6 @@ class Arguments extends IdScriptableObject {
                 ScriptableObject.DONTENUM);
     }
 
-    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
-    public Arguments(final Arguments original) {
-        this.activation = original.activation;
-
-        setParentScope(original.getParentScope());
-        setPrototype(original.getPrototype());
-
-        args = original.args;
-        lengthObj = original.lengthObj;
-        calleeObj = original.calleeObj;
-    }
-    // end HtmlUnit
-
     @Override
     public String getClassName() {
         return FTAG;
@@ -88,8 +75,7 @@ class Arguments extends IdScriptableObject {
             putIntoActivation(index, value);
         }
         synchronized (this) {
-            // HtmlUnit if (args == activation.originalArgs) {
-            if (activation != null && args == activation.originalArgs) {
+            if (args == activation.originalArgs) {
                 args = args.clone();
             }
             args[index] = value;
@@ -134,9 +120,6 @@ class Arguments extends IdScriptableObject {
         if (cx.isStrictMode()) {
             return false;
         }
-        // HtmlUnit
-        if (activation == null) return false;
-        // end HtmlUnit
 
         NativeFunction f = activation.function;
 

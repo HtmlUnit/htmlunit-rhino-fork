@@ -17,10 +17,6 @@ final class InterpretedFunction extends NativeFunction implements Script {
     SecurityController securityController;
     Object securityDomain;
 
-    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
-    private Arguments arguments;
-    // end HtmlUnit
-
     private InterpretedFunction(InterpreterData idata, Object staticSecurityDomain) {
         this.idata = idata;
 
@@ -159,52 +155,6 @@ final class InterpretedFunction extends NativeFunction implements Script {
     protected boolean getParamOrVarConst(int index) {
         return idata.argIsConst[index];
     }
-
-    // HtmlUnit
-    void setArguments(final Arguments arguments) {
-        if (arguments == null) {
-            this.arguments = null;
-            return;
-        }
-
-        if (Context.getCurrentContext().hasFeature(Context.FEATURE_HTMLUNIT_FN_ARGUMENTS_IS_RO_VIEW)) {
-            this.arguments = new Arguments(arguments) {
-                @Override
-                public void put(int index, Scriptable start, Object value) {
-                    // ignore
-                }
-                
-                @Override
-                public void put(String name, Scriptable start, Object value) {
-                    // ignore
-                }
-
-                @Override
-                public void delete(int index) {
-                    // ignore
-                }
-                
-                @Override
-                public void delete(String name) {
-                    // ignore
-                }
-            };
-        }
-        else {
-            this.arguments = arguments;
-        }
-    }
-    // end HtmlUnit
-
-    @Override
-    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
-    public Object get(final String name, final Scriptable start) {
-        if (start == this && "arguments".equals(name)) {
-            return this.arguments;
-        }
-        return super.get(name, start);
-    }
-    // end HtmlUnit
 
     boolean hasFunctionNamed(String name) {
         for (int f = 0; f < idata.getFunctionCount(); f++) {
