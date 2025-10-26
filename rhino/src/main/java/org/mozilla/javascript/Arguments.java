@@ -17,7 +17,27 @@ package org.mozilla.javascript;
 class Arguments extends IdScriptableObject {
     private static final long serialVersionUID = 4275508002492040609L;
 
-    private static final String FTAG = "Arguments";
+    private static final String CLASS_NAME = "Arguments";
+
+    // Fields to hold caller, callee and length properties,
+    // where NOT_FOUND value tags deleted properties.
+    // In addition if callerObj == NULL_VALUE, it tags null for scripts, as
+    // initial callerObj == null means access to caller arguments available
+    // only in JS <= 1.3 scripts
+    // HtmlUnitprivate Object callerObj;
+    private Object calleeObj;
+    private Object lengthObj;
+
+    // HtmlUnit private int callerAttr = DONTENUM;
+    private int calleeAttr = DONTENUM;
+    private int lengthAttr = DONTENUM;
+
+    private NativeCall activation;
+
+    // Initially args holds activation.getOriginalArgs(), but any modification
+    // of its elements triggers creation of a copy. If its element holds NOT_FOUND,
+    // it indicates deleted index, in which case super class is queried.
+    private Object[] args;
 
     public Arguments(NativeCall activation) {
         this.activation = activation;
@@ -46,11 +66,32 @@ class Arguments extends IdScriptableObject {
                                 ScriptableObject.getTopLevelScope(parent), TopLevel.Builtins.Array)
                         .get("values", parent),
                 ScriptableObject.DONTENUM);
+
+        if (activation.isStrict) {
+            // ECMAScript2015
+            // 9.4.4.6 CreateUnmappedArgumentsObject(argumentsList)
+            //   8. Perform DefinePropertyOrThrow(obj, "caller", PropertyDescriptor {[[Get]]:
+            // %ThrowTypeError%,
+            //      [[Set]]: %ThrowTypeError%, [[Enumerable]]: false, [[Configurable]]: false}).
+            //   9. Perform DefinePropertyOrThrow(obj, "callee", PropertyDescriptor {[[Get]]:
+            // %ThrowTypeError%,
+            //      [[Set]]: %ThrowTypeError%, [[Enumerable]]: false, [[Configurable]]: false}).
+            /* HtmlUnit
+            setGetterOrSetter("caller", 0, new ThrowTypeError(parent, "caller"), true);
+            setGetterOrSetter("caller", 0, new ThrowTypeError(parent, "caller"), false);
+            callerObj = null;
+            */
+            setGetterOrSetter("callee", 0, new ThrowTypeError(parent, "callee"), true);
+            setGetterOrSetter("callee", 0, new ThrowTypeError(parent, "callee"), false);
+            setAttributes("caller", DONTENUM | PERMANENT);
+            setAttributes("callee", DONTENUM | PERMANENT);
+            calleeObj = null;
+        }
     }
 
     @Override
     public String getClassName() {
-        return FTAG;
+        return CLASS_NAME;
     }
 
     private Object arg(int index) {
@@ -405,32 +446,7 @@ class Arguments extends IdScriptableObject {
         return true;
     }
 
-    // ECMAScript2015
-    // 9.4.4.6 CreateUnmappedArgumentsObject(argumentsList)
-    //   8. Perform DefinePropertyOrThrow(obj, "caller", PropertyDescriptor {[[Get]]:
-    // %ThrowTypeError%,
-    //      [[Set]]: %ThrowTypeError%, [[Enumerable]]: false, [[Configurable]]: false}).
-    //   9. Perform DefinePropertyOrThrow(obj, "callee", PropertyDescriptor {[[Get]]:
-    // %ThrowTypeError%,
-    //      [[Set]]: %ThrowTypeError%, [[Enumerable]]: false, [[Configurable]]: false}).
-    void defineAttributesForStrictMode() {
-        Context cx = Context.getContext();
-        if (!cx.isStrictMode()) {
-            return;
-        }
-        /* HtmlUnit
-        setGetterOrSetter("caller", 0, new ThrowTypeError("caller"), true);
-        setGetterOrSetter("caller", 0, new ThrowTypeError("caller"), false);
-        setAttributes("caller", DONTENUM | PERMANENT);
-        callerObj = null;
-        */
-        setGetterOrSetter("callee", 0, ThrowTypeError.callee, true);
-        setGetterOrSetter("callee", 0, ThrowTypeError.callee, false);
-        setAttributes("callee", DONTENUM | PERMANENT);
-        calleeObj = null;
-    }
-
-    private static class ThrowTypeError extends BaseFunction {
+    private static final class ThrowTypeError extends BaseFunction {
         private static final long serialVersionUID = -744615873947395749L;
 
         // HtmlUnit
@@ -439,8 +455,19 @@ class Arguments extends IdScriptableObject {
 
         private String propertyName;
 
-        ThrowTypeError(String propertyName) {
+        ThrowTypeError(Scriptable scope, String propertyName) {
             this.propertyName = propertyName;
+            setPrototype(ScriptableObject.getFunctionPrototype(scope));
+
+            setAttributes("length", DONTENUM | PERMANENT | READONLY);
+            setAttributes("name", DONTENUM | PERMANENT | READONLY);
+
+            setAttributes("arity", DONTENUM);
+            delete("arity");
+            setAttributes("arguments", DONTENUM);
+            delete("arguments");
+
+            preventExtensions();
         }
 
         @Override
@@ -448,24 +475,4 @@ class Arguments extends IdScriptableObject {
             throw ScriptRuntime.typeErrorById("msg.arguments.not.access.strict", propertyName);
         }
     }
-
-    // Fields to hold caller, callee and length properties,
-    // where NOT_FOUND value tags deleted properties.
-    // In addition if callerObj == NULL_VALUE, it tags null for scripts, as
-    // initial callerObj == null means access to caller arguments available
-    // only in JS <= 1.3 scripts
-    /* HtmlUnit private Object callerObj; */
-    private Object calleeObj;
-    private Object lengthObj;
-
-    /* HtmlUnit private int callerAttr = DONTENUM; */
-    private int calleeAttr = DONTENUM;
-    private int lengthAttr = DONTENUM;
-
-    private NativeCall activation;
-
-    // Initially args holds activation.getOriginalArgs(), but any modification
-    // of its elements triggers creation of a copy. If its element holds NOT_FOUND,
-    // it indicates deleted index, in which case super class is queried.
-    private Object[] args;
 }

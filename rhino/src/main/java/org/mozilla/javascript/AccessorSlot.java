@@ -203,7 +203,7 @@ public class AccessorSlot extends Slot {
             if (target instanceof Function) {
                 Function t = (Function) target;
                 Context cx = Context.getContext();
-                return t.call(cx, t.getParentScope(), start, ScriptRuntime.emptyArgs);
+                return t.call(cx, t.getDeclarationScope(), start, ScriptRuntime.emptyArgs);
             }
             return Undefined.instance;
         }
@@ -286,7 +286,7 @@ public class AccessorSlot extends Slot {
             if (target instanceof Function) {
                 Function t = (Function) target;
                 Context cx = Context.getContext();
-                t.call(cx, t.getParentScope(), start, new Object[] {value});
+                t.call(cx, t.getDeclarationScope(), start, new Object[] {value});
             }
             return true;
         }
