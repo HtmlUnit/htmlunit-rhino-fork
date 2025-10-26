@@ -869,7 +869,7 @@ public abstract class ScriptableObject extends SlotMapOwner
         Context cx = Context.getCurrentContext();
         Object hasInstance = ScriptRuntime.getObjectElem(this, SymbolKey.HAS_INSTANCE, cx);
         if (hasInstance instanceof Function) {
-            var scope = ((Function) hasInstance).getDeclarationScope();
+            Scriptable scope = ((Function) hasInstance).getDeclarationScope();
             return ScriptRuntime.toBoolean(
                     ((Function) hasInstance).call(cx, scope, this, new Object[] {this}));
         }

@@ -107,14 +107,14 @@ class JavaMembers {
             return bean.getter.call(cx, scope, scope, ScriptRuntime.emptyArgs);
         }
 
-        var field = (NativeJavaField) member;
+        NativeJavaField field = (NativeJavaField) member;
         Object got;
         try {
             got = field.get(isStatic ? null : javaObject);
         } catch (Exception ex) {
             throw Context.throwAsScriptRuntimeEx(ex);
         }
-        var type = field.type();
+        TypeInfo type = field.type();
         if (scope instanceof NativeJavaObject) {
             type =
                     TypeInfoFactory.GLOBAL.consolidateType(
@@ -149,8 +149,8 @@ class JavaMembers {
                     scope,
                     new Object[] {value});
         } else if (member instanceof NativeJavaField) {
-            var field = (NativeJavaField) member;
-            var type = field.type();
+            NativeJavaField field = (NativeJavaField) member;
+            TypeInfo type = field.type();
             if (scope instanceof NativeJavaObject) {
                 type =
                         TypeInfoFactory.GLOBAL.consolidateType(
@@ -512,7 +512,7 @@ class JavaMembers {
                     fmht.put(name, fam);
                     ht.put(name, fam);
                 } else if (member instanceof NativeJavaField) {
-                    var oldField = (NativeJavaField) member;
+                    NativeJavaField oldField = (NativeJavaField) member;
                     // If this newly reflected field shadows an inherited field,
                     // then replace it. Otherwise, since access to the field
                     // would be ambiguous from Java, no field should be
@@ -700,7 +700,7 @@ class JavaMembers {
 
                 // walk up superclass chain and grab fields. No need to deal specially with
                 // interfaces, since they can't have fields
-                for (var c = cl; c != null; c = c.getSuperclass()) {
+                for (Class<?> c = cl; c != null; c = c.getSuperclass()) {
                     // get all declared fields in this class, make them
                     // accessible, and save
                     for (Field field : c.getDeclaredFields()) {

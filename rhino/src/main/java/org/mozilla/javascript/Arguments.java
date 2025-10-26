@@ -449,10 +449,6 @@ class Arguments extends IdScriptableObject {
     private static final class ThrowTypeError extends BaseFunction {
         private static final long serialVersionUID = -744615873947395749L;
 
-        // HtmlUnit
-        static final ThrowTypeError callee = new ThrowTypeError("callee");
-        // end HtmlUnit
-
         private String propertyName;
 
         ThrowTypeError(Scriptable scope, String propertyName) {
