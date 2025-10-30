@@ -79,11 +79,11 @@ class Arguments extends IdScriptableObject {
             /* HtmlUnit
             setGetterOrSetter("caller", 0, new ThrowTypeError(parent, "caller"), true);
             setGetterOrSetter("caller", 0, new ThrowTypeError(parent, "caller"), false);
+            setAttributes("caller", DONTENUM | PERMANENT);
             callerObj = null;
             */
             setGetterOrSetter("callee", 0, new ThrowTypeError(parent, "callee"), true);
             setGetterOrSetter("callee", 0, new ThrowTypeError(parent, "callee"), false);
-            setAttributes("caller", DONTENUM | PERMANENT);
             setAttributes("callee", DONTENUM | PERMANENT);
             calleeObj = null;
         }
@@ -116,7 +116,8 @@ class Arguments extends IdScriptableObject {
             putIntoActivation(index, value);
         }
         synchronized (this) {
-            if (args == activation.originalArgs) {
+            // HtmlUnit if (args == activation.originalArgs) {
+            if (activation != null && args == activation.originalArgs) {
                 args = args.clone();
             }
             args[index] = value;
@@ -161,6 +162,10 @@ class Arguments extends IdScriptableObject {
         if (cx.isStrictMode()) {
             return false;
         }
+        // HtmlUnit
+        if (activation == null) return false;
+        // end HtmlUnit
+
         JSFunction f = activation.function;
 
         // Check if default arguments are present
@@ -471,4 +476,17 @@ class Arguments extends IdScriptableObject {
             throw ScriptRuntime.typeErrorById("msg.arguments.not.access.strict", propertyName);
         }
     }
+
+    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
+    public Arguments(final Arguments original) {
+        this.activation = original.activation;
+
+        setParentScope(original.getParentScope());
+        setPrototype(original.getPrototype());
+
+        args = original.args;
+        lengthObj = original.lengthObj;
+        calleeObj = original.calleeObj;
+    }
+    // end HtmlUnit
 }

@@ -4766,6 +4766,22 @@ public final class Interpreter extends Icode implements Evaluator {
 
     private static void enterFrame(
             Context cx, CallFrame frame, Object[] args, boolean continuationRestart) {
+        // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
+        if (frame.fnOrScript instanceof JSFunction) {
+            JSFunction jsFunction = (JSFunction) frame.fnOrScript;
+            if (frame.parentFrame != null && !(frame.parentFrame.fnOrScript instanceof JSScript)) {
+                jsFunction.defaultPut("caller", frame.parentFrame.fnOrScript);
+                jsFunction.setAttributes("caller", ScriptableObject.DONTENUM);
+            }
+            if (frame.scope instanceof NativeCall) {
+                Object arguments = ScriptableObject.getProperty(frame.scope, "arguments");
+                if (arguments instanceof Arguments) {
+                    jsFunction.setArguments((Arguments) arguments);
+                }
+            }
+        }
+        // end HtmlUnit
+
         boolean usesActivation = frame.fnOrScript.getDescriptor().requiresActivationFrame();
         boolean isDebugged = frame.debuggerFrame != null;
         if (usesActivation || isDebugged) {
@@ -4812,6 +4828,14 @@ public final class Interpreter extends Icode implements Evaluator {
     }
 
     private static void exitFrame(Context cx, CallFrame frame, Object throwable) {
+        // HtmlUnit
+        if (frame.fnOrScript instanceof JSFunction) {
+            JSFunction jsFunction = (JSFunction) frame.fnOrScript;
+            jsFunction.defaultPut("caller", null);
+            jsFunction.setArguments(null);
+        }
+        // end HtmlUnit
+
         if (frame.fnOrScript.getDescriptor().requiresActivationFrame()) {
             ScriptRuntime.exitActivationFunction(cx);
         }
