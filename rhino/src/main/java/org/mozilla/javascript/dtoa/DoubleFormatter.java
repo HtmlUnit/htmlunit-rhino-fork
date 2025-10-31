@@ -186,7 +186,7 @@ public class DoubleFormatter {
             wpin    iff    w' = tp10 10^k in Rv
             See section 9.4 of [1].
              */
-            long sp10 = 10 * Math.multiplyHigh(s, 115_292_150_460_684_698L << 4);
+            long sp10 = 10 * Decimal.multiplyHigh(s, 115_292_150_460_684_698L << 4);
             long tp10 = sp10 + 10;
             boolean upin = vbl + out <= sp10 << 2;
             boolean wpin = (tp10 << 2) + out <= vbr;
@@ -221,9 +221,9 @@ public class DoubleFormatter {
     See section 9.10 and figure 5 of [1].
      */
     private static long rop(long g1, long g0, long cp) {
-        long x1 = Math.multiplyHigh(g0, cp);
+        long x1 = Decimal.multiplyHigh(g0, cp);
         long y0 = g1 * cp;
-        long y1 = Math.multiplyHigh(g1, cp);
+        long y1 = Decimal.multiplyHigh(g1, cp);
         long z = (y0 >>> 1) + x1;
         long vbp = y1 + (z >>> 63);
         return vbp | ((z & MASK_63) + MASK_63) >>> 63;
