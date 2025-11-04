@@ -390,12 +390,10 @@ public final class JSDescriptor<T extends ScriptOrFn<T>> implements Serializable
                             functionType);
             consumer.accept(result);
             result.nestedFunctions =
-                    nestedFunctions.stream()
-                            .map(x -> x.build(result, consumer))
-                            .collect(Collectors.collectingAndThen(
-                                    Collectors.toList(),
-                                    Collections::unmodifiableList
-                            ));
+                    Collections.unmodifiableList(
+                            nestedFunctions.stream()
+                                    .map(x -> x.build(result, consumer))
+                                    .collect(Collectors.toList()));
             return result;
         }
 
