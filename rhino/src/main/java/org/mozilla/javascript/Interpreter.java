@@ -4769,7 +4769,8 @@ public final class Interpreter extends Icode implements Evaluator {
         // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
         if (frame.fnOrScript instanceof JSFunction) {
             JSFunction jsFunction = (JSFunction) frame.fnOrScript;
-            if (frame.parentFrame != null && !(frame.parentFrame.fnOrScript instanceof JSScript)) {
+            if (!cx.isStrictMode()
+                    && frame.parentFrame != null && !(frame.parentFrame.fnOrScript instanceof JSScript)) {
                 jsFunction.defaultPut("caller", frame.parentFrame.fnOrScript);
                 jsFunction.setAttributes("caller", ScriptableObject.DONTENUM);
             }
