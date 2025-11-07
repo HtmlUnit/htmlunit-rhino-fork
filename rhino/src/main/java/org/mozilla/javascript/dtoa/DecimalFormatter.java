@@ -26,7 +26,7 @@ public class DecimalFormatter {
         if (negative) {
             val = Math.abs(v);
         }
-        var bd = new BigDecimal(val, new MathContext(fractionDigits + 1, RoundingMode.HALF_UP));
+        BigDecimal bd = new BigDecimal(val, new MathContext(fractionDigits + 1, RoundingMode.HALF_UP));
 
         int exponent;
         if (bd.scale() >= 0) {
@@ -51,7 +51,7 @@ public class DecimalFormatter {
         if (val >= MAX_FIXED) {
             return DoubleFormatter.toString(v);
         }
-        var bd = new BigDecimal(val, MathContext.UNLIMITED);
+        BigDecimal bd = new BigDecimal(val, MathContext.UNLIMITED);
         if (bd.scale() > fractionDigits) {
             bd = bd.setScale(fractionDigits, RoundingMode.HALF_UP);
         }
@@ -69,7 +69,7 @@ public class DecimalFormatter {
         } else {
             val = v;
         }
-        var bd = new BigDecimal(val, new MathContext(precision, RoundingMode.HALF_UP));
+        BigDecimal bd = new BigDecimal(val, new MathContext(precision, RoundingMode.HALF_UP));
 
         int scale = bd.scale();
         int numDigits = bd.precision();
@@ -111,7 +111,7 @@ public class DecimalFormatter {
         }
 
         // Room for digits, -, ., extra 0
-        var b = new StringBuilder(numDigits * 2 + 3);
+        StringBuilder b = new StringBuilder(numDigits * 2 + 3);
         if (negative) {
             b.append('-');
         }
