@@ -42,6 +42,7 @@ public class SlotMapTest {
         startingSize = this.obj.getMap().size();
     }
 
+    /* HtmlUnit
     @Parameterized.Parameters
     public static Collection<Object[]> mapTypes() {
         List<Supplier<SlotMap>> suppliers =
@@ -58,6 +59,7 @@ public class SlotMapTest {
                         () -> new ThreadSafeHashSlotMap());
         return suppliers.stream().map(i -> new Object[] {i}).collect(Collectors.toList());
     }
+    HtmlUnit */
 
     @Test
     public void empty() {

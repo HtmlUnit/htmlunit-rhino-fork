@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import org.junit.jupiter.api.Test;
 
 class SlotMapConcurrentLocksPromotionTest {
+    /* Htmlunit
     @Test
     public void singleThreadPromotionInCompute_emptyToOne() {
         ScriptableObject obj = new TestScriptableObject();
@@ -48,6 +49,7 @@ class SlotMapConcurrentLocksPromotionTest {
 
         assertArrayEquals(new Object[] {"a", "b"}, obj.getIds());
     }
+    HtmlUnit */
 
     @Test
     public void singleThreadPromotionInCompute_oneToTwo() {
