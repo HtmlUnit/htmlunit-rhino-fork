@@ -957,7 +957,7 @@ final class NativeProxy extends ScriptableObject implements Function {
                         "getOwnPropertyDescriptor trap has to return undefined or an object");
             }
 
-            var targetDesc =
+            DescriptorInfo targetDesc =
                     ScriptRuntime.isSymbol(id)
                             ? target.getOwnPropertyDescriptor(cx, id)
                             : target.getOwnPropertyDescriptor(cx, ScriptRuntime.toString(id));
@@ -986,7 +986,7 @@ final class NativeProxy extends ScriptableObject implements Function {
                                 getProperty(trapResult, "writable"),
                                 getProperty(trapResult, "configurable"));
 
-                var desc = ScriptableObject.buildDataDescriptor(value, attributes);
+                DescriptorInfo desc = ScriptableObject.buildDataDescriptor(value, attributes);
                 return desc;
             }
             return null;

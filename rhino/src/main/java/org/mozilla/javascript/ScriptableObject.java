@@ -1635,7 +1635,7 @@ public abstract class ScriptableObject extends SlotMapOwner
         DescriptorInfo[] descs = new DescriptorInfo[ids.length];
         for (int i = 0, len = ids.length; i < len; ++i) {
             Object descObj = ScriptRuntime.getObjectElem(props, ids[i], cx);
-            var desc = new DescriptorInfo(ensureScriptableObject(descObj));
+            DescriptorInfo desc = new DescriptorInfo(ensureScriptableObject(descObj));
             checkPropertyDefinition(desc);
             descs[i] = desc;
         }
@@ -2044,7 +2044,7 @@ public abstract class ScriptableObject extends SlotMapOwner
     }
 
     private void replaceLambdaAccessorSlot(Context cx, Object key, LambdaAccessorSlot newSlot) {
-        var newDesc = newSlot.buildPropertyDescriptor(cx);
+        DescriptorInfo newDesc = newSlot.buildPropertyDescriptor(cx);
         checkPropertyDefinition(newDesc);
         getMap().compute(
                         this,

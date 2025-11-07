@@ -918,7 +918,7 @@ public abstract class IdScriptableObject extends ScriptableObject implements IdF
 
     @Override
     protected DescriptorInfo getOwnPropertyDescriptor(Context cx, Object id) {
-        var desc = super.getOwnPropertyDescriptor(cx, id);
+        DescriptorInfo desc = super.getOwnPropertyDescriptor(cx, id);
         if (desc == null) {
             if (id instanceof String) {
                 return getBuiltInDataDescriptor((String) id);
@@ -954,7 +954,7 @@ public abstract class IdScriptableObject extends ScriptableObject implements IdF
     }
 
     private DescriptorInfo getBuiltInDataDescriptor(String name) {
-        var slot = getBuiltInSlot(name);
+        Slot slot = getBuiltInSlot(name);
         return slot == null ? null : new DescriptorInfo(slot.value, slot.getAttributes(), true);
     }
 
@@ -982,7 +982,7 @@ public abstract class IdScriptableObject extends ScriptableObject implements IdF
     }
 
     private DescriptorInfo getBuiltInDataDescriptor(Symbol key) {
-        var slot = getBuiltInSlot(key);
+        Slot slot = getBuiltInSlot(key);
         return slot == null ? null : new DescriptorInfo(slot.value, slot.getAttributes(), true);
     }
 

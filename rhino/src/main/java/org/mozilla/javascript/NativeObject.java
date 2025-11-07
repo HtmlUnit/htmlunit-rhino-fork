@@ -571,7 +571,7 @@ public class NativeObject extends ScriptableObject implements Map {
         Scriptable s = getCompatibleObject(cx, scope, arg);
         ScriptableObject obj = ensureScriptableObject(s);
         Object nameArg = args.length < 2 ? Undefined.instance : args[1];
-        var desc = obj.getOwnPropertyDescriptor(cx, nameArg);
+        DescriptorInfo desc = obj.getOwnPropertyDescriptor(cx, nameArg);
         return desc == null ? Undefined.instance : desc.toObject(scope);
     }
 
@@ -587,7 +587,7 @@ public class NativeObject extends ScriptableObject implements Map {
             ids = obj.getIds(map, true, true);
         }
         for (Object key : ids) {
-            var desc = obj.getOwnPropertyDescriptor(cx, key);
+            DescriptorInfo desc = obj.getOwnPropertyDescriptor(cx, key);
             if (desc == null) {
                 continue;
             } else if (key instanceof Symbol) {
@@ -607,7 +607,7 @@ public class NativeObject extends ScriptableObject implements Map {
         ScriptableObject obj = ensureScriptableObject(arg);
         Object name = args.length < 2 ? Undefined.instance : args[1];
         Object descArg = args.length < 3 ? Undefined.instance : args[2];
-        var desc = new DescriptorInfo(ensureScriptableObject(descArg));
+        DescriptorInfo desc = new DescriptorInfo(ensureScriptableObject(descArg));
         ScriptableObject.checkPropertyDefinition(desc);
         obj.defineOwnProperty(cx, name, desc);
         return obj;

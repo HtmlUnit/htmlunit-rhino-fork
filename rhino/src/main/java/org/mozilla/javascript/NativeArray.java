@@ -248,8 +248,8 @@ public class NativeArray extends ScriptableObject implements List {
 
         obj = (NativeObject) cx.newObject(scope);
 
-        var desc = ScriptableObject.buildDataDescriptor(true, EMPTY);
-        for (var k : UNSCOPABLES) {
+        DescriptorInfo desc = ScriptableObject.buildDataDescriptor(true, EMPTY);
+        for (String k : UNSCOPABLES) {
             obj.defineOwnProperty(cx, k, desc);
         }
         obj.setPrototype(null); // unscopables don't have any prototype
@@ -742,7 +742,7 @@ public class NativeArray extends ScriptableObject implements List {
                 callConstructorOrCreateArray(cx, scope, thisObj, args.length, true);
 
         if (cx.getLanguageVersion() >= Context.VERSION_ES6 && result instanceof ScriptableObject) {
-            var desc = ScriptableObject.buildDataDescriptor(null, EMPTY);
+            DescriptorInfo desc = ScriptableObject.buildDataDescriptor(null, EMPTY);
             for (int i = 0; i < args.length; i++) {
                 desc.value = args[i];
                 ((ScriptableObject) result).defineOwnProperty(cx, i, desc);

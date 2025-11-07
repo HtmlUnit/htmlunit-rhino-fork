@@ -275,8 +275,8 @@ public class ArrayLikeAbstractOperations {
     static void defineElem(Context cx, Scriptable target, long index, Object value) {
         if (!(target instanceof NativeArray && ((NativeArray) target).getDenseOnly())
                 && target instanceof ScriptableObject) {
-            var so = (ScriptableObject) target;
-            var desc = new DescriptorInfo(true, true, true, value);
+            ScriptableObject so = (ScriptableObject) target;
+            DescriptorInfo desc = new DescriptorInfo(true, true, true, value);
             so.defineOwnProperty(cx, index, desc);
             return;
         }

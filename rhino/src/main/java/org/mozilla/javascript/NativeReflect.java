@@ -229,11 +229,11 @@ final class NativeReflect extends ScriptableObject {
 
         if (args.length > 1) {
             if (ScriptRuntime.isSymbol(args[1])) {
-                var desc = target.getOwnPropertyDescriptor(cx, args[1]);
+                DescriptorInfo desc = target.getOwnPropertyDescriptor(cx, args[1]);
                 return desc == null ? Undefined.SCRIPTABLE_UNDEFINED : desc.toObject(scope);
             }
 
-            var desc = target.getOwnPropertyDescriptor(cx, ScriptRuntime.toString(args[1]));
+            DescriptorInfo desc = target.getOwnPropertyDescriptor(cx, ScriptRuntime.toString(args[1]));
             return desc == null ? Undefined.SCRIPTABLE_UNDEFINED : desc.toObject(scope);
         }
         return Undefined.SCRIPTABLE_UNDEFINED;
