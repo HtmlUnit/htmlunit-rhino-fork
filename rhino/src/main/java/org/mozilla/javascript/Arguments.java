@@ -14,23 +14,16 @@ package org.mozilla.javascript;
  * @see org.mozilla.javascript.NativeCall
  * @author Norris Boyd
  */
-class Arguments extends IdScriptableObject {
+class Arguments extends ScriptableObject {
     private static final long serialVersionUID = 4275508002492040609L;
 
     private static final String CLASS_NAME = "Arguments";
 
     // Fields to hold caller, callee and length properties,
     // where NOT_FOUND value tags deleted properties.
-    // In addition if callerObj == NULL_VALUE, it tags null for scripts, as
-    // initial callerObj == null means access to caller arguments available
-    // only in JS <= 1.3 scripts
-    // HtmlUnitprivate Object callerObj;
+    // In addition, the 'caller' arguments is only available in JS <= 1.3 scripts
     private Object calleeObj;
     private Object lengthObj;
-
-    // HtmlUnit private int callerAttr = DONTENUM;
-    private int calleeAttr = DONTENUM;
-    private int lengthAttr = DONTENUM;
 
     private NativeCall activation;
 
@@ -39,7 +32,7 @@ class Arguments extends IdScriptableObject {
     // it indicates deleted index, in which case super class is queried.
     private Object[] args;
 
-    public Arguments(NativeCall activation) {
+    public Arguments(NativeCall activation, Context cx) {
         this.activation = activation;
 
         Scriptable parent = activation.getParentScope();
@@ -52,20 +45,13 @@ class Arguments extends IdScriptableObject {
         JSFunction f = activation.function;
         calleeObj = f;
 
-        // HtmlUnit
-        // int version = f.getLanguageVersion();
-        // if (version <= Context.VERSION_1_3 && version != Context.VERSION_DEFAULT) {
-        //     callerObj = null;
-        // } else {
-        //     callerObj = NOT_FOUND;
-        // }
-
         defineProperty(
                 SymbolKey.ITERATOR,
                 TopLevel.getBuiltinPrototype(
                                 ScriptableObject.getTopLevelScope(parent), TopLevel.Builtins.Array)
                         .get("values", parent),
                 ScriptableObject.DONTENUM);
+        defineProperty("length", lengthObj, ScriptableObject.DONTENUM);
 
         if (activation.isStrict) {
             // ECMAScript2015
@@ -76,16 +62,28 @@ class Arguments extends IdScriptableObject {
             //   9. Perform DefinePropertyOrThrow(obj, "callee", PropertyDescriptor {[[Get]]:
             // %ThrowTypeError%,
             //      [[Set]]: %ThrowTypeError%, [[Enumerable]]: false, [[Configurable]]: false}).
-            /* HtmlUnit
-            setGetterOrSetter("caller", 0, new ThrowTypeError(parent, "caller"), true);
-            setGetterOrSetter("caller", 0, new ThrowTypeError(parent, "caller"), false);
-            setAttributes("caller", DONTENUM | PERMANENT);
-            callerObj = null;
-            */
-            setGetterOrSetter("callee", 0, new ThrowTypeError(parent, "callee"), true);
-            setGetterOrSetter("callee", 0, new ThrowTypeError(parent, "callee"), false);
-            setAttributes("callee", DONTENUM | PERMANENT);
+            BaseFunction typeErrorThrower = ScriptRuntime.typeErrorThrower(cx);
+            int version = cx.getLanguageVersion();
+            if (version <= Context.VERSION_1_8) {
+                setGetterOrSetter("caller", 0, typeErrorThrower, true);
+                setGetterOrSetter("caller", 0, typeErrorThrower, false);
+                setGetterOrSetter("callee", 0, typeErrorThrower, true);
+                setGetterOrSetter("callee", 0, typeErrorThrower, false);
+                setAttributes("caller", DONTENUM | PERMANENT);
+                setAttributes("callee", DONTENUM | PERMANENT);
+            } else {
+                setGetterOrSetter("callee", 0, typeErrorThrower, true);
+                setGetterOrSetter("callee", 0, typeErrorThrower, false);
+                setAttributes("callee", DONTENUM | PERMANENT);
+            }
             calleeObj = null;
+        } else {
+            defineProperty("callee", calleeObj, ScriptableObject.DONTENUM);
+
+            int version = cx.getLanguageVersion();
+            if (version <= Context.VERSION_1_3 && version != Context.VERSION_DEFAULT) {
+                defineProperty("caller", (Object) null, ScriptableObject.DONTENUM);
+            }
         }
     }
 
@@ -205,148 +203,16 @@ class Arguments extends IdScriptableObject {
     }
 
     @Override
+    public void put(Symbol key, Scriptable start, Object value) {
+        super.put(key, start, value);
+    }
+
+    @Override
     public void delete(int index) {
         if (0 <= index && index < args.length) {
             removeArg(index);
         }
         super.delete(index);
-    }
-
-    private static final int Id_callee = 1,
-            Id_length = 2,
-            /* HtmlUnit
-            Id_caller = 3,
-            MAX_INSTANCE_ID = Id_caller;
-            */
-            MAX_INSTANCE_ID = Id_length;
-
-    @Override
-    protected int getMaxInstanceId() {
-        return MAX_INSTANCE_ID;
-    }
-
-    @Override
-    protected int findInstanceIdInfo(String s) {
-        int id;
-        switch (s) {
-            case "callee":
-                id = Id_callee;
-                break;
-            case "length":
-                id = Id_length;
-                break;
-            /* HtmlUnit
-            case "caller":
-                id = Id_caller;
-                break;
-            */
-            default:
-                id = 0;
-                break;
-        }
-        Context cx = Context.getContext();
-        if (cx.isStrictMode()) {
-            if (id == Id_callee /* HtmlUnit || id == Id_caller */) {
-                return super.findInstanceIdInfo(s);
-            }
-        }
-
-        if (id == 0) return super.findInstanceIdInfo(s);
-
-        int attr;
-        switch (id) {
-            case Id_callee:
-                attr = calleeAttr;
-                break;
-            /* HtmlUnit
-            case Id_caller:
-                attr = callerAttr;
-                break;
-            */
-            case Id_length:
-                attr = lengthAttr;
-                break;
-            default:
-                throw new IllegalStateException();
-        }
-        return instanceIdInfo(attr, id);
-    }
-
-    @Override
-    protected String getInstanceIdName(int id) {
-        switch (id) {
-            case Id_callee:
-                return "callee";
-            case Id_length:
-                return "length";
-            /* HtmlUnit
-            case Id_caller:
-                return "caller";
-            */
-        }
-        return null;
-    }
-
-    @Override
-    protected Object getInstanceIdValue(int id) {
-        switch (id) {
-            case Id_callee:
-                return calleeObj;
-            case Id_length:
-                return lengthObj;
-            /* HtmlUnit
-            case Id_caller:
-                {
-                    Object value = callerObj;
-                    if (value == UniqueTag.NULL_VALUE) {
-                        value = null;
-                    } else if (value == null) {
-                        NativeCall caller = activation.parentActivationCall;
-                        if (caller != null) {
-                            value = caller.get("arguments", caller);
-                        }
-                    }
-                    return value;
-                }
-            */
-        }
-        return super.getInstanceIdValue(id);
-    }
-
-    @Override
-    protected void setInstanceIdValue(int id, Object value) {
-        switch (id) {
-            case Id_callee:
-                calleeObj = value;
-                return;
-            case Id_length:
-                lengthObj = value;
-                return;
-            /* HtmlUnit
-            case Id_caller:
-                callerObj = (value != null) ? value : UniqueTag.NULL_VALUE;
-                return;
-            */
-        }
-        super.setInstanceIdValue(id, value);
-    }
-
-    @Override
-    protected void setInstanceIdAttributes(int id, int attr) {
-        switch (id) {
-            case Id_callee:
-                calleeAttr = attr;
-                return;
-            case Id_length:
-                lengthAttr = attr;
-                return;
-            /* HtmlUnit
-            case Id_caller:
-                callerAttr = attr;
-                return;
-            */
-        }
-        super.setInstanceIdAttributes(id, attr);
     }
 
     @Override
@@ -451,29 +317,60 @@ class Arguments extends IdScriptableObject {
         return true;
     }
 
-    private static final class ThrowTypeError extends BaseFunction {
-        private static final long serialVersionUID = -744615873947395749L;
+    static final class ReadonlyArguments extends Arguments {
+        private boolean initialized;
 
-        private String propertyName;
-
-        ThrowTypeError(Scriptable scope, String propertyName) {
-            this.propertyName = propertyName;
-            setPrototype(ScriptableObject.getFunctionPrototype(scope));
-
-            setAttributes("length", DONTENUM | PERMANENT | READONLY);
-            setAttributes("name", DONTENUM | PERMANENT | READONLY);
-
-            setAttributes("arity", DONTENUM);
-            delete("arity");
-            setAttributes("arguments", DONTENUM);
-            delete("arguments");
-
-            preventExtensions();
+        public ReadonlyArguments(Arguments arguments, Context cx) {
+            super(arguments.activation, cx);
+            initialized = true;
         }
 
         @Override
-        public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-            throw ScriptRuntime.typeErrorById("msg.arguments.not.access.strict", propertyName);
+        public void put(int index, Scriptable start, Object value) {
+            if (initialized) {
+                return;
+            }
+            super.put(index, start, value);
+        }
+
+        @Override
+        public void put(String name, Scriptable start, Object value) {
+            if (initialized) {
+                return;
+            }
+            super.put(name, start, value);
+        }
+
+        @Override
+        public void put(Symbol key, Scriptable start, Object value) {
+            if (initialized) {
+                return;
+            }
+            super.put(key, start, value);
+        }
+
+        @Override
+        public void delete(int index) {
+            if (initialized) {
+                return;
+            }
+            super.delete(index);
+        }
+
+        @Override
+        public void delete(String name) {
+            if (initialized) {
+                return;
+            }
+            super.delete(name);
+        }
+
+        @Override
+        public void delete(Symbol key) {
+            if (initialized) {
+                return;
+            }
+            super.delete(key);
         }
     }
 
