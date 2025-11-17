@@ -233,8 +233,6 @@ public class NativeArray extends ScriptableObject implements List {
         return "Array";
     }
 
-    private static final int Id_length = 1, MAX_INSTANCE_ID = 1;
-
     @Override
     public void setPrototype(Scriptable p) {
         super.setPrototype(p);
@@ -931,7 +929,7 @@ public class NativeArray extends ScriptableObject implements List {
         }
     }
 
-    private static Object getElem(Context cx, Scriptable target, long index) {
+    static Object getElem(Context cx, Scriptable target, long index) {
         Object elem = getRawElem(target, index);
         return (elem != Scriptable.NOT_FOUND ? elem : Undefined.instance);
     }
