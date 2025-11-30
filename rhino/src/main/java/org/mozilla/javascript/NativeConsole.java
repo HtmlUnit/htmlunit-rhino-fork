@@ -100,7 +100,7 @@ public class NativeConsole extends ScriptableObject {
 
     private static Object js_trace(
             Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        var console = realThis(thisObj, "trace");
+        NativeConsole console = realThis(thisObj, "trace");
         ScriptStackElement[] stack = new EvaluatorException("[object Object]").getScriptStack();
         console.printer.print(cx, scope, Level.TRACE, args, stack);
         return Undefined.instance;
@@ -108,32 +108,32 @@ public class NativeConsole extends ScriptableObject {
 
     private static Object js_debug(
             Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        var console = realThis(thisObj, "debug");
+        NativeConsole console = realThis(thisObj, "debug");
         console.printer.print(cx, scope, Level.DEBUG, args, null);
         return Undefined.instance;
     }
 
     private static Object js_log(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        var console = realThis(thisObj, "log");
+        NativeConsole console = realThis(thisObj, "log");
         console.printer.print(cx, scope, Level.INFO, args, null);
         return Undefined.instance;
     }
 
     private static Object js_info(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        var console = realThis(thisObj, "info");
+        NativeConsole console = realThis(thisObj, "info");
         console.printer.print(cx, scope, Level.INFO, args, null);
         return Undefined.instance;
     }
 
     private static Object js_warn(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        var console = realThis(thisObj, "warn");
+        NativeConsole console = realThis(thisObj, "warn");
         console.printer.print(cx, scope, Level.WARN, args, null);
         return Undefined.instance;
     }
 
     private static Object js_error(
             Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        var console = realThis(thisObj, "error");
+        NativeConsole console = realThis(thisObj, "error");
         console.printer.print(cx, scope, Level.ERROR, args, null);
         return Undefined.instance;
     }
