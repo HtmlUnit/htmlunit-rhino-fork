@@ -36,9 +36,9 @@ public interface ParameterizedTypeInfo extends TypeInfo {
      * Extract consolidation mapping based on {@link #params()} and {@link
      * Class#getTypeParameters()}
      *
-     * <p>Example: {@code type} is {@code List<String>}, calling {@snippet :
-     * ((ParameterizedTypeInfo) type).extractConsolidationMapping(TypeInfoFactory.GLOBAL) } will
-     * give {@code E -> String}, where the {@code E} the type variable declared by {@link List}
+     * <p>Example: {@code type} is {@code List<String>}, calling {@code ((ParameterizedTypeInfo)
+     * type).extractConsolidationMapping(TypeInfoFactory.GLOBAL) } will give {@code E -> String},
+     * where the {@code E} the type variable declared by {@link List}
      */
     default Map<VariableTypeInfo, TypeInfo> extractConsolidationMapping(TypeInfoFactory factory) {
         TypeVariable<? extends Class<?>>[] typeVariables = this.asClass().getTypeParameters();
