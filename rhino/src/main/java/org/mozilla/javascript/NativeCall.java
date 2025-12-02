@@ -36,7 +36,6 @@ public final class NativeCall extends IdScriptableObject {
             boolean argsHasRest,
             boolean requiresArgumentObject) {
         this.function = function;
-        this.isArrow = isArrow;
 
         setParentScope(scope);
         // leave prototype null
@@ -75,15 +74,14 @@ public final class NativeCall extends IdScriptableObject {
             }
         }
 
+        // initialize "arguments" property but only if it was not overridden by
+        // the parameter with the same name
         // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
         // we have to disable this optimization to let our hack work
-        // HtmlUnit if (requiresArgumentObject) {
-            // initialize "arguments" property but only if it was not overridden by
-            // the parameter with the same name
-            if (!super.has("arguments", this) && !isArrow) {
-                arguments = new Arguments(this, cx);
-                defineProperty("arguments", arguments, PERMANENT);
-            }
+        // HtmlUnit if (requiresArgumentObject && !isArrow && !super.has("arguments", this)) {
+        if (!isArrow && !super.has("arguments", this)) {
+            defineProperty("arguments", new Arguments(this, cx), PERMANENT);
+        }
         // HtmlUnit }
 
         if (paramAndVarCount != 0) {
@@ -151,8 +149,6 @@ public final class NativeCall extends IdScriptableObject {
     JSFunction function;
     Object[] originalArgs;
     boolean isStrict;
-    private Arguments arguments;
-    boolean isArrow;
 
     transient NativeCall parentActivationCall;
 }
