@@ -657,12 +657,13 @@ public final class IRFactory {
             /* Process simple default parameters */
             List<Object> defaultParams = fn.getDefaultParams();
             if (defaultParams != null) {
+                Node paramInitBlock = null;
                 for (int i = defaultParams.size() - 1; i > 0; ) {
                     if (defaultParams.get(i) instanceof AstNode
                             && defaultParams.get(i - 1) instanceof String) {
                         AstNode rhs = (AstNode) defaultParams.get(i);
                         String name = (String) defaultParams.get(i - 1);
-                        body.addChildToFront(
+                        Node paramInit =
                                 createIf(
                                         createBinary(
                                                 Token.SHEQ,
@@ -678,9 +679,20 @@ public final class IRFactory {
                                                 body.getColumn()),
                                         null,
                                         body.getLineno(),
-                                        body.getColumn()));
+                                        body.getColumn());
+                        if (fn.isGenerator()) {
+                            if (paramInitBlock == null) {
+                                paramInitBlock = new Node(Token.BLOCK);
+                            }
+                            paramInitBlock.addChildToFront(paramInit);
+                        } else {
+                            body.addChildToFront(paramInit);
+                        }
                     }
                     i -= 2;
+                }
+                if (fn.isGenerator() && paramInitBlock != null) {
+                    fn.setGeneratorParamInitBlock(paramInitBlock);
                 }
             }
 
@@ -1167,8 +1179,15 @@ public final class IRFactory {
         Scope block = Scope.splitScope(node);
         block.setLineColumnNumber(node.getLineno(), node.getColumn());
         block.addChildToBack(node);
+        node.setParentScope(block);
 
-        parser.pushScope(node);
+        // Can't use pushScope/popScope here since splitScope moves the symbol table
+        // We set currentScope to 'node' (not 'block') so nested scopes can be pushed,
+        // since their parent pointers were set to 'node' during parsing. Variable resolution
+        // works correctly because it walks up the parentScope chain, where node.parentScope =
+        // block.
+        Scope savedScope = parser.currentScope;
+        parser.currentScope = node;
         try {
             Node switchExpr = transform(node.getExpression());
             node.addChildToBack(switchExpr);
@@ -1193,7 +1212,7 @@ public final class IRFactory {
             closeSwitch(block);
             return block;
         } finally {
-            parser.popScope();
+            parser.currentScope = savedScope;
         }
     }
 
