@@ -522,9 +522,9 @@ public final class Interpreter extends Icode implements Evaluator {
         }
 
         private static Map<String, Integer> buildOffsets(CallFrame frame) {
-            var desc = frame.fnOrScript.getDescriptor();
+            JSDescriptor<? extends ScriptOrFn<?>> desc = frame.fnOrScript.getDescriptor();
             int varCount = desc.getParamAndVarCount();
-            var map = new HashMap<String, Integer>();
+            HashMap<String, Integer> map = new HashMap<String, Integer>();
             for (int i = 0; i < varCount; i++) {
                 map.put(desc.getParamOrVarName(i), i);
             }
