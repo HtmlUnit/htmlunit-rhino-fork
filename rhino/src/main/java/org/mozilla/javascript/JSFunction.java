@@ -223,24 +223,4 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
         JSFunction f = new JSFunction(cx, scope, desc, null, homeObject);
         return f;
     }
-
-    // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
-    private Arguments arguments;
-    void setArguments(final Arguments arguments, final Context cx) {
-        if (arguments == null) {
-            this.arguments = null;
-            return;
-        }
-
-        this.arguments = new Arguments.ReadonlyArguments(arguments, cx);
-    }
-
-    @Override
-    public Object get(final String name, final Scriptable start) {
-        if (start == this && "arguments".equals(name)) {
-            return this.arguments;
-        }
-        return super.get(name, start);
-    }
-    // end HtmlUnit
 }

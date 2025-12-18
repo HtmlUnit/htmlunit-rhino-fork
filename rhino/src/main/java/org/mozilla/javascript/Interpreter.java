@@ -4882,12 +4882,6 @@ public final class Interpreter extends Icode implements Evaluator {
                 jsFunction.defaultPut("caller", frame.parentFrame.fnOrScript);
                 jsFunction.setAttributes("caller", ScriptableObject.DONTENUM);
             }
-            if (frame.scope instanceof NativeCall) {
-                Object arguments = ScriptableObject.getProperty(frame.scope, "arguments");
-                if (arguments instanceof Arguments) {
-                    jsFunction.setArguments((Arguments) arguments, cx);
-                }
-            }
         }
         // end HtmlUnit
 
@@ -4938,7 +4932,6 @@ public final class Interpreter extends Icode implements Evaluator {
         if (frame.fnOrScript instanceof JSFunction) {
             JSFunction jsFunction = (JSFunction) frame.fnOrScript;
             jsFunction.defaultPut("caller", null);
-            jsFunction.setArguments(null, cx);
         }
         // end HtmlUnit
 
