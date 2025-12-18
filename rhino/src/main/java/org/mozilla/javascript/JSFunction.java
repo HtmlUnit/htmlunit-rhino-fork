@@ -1,6 +1,8 @@
 package org.mozilla.javascript;
 
 import java.util.EnumSet;
+
+import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.debug.DebuggableScript;
 
 /**
@@ -223,4 +225,27 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
         JSFunction f = new JSFunction(cx, scope, desc, null, homeObject);
         return f;
     }
+
+    // HtmlUnit
+    Object callerObj;
+
+    @Override
+    Object getCaller() {
+        if (isStrict() || getDescriptor().getFunctionType() == FunctionNode.ARROW_FUNCTION) {
+            throw ScriptRuntime.typeErrorById("msg.op.not.allowed");
+        }
+        return callerObj;
+    }
+
+    void setCaller(Object caller) {
+        if (isStrict()) {
+            throw ScriptRuntime.typeErrorById("msg.op.not.allowed");
+        }
+    }
+
+
+    void setCallerObj(Object caller) {
+        callerObj = caller;
+    }
+    // HtmlUnit
 }

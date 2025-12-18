@@ -4879,8 +4879,7 @@ public final class Interpreter extends Icode implements Evaluator {
             JSFunction jsFunction = (JSFunction) frame.fnOrScript;
             if (!(cx.isStrictMode() || jsFunction.isStrict())
                     && frame.parentFrame != null && !(frame.parentFrame.fnOrScript instanceof JSScript)) {
-                jsFunction.defaultPut("caller", frame.parentFrame.fnOrScript);
-                jsFunction.setAttributes("caller", ScriptableObject.DONTENUM);
+                jsFunction.setCallerObj(frame.parentFrame.fnOrScript);
             }
         }
         // end HtmlUnit
@@ -4931,7 +4930,7 @@ public final class Interpreter extends Icode implements Evaluator {
         // HtmlUnit
         if (frame.fnOrScript instanceof JSFunction) {
             JSFunction jsFunction = (JSFunction) frame.fnOrScript;
-            jsFunction.defaultPut("caller", null);
+            jsFunction.setCallerObj(null);
         }
         // end HtmlUnit
 

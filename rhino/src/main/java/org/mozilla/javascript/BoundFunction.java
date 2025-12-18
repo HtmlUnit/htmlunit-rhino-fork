@@ -40,7 +40,7 @@ public class BoundFunction extends BaseFunction {
         Function thrower = ScriptRuntime.typeErrorThrower(cx);
         DescriptorInfo throwing = new DescriptorInfo(false, NOT_FOUND, false, thrower, thrower, NOT_FOUND);
 
-        defineOwnProperty(cx, "caller", throwing, false);
+        // HtmlUnit defineOwnProperty(cx, "caller", throwing, false);
         if (cx.getLanguageVersion() < Context.VERSION_ES6) {
             defineOwnProperty(cx, "arguments", throwing, false);
         }

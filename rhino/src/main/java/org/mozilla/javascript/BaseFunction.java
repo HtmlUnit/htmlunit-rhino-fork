@@ -77,6 +77,14 @@ public class BaseFunction extends ScriptableObject implements Function {
                     BaseFunction::js_protoArgumentsGetter,
                     BaseFunction::js_protoArgumentsSetter,
                     DONTENUM | READONLY);
+            // HtmlUnit
+            ctor.definePrototypeProperty(
+                    cx,
+                    "caller",
+                    BaseFunction::js_protoCallerGetter,
+                    BaseFunction::js_protoCallerSetter,
+                    DONTENUM | READONLY);
+            // HtmlUnit
         }
 
         ScriptableObject.defineProperty(scope, FUNCTION_CLASS, ctor, DONTENUM);
@@ -651,6 +659,24 @@ public class BaseFunction extends ScriptableObject implements Function {
     private static void js_protoArgumentsSetter(Scriptable thisObj, Object value) {
         LambdaConstructor.convertThisObject(thisObj, BaseFunction.class).setArguments(value);
     }
+
+    // HtmlUnit
+    private static Object js_protoCallerGetter(Scriptable thisObj) {
+        return LambdaConstructor.convertThisObject(thisObj, BaseFunction.class).getCaller();
+    }
+
+    private static void js_protoCallerSetter(Scriptable thisObj, Object value) {
+        LambdaConstructor.convertThisObject(thisObj, BaseFunction.class).setCaller(value);
+    }
+
+    Object getCaller() {
+        throw ScriptRuntime.typeErrorById("msg.op.not.allowed");
+    }
+
+    void setCaller(Object caller) {
+        throw ScriptRuntime.typeErrorById("msg.op.not.allowed");
+    }
+    // HtmlUnit
 
     public String getFunctionName() {
         return "";
