@@ -66,7 +66,7 @@ final class MemberBox implements Serializable {
         this.argTypeInfos = factory.createList(method.getGenericParameterTypes());
         this.returnTypeInfo = factory.create(method.getGenericReturnType());
 
-        Map<VariableTypeInfo, TypeInfo> mapping = factory.getConsolidationMapping(parent);
+        var mapping = factory.getConsolidationMapping(parent);
         this.argTypeInfos = TypeInfoFactory.consolidateAll(this.argTypeInfos, mapping);
         this.returnTypeInfo = returnTypeInfo.consolidate(mapping);
     }
@@ -134,7 +134,7 @@ final class MemberBox implements Serializable {
     }
 
     public NullabilityDetector.NullabilityAccessor getArgNullability() {
-        NullabilityDetector.NullabilityAccessor got = this.argNullability;
+        var got = this.argNullability;
         if (got == null) {
             // synchronization is optional, because `getParameterNullability(...)` will always
             // give `NullabilityAccessor` with same behaviour, which is because arg nullability
@@ -190,12 +190,12 @@ final class MemberBox implements Serializable {
     }
 
     boolean isSameGetterFunction(Object function) {
-        Object f = asGetterFunction == null ? Undefined.instance : asGetterFunction;
+        var f = asGetterFunction == null ? Undefined.instance : asGetterFunction;
         return ScriptRuntime.shallowEq(function, f);
     }
 
     boolean isSameSetterFunction(Object function) {
-        Object f = asSetterFunction == null ? Undefined.instance : asSetterFunction;
+        var f = asSetterFunction == null ? Undefined.instance : asSetterFunction;
         return ScriptRuntime.shallowEq(function, f);
     }
 
@@ -368,10 +368,10 @@ final class MemberBox implements Serializable {
     }
 
     Object[] wrapArgsInternal(Object[] args, Map<VariableTypeInfo, TypeInfo> mapping) {
-        List<TypeInfo> argTypes = getArgTypes();
-        int argTypesLen = argTypes.size();
-        int argLen = args.length;
-        final boolean shouldConsolidate = !mapping.isEmpty();
+        var argTypes = getArgTypes();
+        var argTypesLen = argTypes.size();
+        var argLen = args.length;
+        final var shouldConsolidate = !mapping.isEmpty();
 
         if (!this.vararg) {
             // fast path for getter
@@ -379,15 +379,15 @@ final class MemberBox implements Serializable {
                 return args;
             }
 
-            Object[] wrappedArgs = args;
+            var wrappedArgs = args;
             for (int i = 0; i < argLen; i++) {
-                Object arg = args[i];
-                TypeInfo argType = argTypes.get(i);
+                var arg = args[i];
+                var argType = argTypes.get(i);
                 if (shouldConsolidate) {
                     argType = argType.consolidate(mapping);
                 }
 
-                Object coerced = Context.jsToJava(arg, argType);
+                var coerced = Context.jsToJava(arg, argType);
                 if (coerced != arg) {
                     if (wrappedArgs == args) {
                         wrappedArgs = args.clone();
@@ -399,9 +399,9 @@ final class MemberBox implements Serializable {
         }
 
         // marshall the explicit parameters
-        Object[] wrappedArgs = new Object[argTypesLen];
+        var wrappedArgs = new Object[argTypesLen];
         for (int i = 0; i < argTypesLen - 1; i++) {
-            TypeInfo argType = argTypes.get(i);
+            var argType = argTypes.get(i);
             if (shouldConsolidate) {
                 argType = argType.consolidate(mapping);
             }
@@ -411,8 +411,8 @@ final class MemberBox implements Serializable {
         // Handle special situation where a single variable parameter
         // is given, and it is a Java or ECMA array or is null.
         if (argLen == argTypesLen) {
-            Object lastArg = args[argLen - 1];
-            TypeInfo lastArgType = argTypes.get(argTypesLen - 1);
+            var lastArg = args[argLen - 1];
+            var lastArgType = argTypes.get(argTypesLen - 1);
             if (shouldConsolidate) {
                 lastArgType = lastArgType.consolidate(mapping);
             }
@@ -426,11 +426,11 @@ final class MemberBox implements Serializable {
         }
 
         // marshall the variable parameters
-        TypeInfo lastArgType = argTypes.get(argTypesLen - 1).getComponentType();
+        var lastArgType = argTypes.get(argTypesLen - 1).getComponentType();
         if (shouldConsolidate) {
             lastArgType = lastArgType.consolidate(mapping);
         }
-        Object varArgs = lastArgType.newArray(argLen - argTypesLen + 1);
+        var varArgs = lastArgType.newArray(argLen - argTypesLen + 1);
         for (int i = 0, arrayLen = Array.getLength(varArgs); i < arrayLen; i++) {
             Array.set(varArgs, i, Context.jsToJava(args[argTypesLen - 1 + i], lastArgType));
         }

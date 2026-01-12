@@ -20,7 +20,6 @@ import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -100,21 +99,21 @@ class JavaMembers {
         Context cx = Context.getContext();
 
         if (member instanceof BeanProperty) {
-            BeanProperty bean = (BeanProperty) member;
+            var bean = (BeanProperty) member;
             if (bean.getter == null) {
                 return Scriptable.NOT_FOUND;
             }
             return bean.getter.call(cx, scope, scope, ScriptRuntime.emptyArgs);
         }
 
-        NativeJavaField field = (NativeJavaField) member;
+        var field = (NativeJavaField) member;
         Object got;
         try {
             got = field.get(isStatic ? null : javaObject);
         } catch (Exception ex) {
             throw Context.throwAsScriptRuntimeEx(ex);
         }
-        TypeInfo type = field.type();
+        var type = field.type();
         if (scope instanceof NativeJavaObject) {
             type =
                     TypeInfoFactory.GLOBAL.consolidateType(
@@ -149,8 +148,8 @@ class JavaMembers {
                     scope,
                     new Object[] {value});
         } else if (member instanceof NativeJavaField) {
-            NativeJavaField field = (NativeJavaField) member;
-            TypeInfo type = field.type();
+            var field = (NativeJavaField) member;
+            var type = field.type();
             if (scope instanceof NativeJavaObject) {
                 type =
                         TypeInfoFactory.GLOBAL.consolidateType(
@@ -207,10 +206,10 @@ class JavaMembers {
             return "()";
         }
 
-        StringBuilder builder = new StringBuilder();
+        var builder = new StringBuilder();
 
         builder.append('(');
-        Iterator<TypeInfo> iter = argTypes.iterator();
+        var iter = argTypes.iterator();
         if (iter.hasNext()) {
             builder.append(javaSignature(iter.next().asClass()));
             while (iter.hasNext()) {
@@ -428,7 +427,7 @@ class JavaMembers {
         // We reflect methods first, because we want overloaded field/method
         // names to be allocated to the NativeJavaMethod before the field
         // gets in the way.
-        TypeInfoFactory typeFactory = TypeInfoFactory.get(scope);
+        var typeFactory = TypeInfoFactory.get(scope);
 
         Method[] methods = discoverAccessibleMethods(cl, includeProtected, includePrivate);
         for (Method method : methods) {
@@ -512,7 +511,7 @@ class JavaMembers {
                     fmht.put(name, fam);
                     ht.put(name, fam);
                 } else if (member instanceof NativeJavaField) {
-                    NativeJavaField oldField = (NativeJavaField) member;
+                    var oldField = (NativeJavaField) member;
                     // If this newly reflected field shadows an inherited field,
                     // then replace it. Otherwise, since access to the field
                     // would be ambiguous from Java, no field should be
@@ -559,7 +558,7 @@ class JavaMembers {
 
     private static boolean maskingExistedMember(
             boolean includePrivate, Map<String, Object> members, String beanName) {
-        Object existed = members.get(beanName);
+        var existed = members.get(beanName);
 
         if (existed == null) { // no member
             return false;
@@ -594,33 +593,33 @@ class JavaMembers {
     /** at this stage, {@code members} includes {@link NativeJavaMethod} and {@link Field} */
     private static Map<String, BeanProperty> extractBeaning(
             Map<String, Object> members, boolean isStatic, boolean includePrivate) {
-        HashMap<String, BeanProperty> beans = new HashMap<String, BeanProperty>();
-        for (Map.Entry<String, Object> entry : members.entrySet()) {
-            String name = entry.getKey();
+        var beans = new HashMap<String, BeanProperty>();
+        for (var entry : members.entrySet()) {
+            var name = entry.getKey();
 
-            boolean isGetBeaning = name.startsWith("get");
-            boolean isIsBeaning = name.startsWith("is");
-            boolean isSetBeaning = name.startsWith("set");
+            var isGetBeaning = name.startsWith("get");
+            var isIsBeaning = name.startsWith("is");
+            var isSetBeaning = name.startsWith("set");
             if (!isGetBeaning && !isIsBeaning && !isSetBeaning) {
                 continue;
             }
 
-            String nameComponent = name.substring(isIsBeaning ? 2 : 3);
+            var nameComponent = name.substring(isIsBeaning ? 2 : 3);
             if (nameComponent.isEmpty() || !(entry.getValue() instanceof NativeJavaMethod)) {
                 continue;
             }
 
-            String beanName = getBeanName(nameComponent);
+            var beanName = getBeanName(nameComponent);
             if (maskingExistedMember(includePrivate, members, beanName)) {
                 continue;
             }
 
             if (isGetBeaning || isIsBeaning) { // getter
-                NativeJavaMethod method = (NativeJavaMethod) entry.getValue();
+                var method = (NativeJavaMethod) entry.getValue();
 
-                MemberBox candidate = extractGetMethod(method.methods, isStatic);
+                var candidate = extractGetMethod(method.methods, isStatic);
                 if (candidate != null) {
-                    BeanProperty bean = beans.computeIfAbsent(beanName, BeanProperty::new);
+                    var bean = beans.computeIfAbsent(beanName, BeanProperty::new);
                     if (bean.getter == null
                             // prefer 'get' over 'is'
                             || bean.getter.getFunctionName().startsWith("is")) {
@@ -632,23 +631,23 @@ class JavaMembers {
                     }
                 }
             } else { // isSetBeaning
-                BeanProperty bean = beans.computeIfAbsent(beanName, BeanProperty::new);
+                var bean = beans.computeIfAbsent(beanName, BeanProperty::new);
                 // capture all possible setters for now, actual setter will be searched later
                 bean.setter = (NativeJavaMethod) entry.getValue();
             }
         }
 
         // process setter candidates
-        for (BeanProperty bean : beans.values()) {
-            NativeJavaMethod setterCandidates = bean.setter;
+        for (var bean : beans.values()) {
+            var setterCandidates = bean.setter;
             if (setterCandidates == null) {
                 continue;
             }
 
             MemberBox match;
-            NativeJavaMethod getter = bean.getter;
+            var getter = bean.getter;
             if (getter != null) {
-                TypeInfo type = getter.methods[0].getReturnType();
+                var type = getter.methods[0].getReturnType();
                 // We have a getter. Now, do we have a setter with matching type?
                 match = extractSetMethod(type, setterCandidates.methods, isStatic);
                 if (match != null) {
@@ -700,7 +699,7 @@ class JavaMembers {
 
                 // walk up superclass chain and grab fields. No need to deal specially with
                 // interfaces, since they can't have fields
-                for (Class<?> c = cl; c != null; c = c.getSuperclass()) {
+                for (var c = cl; c != null; c = c.getSuperclass()) {
                     // get all declared fields in this class, make them
                     // accessible, and save
                     for (Field field : c.getDeclaredFields()) {
@@ -727,7 +726,7 @@ class JavaMembers {
             // Does getter method have an empty parameter list with a return
             // value (eg. a getSomething() or isSomething())?
             if (method.getArgTypes().isEmpty() && (!isStatic || method.isStatic())) {
-                TypeInfo type = method.getReturnType();
+                var type = method.getReturnType();
                 if (type != TypeInfo.PRIMITIVE_VOID) {
                     return method;
                 }
@@ -748,7 +747,7 @@ class JavaMembers {
         MemberBox acceptableMatch = null;
         for (MemberBox method : methods) {
             if (!isStatic || method.isStatic()) {
-                List<TypeInfo> argTypes = method.getArgTypes();
+                var argTypes = method.getArgTypes();
                 if (argTypes.size() == 1) {
                     if (type.is(argTypes.get(0).asClass())) {
                         // perfect match, no need to continue scanning

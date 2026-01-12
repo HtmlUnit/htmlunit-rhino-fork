@@ -253,7 +253,7 @@ public final class Interpreter extends Icode implements Evaluator {
                 int argShift,
                 int argCount,
                 Scriptable homeObject) {
-            JSDescriptor<? extends ScriptOrFn<?>> desc = fnOrScript.getDescriptor();
+            var desc = fnOrScript.getDescriptor();
             if (useActivation) {
                 // Copy args to new array to pass to enterActivationFunction
                 // or debuggerFrame.onEnter
@@ -522,9 +522,9 @@ public final class Interpreter extends Icode implements Evaluator {
         }
 
         private static Map<String, Integer> buildOffsets(CallFrame frame) {
-            JSDescriptor<? extends ScriptOrFn<?>> desc = frame.fnOrScript.getDescriptor();
+            var desc = frame.fnOrScript.getDescriptor();
             int varCount = desc.getParamAndVarCount();
-            HashMap<String, Integer> map = new HashMap<String, Integer>();
+            var map = new HashMap<String, Integer>();
             for (int i = 0; i < varCount; i++) {
                 map.put(desc.getParamOrVarName(i), i);
             }
@@ -708,7 +708,7 @@ public final class Interpreter extends Icode implements Evaluator {
             String rawSource,
             boolean returnFunction) {
         CodeGenerator<?> cgen = new CodeGenerator<>();
-        JSDescriptor<? extends ScriptOrFn<?>> itsData = cgen.compile(compilerEnv, tree, rawSource, returnFunction);
+        var itsData = cgen.compile(compilerEnv, tree, rawSource, returnFunction);
         return new CompilationResult(itsData, compilerEnv.homeObject());
     }
 
@@ -721,7 +721,7 @@ public final class Interpreter extends Icode implements Evaluator {
     @Override
     @SuppressWarnings("unchecked")
     public Script createScriptObject(Object bytecode, Object staticSecurityDomain) {
-        CompilationResult<JSScript> compilerResult = (CompilationResult<JSScript>) bytecode;
+        var compilerResult = (CompilationResult<JSScript>) bytecode;
         return JSFunction.createScript(
                 compilerResult.descriptor, compilerResult.homeObject, staticSecurityDomain);
     }
@@ -735,7 +735,7 @@ public final class Interpreter extends Icode implements Evaluator {
     @SuppressWarnings("unchecked")
     public Function createFunctionObject(
             Context cx, Scriptable scope, Object bytecode, Object staticSecurityDomain) {
-        CompilationResult<JSFunction> compilerResult = (CompilationResult<JSFunction>) bytecode;
+        var compilerResult = (CompilationResult<JSFunction>) bytecode;
         return JSFunction.createFunction(
                 cx,
                 scope,
@@ -1387,7 +1387,7 @@ public final class Interpreter extends Icode implements Evaluator {
     private static void initFunction(Context cx, Scriptable scope, JSDescriptor parent, int index) {
         JSFunction fn;
         fn = JSFunction.createFunction(cx, scope, parent, index, null);
-        JSDescriptor<JSFunction> desc = fn.getDescriptor();
+        var desc = fn.getDescriptor();
         ScriptRuntime.initFunction(cx, scope, fn, desc.getFunctionType(), parent.isEvalFunction());
     }
 
@@ -1400,7 +1400,7 @@ public final class Interpreter extends Icode implements Evaluator {
             Object[] args) {
         if (!ScriptRuntime.hasTopCall(cx)) Kit.codeBug();
 
-        JSDescriptor desc = ifun.getDescriptor();
+        var desc = ifun.getDescriptor();
 
         if (cx.interpreterSecurityDomain != desc.getSecurityDomain()) {
             Object savedDomain = cx.interpreterSecurityDomain;
@@ -2052,7 +2052,7 @@ public final class Interpreter extends Icode implements Evaluator {
                     // exception handler
                     int op = iCode[frame.pc++];
 
-                    InstructionClass insn = instructionObjs[-MIN_ICODE + op];
+                    var insn = instructionObjs[-MIN_ICODE + op];
 
                     nextState = insn.execute(cx, frame, state, op);
                 } while (nextState == null);
@@ -3911,9 +3911,9 @@ public final class Interpreter extends Icode implements Evaluator {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
             state.indexReg = frame.idata.itsICode[frame.pc++];
-            byte[] varAttributes = frame.varSource.stackAttributes;
-            Object[] vars = frame.varSource.stack;
-            double[] varDbls = frame.varSource.sDbl;
+            var varAttributes = frame.varSource.stackAttributes;
+            var vars = frame.varSource.stack;
+            var varDbls = frame.varSource.sDbl;
             if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                 throw Context.reportRuntimeErrorById(
                         "msg.var.redecl",
@@ -3931,9 +3931,9 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoSetConstVar extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            byte[] varAttributes = frame.varSource.stackAttributes;
-            Object[] vars = frame.varSource.stack;
-            double[] varDbls = frame.varSource.sDbl;
+            var varAttributes = frame.varSource.stackAttributes;
+            var vars = frame.varSource.stack;
+            var varDbls = frame.varSource.sDbl;
             if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                 throw Context.reportRuntimeErrorById(
                         "msg.var.redecl",
@@ -3961,9 +3961,9 @@ public final class Interpreter extends Icode implements Evaluator {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
             state.indexReg = frame.idata.itsICode[frame.pc++];
-            byte[] varAttributes = frame.varSource.stackAttributes;
-            Object[] vars = frame.varSource.stack;
-            double[] varDbls = frame.varSource.sDbl;
+            var varAttributes = frame.varSource.stackAttributes;
+            var vars = frame.varSource.stack;
+            var varDbls = frame.varSource.sDbl;
             if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                 vars[state.indexReg] = frame.stack[state.stackTop];
                 varDbls[state.indexReg] = frame.sDbl[state.stackTop];
@@ -3975,9 +3975,9 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoSetVar extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            byte[] varAttributes = frame.varSource.stackAttributes;
-            Object[] vars = frame.varSource.stack;
-            double[] varDbls = frame.varSource.sDbl;
+            var varAttributes = frame.varSource.stackAttributes;
+            var vars = frame.varSource.stack;
+            var varDbls = frame.varSource.sDbl;
             if ((varAttributes[state.indexReg] & ScriptableObject.READONLY) == 0) {
                 vars[state.indexReg] = frame.stack[state.stackTop];
                 varDbls[state.indexReg] = frame.sDbl[state.stackTop];
@@ -3990,8 +3990,8 @@ public final class Interpreter extends Icode implements Evaluator {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
             state.indexReg = frame.idata.itsICode[frame.pc++];
-            Object[] vars = frame.varSource.stack;
-            double[] varDbls = frame.varSource.sDbl;
+            var vars = frame.varSource.stack;
+            var varDbls = frame.varSource.sDbl;
             ++state.stackTop;
             frame.stack[state.stackTop] = vars[state.indexReg];
             frame.sDbl[state.stackTop] = varDbls[state.indexReg];
@@ -4002,8 +4002,8 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoGetVar extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            Object[] vars = frame.varSource.stack;
-            double[] varDbls = frame.varSource.sDbl;
+            var vars = frame.varSource.stack;
+            var varDbls = frame.varSource.sDbl;
             ++state.stackTop;
             frame.stack[state.stackTop] = vars[state.indexReg];
             frame.sDbl[state.stackTop] = varDbls[state.indexReg];
@@ -4014,9 +4014,9 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoVarIncDec extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            byte[] varAttributes = frame.varSource.stackAttributes;
-            Object[] vars = frame.varSource.stack;
-            double[] varDbls = frame.varSource.sDbl;
+            var varAttributes = frame.varSource.stackAttributes;
+            var vars = frame.varSource.stack;
+            var varDbls = frame.varSource.sDbl;
             // indexReg : varindex
             ++state.stackTop;
             int incrDecrMask = frame.idata.itsICode[frame.pc];
@@ -4428,7 +4428,7 @@ public final class Interpreter extends Icode implements Evaluator {
             Object value = frame.stack[state.stackTop];
             if (value == DOUBLE_MARK) value = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
             --state.stackTop;
-            NewLiteralStorage store = (NewLiteralStorage) frame.stack[state.stackTop];
+            var store = (NewLiteralStorage) frame.stack[state.stackTop];
             store.pushValue(value);
             return null;
         }
@@ -4439,7 +4439,7 @@ public final class Interpreter extends Icode implements Evaluator {
         NewState execute(Context cs, CallFrame frame, InterpreterState state, int op) {
             Object value = frame.stack[state.stackTop];
             --state.stackTop;
-            NewLiteralStorage store = (NewLiteralStorage) frame.stack[state.stackTop];
+            var store = (NewLiteralStorage) frame.stack[state.stackTop];
             store.pushGetter(value);
             return null;
         }
@@ -4450,7 +4450,7 @@ public final class Interpreter extends Icode implements Evaluator {
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
             Object value = frame.stack[state.stackTop];
             --state.stackTop;
-            NewLiteralStorage store = (NewLiteralStorage) frame.stack[state.stackTop];
+            var store = (NewLiteralStorage) frame.stack[state.stackTop];
             store.pushSetter(value);
             return null;
         }
@@ -4462,7 +4462,7 @@ public final class Interpreter extends Icode implements Evaluator {
             Object key = frame.stack[state.stackTop];
             if (key == DOUBLE_MARK) key = ScriptRuntime.wrapNumber(frame.sDbl[state.stackTop]);
             --state.stackTop;
-            NewLiteralStorage store = (NewLiteralStorage) frame.stack[state.stackTop];
+            var store = (NewLiteralStorage) frame.stack[state.stackTop];
             store.pushKey(key);
             return null;
         }
@@ -4490,7 +4490,7 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoObjectLit extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            NewLiteralStorage store = (NewLiteralStorage) frame.stack[state.stackTop];
+            var store = (NewLiteralStorage) frame.stack[state.stackTop];
             --state.stackTop;
             Scriptable object = (Scriptable) frame.stack[state.stackTop];
             ScriptRuntime.fillObjectLiteral(
@@ -4507,7 +4507,7 @@ public final class Interpreter extends Icode implements Evaluator {
     private static class DoArrayLiteral extends InstructionClass {
         @Override
         NewState execute(Context cx, CallFrame frame, InterpreterState state, int op) {
-            NewLiteralStorage store = (NewLiteralStorage) frame.stack[state.stackTop];
+            var store = (NewLiteralStorage) frame.stack[state.stackTop];
             int[] skipIndexes = null;
             if (op == Icode_SPARE_ARRAYLIT) {
                 skipIndexes = store.getAdjustedSkipIndexes();
@@ -5115,16 +5115,16 @@ public final class Interpreter extends Icode implements Evaluator {
     }
 
     private static JSFunction createClosure(Context cx, CallFrame frame, int index) {
-        JSDescriptor<JSFunction> desc = frame.fnOrScript.getDescriptor().getFunction(index);
+        var desc = frame.fnOrScript.getDescriptor().getFunction(index);
         boolean isArrow = desc.getFunctionType() == FunctionNode.ARROW_FUNCTION;
-        Scriptable homeObject = isArrow ? frame.fnOrScript.getHomeObject() : null;
+        var homeObject = isArrow ? frame.fnOrScript.getHomeObject() : null;
         JSFunction f = new JSFunction(cx, frame.scope, desc, frame.thisObj, homeObject);
         return f;
     }
 
     private static JSFunction createMethod(
             Context cx, CallFrame frame, int index, Scriptable homeObject) {
-        JSDescriptor<JSFunction> desc = frame.fnOrScript.getDescriptor().getFunction(index);
+        var desc = frame.fnOrScript.getDescriptor().getFunction(index);
         boolean isArrow = desc.getFunctionType() == FunctionNode.ARROW_FUNCTION;
         JSFunction f = new JSFunction(cx, frame.scope, desc, frame.thisObj, homeObject);
         return f;

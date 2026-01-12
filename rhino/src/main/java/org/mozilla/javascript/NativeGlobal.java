@@ -23,14 +23,6 @@ import org.mozilla.javascript.xml.XMLLib;
 public class NativeGlobal implements Serializable {
     static final long serialVersionUID = 6080442165748707530L;
 
-    // HtmlUnit
-    private static abstract class SerializableConstructableWithInjectableCtor implements SerializableConstructable {
-        // We need a reference to the LambdaFunction, so we use this "lateBound"
-        // trick. It ain't great, but it's the only idea I have.
-        Function lateBoundCtor;
-    }
-    // HtmlUnit
-
     public static void init(Context cx, Scriptable scope, boolean sealed) {
         defineGlobalFunction(scope, sealed, "decodeURI", 1, NativeGlobal::js_decodeURI);
         defineGlobalFunction(
@@ -84,8 +76,12 @@ public class NativeGlobal implements Serializable {
             // Building errors is complex because of the prototype chain requirements. This is a bit
             // arcane, but it's a combination that makes test262 happy.
             if (error == TopLevel.NativeErrors.AggregateError) {
-                SerializableConstructableWithInjectableCtor target =
-                        new SerializableConstructableWithInjectableCtor() {
+                var target =
+                        new SerializableConstructable() {
+                            // We need a reference to the LambdaFunction, so we use this "lateBound"
+                            // trick. It ain't great, but it's the only idea I have.
+                            private Function lateBoundCtor;
+
                             @Override
                             public Scriptable construct(
                                     Context callCx, Scriptable callScope, Object[] args) {
@@ -105,8 +101,10 @@ public class NativeGlobal implements Serializable {
                         };
                 target.lateBoundCtor = ctor;
             } else {
-                SerializableConstructableWithInjectableCtor target =
-                        new SerializableConstructableWithInjectableCtor() {
+                var target =
+                        new SerializableConstructable() {
+                            private Function lateBoundCtor;
+
                             @Override
                             public Scriptable construct(
                                     Context callCx, Scriptable callScope, Object[] args) {

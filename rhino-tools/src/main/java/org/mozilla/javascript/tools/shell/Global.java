@@ -447,8 +447,7 @@ public class Global extends ImporterTopLevel {
                 this.setErr(savedErr);
                 cx.setErrorReporter(savedErrorReporter);
                 resultString +=
-                // HtmlUnit        err.toString(StandardCharsets.UTF_8) + out.toString(StandardCharsets.UTF_8);
-                                   err.toString() + out.toString();
+                        err.toString(StandardCharsets.UTF_8) + out.toString(StandardCharsets.UTF_8);
             }
             if (!doctestOutputMatches(expectedString.toString(), resultString)) {
                 String message =

@@ -20,7 +20,6 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.IdFunctionObject;
 import org.mozilla.javascript.IdScriptableObject;
 import org.mozilla.javascript.Kit;
-import org.mozilla.javascript.LambdaConstructor;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.ScriptRuntime;
@@ -154,7 +153,7 @@ public class NativeRegExp extends IdScriptableObject {
         proto.setParentScope(scope);
         proto.setPrototype(getObjectPrototype(scope));
 
-        LambdaConstructor ctor = NativeRegExpCtor.init(cx, scope, sealed);
+        var ctor = NativeRegExpCtor.init(cx, scope, sealed);
         // Bug #324006: ECMA-262 15.10.6.1 says "The initial value of
         // RegExp.prototype.constructor is the builtin RegExp constructor."
         proto.defineProperty("constructor", ctor, ScriptableObject.DONTENUM);
@@ -421,11 +420,10 @@ public class NativeRegExp extends IdScriptableObject {
                     pc += INDEX_LEN;
                     char lowSurrogate = (char) getIndex(regexp.program, pc);
                     pc += INDEX_LEN;
-                    StringBuilder sb = new StringBuilder()
-                                                .append("UCSPFLAT1: ")
-                                                .append(highSurrogate)
-                                                .append(lowSurrogate);
-                    System.out.println(sb);
+                    System.out.println(
+                            "UCSPFLAT1: "
+                                    + Character.toString(
+                                            Character.toCodePoint(highSurrogate, lowSurrogate)));
                     break;
                 case REOP_CLASS:
                     int classIndex = getIndex(regexp.program, pc);
@@ -3973,7 +3971,7 @@ public class NativeRegExp extends IdScriptableObject {
     private Object js_SymbolMatch(
             Context cx, Scriptable scope, Scriptable thisScriptable, Object[] args) {
         // See ECMAScript spec 22.2.6.8
-        ScriptableObject thisObj = ScriptableObject.ensureScriptableObject(thisScriptable);
+        var thisObj = ScriptableObject.ensureScriptableObject(thisScriptable);
 
         String string = ScriptRuntime.toString(args.length > 0 ? args[0] : Undefined.instance);
         String flags = ScriptRuntime.toString(ScriptRuntime.getObjectProp(thisObj, "flags", cx));

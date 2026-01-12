@@ -122,7 +122,7 @@ public class BuiltInSlot<T extends ScriptableObject> extends Slot {
 
     @Override
     Slot copySlot() {
-        BuiltInSlot<T> res = new BuiltInSlot<T>(this);
+        var res = new BuiltInSlot<T>(this);
         res.next = null;
         res.orderedNext = null;
         return res;
@@ -193,7 +193,7 @@ public class BuiltInSlot<T extends ScriptableObject> extends Slot {
             boolean checkValid,
             Object key,
             int index) {
-        try (CompoundOperationMap map = builtIn.startCompoundOp(true)) {
+        try (var map = builtIn.startCompoundOp(true)) {
             return ScriptableObject.defineOrdinaryProperty(
                     ScriptableObject::setSlotValue, builtIn, map, id, info, checkValid, key, index);
         }

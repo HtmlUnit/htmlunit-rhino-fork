@@ -38,7 +38,7 @@ public class BoundFunction extends BaseFunction {
         ScriptRuntime.setFunctionProtoAndParent(this, cx, scope, false);
 
         Function thrower = ScriptRuntime.typeErrorThrower(cx);
-        DescriptorInfo throwing = new DescriptorInfo(false, NOT_FOUND, false, thrower, thrower, NOT_FOUND);
+        var throwing = new DescriptorInfo(false, NOT_FOUND, false, thrower, thrower, NOT_FOUND);
 
         // HtmlUnit defineOwnProperty(cx, "caller", throwing, false);
         if (cx.getLanguageVersion() < Context.VERSION_ES6) {

@@ -14,7 +14,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
 import org.mozilla.javascript.commonjs.module.ModuleScope;
 import org.mozilla.javascript.lc.type.TypeInfo;
 import org.mozilla.javascript.lc.type.TypeInfoFactory;
@@ -83,7 +82,7 @@ public class FunctionObject extends BaseFunction {
     public FunctionObject(String name, Member methodOrConstructor, Scriptable scope) {
         // fallback to global factory for compatibility with old behaviour, where the `scope` can be
         // an object not yet initialized via `initStandardObject(...)`
-        TypeInfoFactory typeInfoFactory = TypeInfoFactory.getOrElse(scope, TypeInfoFactory.GLOBAL);
+        var typeInfoFactory = TypeInfoFactory.getOrElse(scope, TypeInfoFactory.GLOBAL);
 
         if (methodOrConstructor instanceof Constructor) {
             member = new MemberBox((Constructor<?>) methodOrConstructor, typeInfoFactory);
@@ -94,7 +93,7 @@ public class FunctionObject extends BaseFunction {
         }
         String methodName = member.getName();
         this.functionName = name;
-        List<TypeInfo> types = member.getArgTypes();
+        var types = member.getArgTypes();
         int arity = types.size();
         if (arity == 5 && (types.get(2).isArray() || types.get(3).isArray())) {
             // Either variable args or an error.
@@ -534,7 +533,7 @@ public class FunctionObject extends BaseFunction {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         if (parmsLength > 0) {
-            List<TypeInfo> types = member.getArgTypes();
+            var types = member.getArgTypes();
             typeTags = new byte[parmsLength];
             for (int i = 0; i != parmsLength; ++i) {
                 typeTags[i] = (byte) types.get(i).getTypeTag();

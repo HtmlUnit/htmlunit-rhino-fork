@@ -24,7 +24,7 @@ public class AccessorSlot extends Slot {
 
     @Override
     AccessorSlot copySlot() {
-        AccessorSlot newSlot = new AccessorSlot(this);
+        var newSlot = new AccessorSlot(this);
         newSlot.value = value;
         newSlot.getter = getter;
         newSlot.setter = setter;
@@ -238,10 +238,10 @@ public class AccessorSlot extends Slot {
         @Override
         public boolean setValue(Object value, Scriptable owner, Scriptable start) {
             Context cx = Context.getContext();
-            List<TypeInfo> pTypes = member.getArgTypes();
+            var pTypes = member.getArgTypes();
             // XXX: cache tag since it is already calculated in
             // defineProperty ?
-            TypeInfo valueType = pTypes.get(pTypes.size() - 1);
+            var valueType = pTypes.get(pTypes.size() - 1);
             // HtmlUnit boolean isNullable = member.getArgNullability().isNullable(pTypes.size() - 1);
             int tag = valueType.getTypeTag();
             // HtmlUnit Object actualArg = FunctionObject.convertArg(cx, start, value, tag, isNullable);

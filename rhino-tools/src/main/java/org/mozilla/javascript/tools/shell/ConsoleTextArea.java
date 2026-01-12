@@ -111,8 +111,7 @@ public class ConsoleTextArea extends JTextArea implements KeyListener, DocumentL
         out = new PrintStream(console1, true);
         err = new PrintStream(console2, true);
         PipedOutputStream outPipe = new PipedOutputStream();
-        // HtmlUnit inPipe = new PrintWriter(outPipe, false, StandardCharsets.UTF_8);
-        inPipe = new PrintWriter(outPipe);
+        inPipe = new PrintWriter(outPipe, false, StandardCharsets.UTF_8);
         in = new PipedInputStream();
         try {
             outPipe.connect(in);

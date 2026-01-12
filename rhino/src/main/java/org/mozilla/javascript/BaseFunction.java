@@ -37,7 +37,7 @@ public class BaseFunction extends ScriptableObject implements Function {
                         BaseFunction::js_constructorCall,
                         BaseFunction::js_constructor);
 
-        LambdaFunction proto =
+        var proto =
                 new LambdaFunction(
                         scope, "", 0, null, (lcx, lscope, lthisObj, largs) -> Undefined.instance);
 
@@ -135,15 +135,15 @@ public class BaseFunction extends ScriptableObject implements Function {
     }
 
     static Object initAsGeneratorFunction(Scriptable scope, boolean sealed) {
-        NativeObject proto = new NativeObject();
+        var proto = new NativeObject();
         Scriptable top = ScriptableObject.getTopLevelScope(scope);
 
-        Scriptable function = (Scriptable) ScriptableObject.getProperty(scope, FUNCTION_CLASS);
-        Scriptable functionProto =
+        var function = (Scriptable) ScriptableObject.getProperty(scope, FUNCTION_CLASS);
+        var functionProto =
                 (Scriptable) ScriptableObject.getProperty(function, PROTOTYPE_PROPERTY_NAME);
         proto.setPrototype(functionProto);
 
-        Scriptable iterator = (Scriptable) ScriptableObject.getProperty(scope, "Iterator");
+        var iterator = (Scriptable) ScriptableObject.getProperty(scope, "Iterator");
         ScriptableObject.putProperty(
                 proto,
                 PROTOTYPE_PROPERTY_NAME,
@@ -254,7 +254,7 @@ public class BaseFunction extends ScriptableObject implements Function {
     }
 
     protected void createPrototypeProperty() {
-        try (CompoundOperationMap map = startCompoundOp(true)) {
+        try (var map = startCompoundOp(true)) {
             createPrototypeProperty(map);
         }
     }
@@ -307,7 +307,7 @@ public class BaseFunction extends ScriptableObject implements Function {
             boolean checkValid,
             Object key,
             int index) {
-        try (CompoundOperationMap map = builtIn.startCompoundOp(true)) {
+        try (var map = builtIn.startCompoundOp(true)) {
             return ScriptableObject.defineOrdinaryProperty(
                     (o, i, k, e, m, s) -> {
                         if (i.value != NOT_FOUND) {
@@ -396,7 +396,7 @@ public class BaseFunction extends ScriptableObject implements Function {
     }
 
     static boolean isApplyOrCall(KnownBuiltInFunction f) {
-        Object tag = f.getTag();
+        var tag = f.getTag();
         return tag == APPLY_TAG || tag == CALL_TAG;
     }
 
