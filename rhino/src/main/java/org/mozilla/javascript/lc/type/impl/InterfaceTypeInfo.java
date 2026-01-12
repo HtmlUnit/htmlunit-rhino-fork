@@ -1,7 +1,6 @@
 package org.mozilla.javascript.lc.type.impl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import org.mozilla.javascript.Kit;
 import org.mozilla.javascript.lc.ByteAsBool;
@@ -33,7 +32,7 @@ public class InterfaceTypeInfo extends ClassTypeInfo {
                 } else {
                     int count = 0;
 
-                    for (Method method : asClass().getMethods()) {
+                    for (var method : asClass().getMethods()) {
                         if (Modifier.isAbstract(method.getModifiers())
                                 && !method.isSynthetic()
                                 && !method.isBridge()) {

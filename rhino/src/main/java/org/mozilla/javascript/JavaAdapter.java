@@ -60,7 +60,7 @@ public final class JavaAdapter {
     }
 
     public static void init(Context cx, Scriptable scope, boolean sealed) {
-        LambdaConstructor ctor = new LambdaConstructor(scope, "JavaAdapter", 1, JavaAdapter::js_createAdapter);
+        var ctor = new LambdaConstructor(scope, "JavaAdapter", 1, JavaAdapter::js_createAdapter);
 
         if (sealed) {
             ctor.sealObject();
@@ -108,8 +108,8 @@ public final class JavaAdapter {
         //     ["args for AbstractClazz ctor"]
         // )
 
-        JavaAdapterSignature sig = new JavaAdapterSignature();
-        int classCount = fillAdapterInheritanceData(args, sig);
+        var sig = new JavaAdapterSignature();
+        var classCount = fillAdapterInheritanceData(args, sig);
 
         // next argument is implementation, must be scriptable
         Scriptable obj = ScriptableObject.ensureScriptable(args[classCount]);
@@ -149,7 +149,7 @@ public final class JavaAdapter {
                 adapter = adapterClass.getConstructor(ctorParms).newInstance(ctorArgs);
             }
 
-            Scriptable self = (Scriptable) getAdapterSelf(adapterClass, adapter);
+            var self = (Scriptable) getAdapterSelf(adapterClass, adapter);
             // Return unwrapped JavaAdapter if it implements Scriptable
             if (self instanceof Wrapper) {
                 Object unwrapped = ((Wrapper) self).unwrap();
@@ -173,7 +173,7 @@ public final class JavaAdapter {
      * @return the index of JS implementation object
      */
     private static int fillAdapterInheritanceData(Object[] args, JavaAdapterSignature signature) {
-        int len = args.length;
+        var len = args.length;
 
         int classCount;
         for (classCount = 0; classCount < len - 1; classCount++) {
@@ -249,7 +249,7 @@ public final class JavaAdapter {
             factory = null;
         }
 
-        JavaAdapterSignature sig = new JavaAdapterSignature();
+        var sig = new JavaAdapterSignature();
         sig.superClass = Class.forName((String) in.readObject());
 
         String[] interfaceNames = (String[]) in.readObject();

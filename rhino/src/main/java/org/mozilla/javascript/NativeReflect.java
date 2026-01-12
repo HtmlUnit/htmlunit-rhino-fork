@@ -229,11 +229,11 @@ final class NativeReflect extends ScriptableObject {
 
         if (args.length > 1) {
             if (ScriptRuntime.isSymbol(args[1])) {
-                DescriptorInfo desc = target.getOwnPropertyDescriptor(cx, args[1]);
+                var desc = target.getOwnPropertyDescriptor(cx, args[1]);
                 return desc == null ? Undefined.SCRIPTABLE_UNDEFINED : desc.toObject(scope);
             }
 
-            DescriptorInfo desc = target.getOwnPropertyDescriptor(cx, ScriptRuntime.toString(args[1]));
+            var desc = target.getOwnPropertyDescriptor(cx, ScriptRuntime.toString(args[1]));
             return desc == null ? Undefined.SCRIPTABLE_UNDEFINED : desc.toObject(scope);
         }
         return Undefined.SCRIPTABLE_UNDEFINED;
@@ -273,7 +273,7 @@ final class NativeReflect extends ScriptableObject {
         final List<Object> symbols = new ArrayList<>();
 
         Object[] ids;
-        try (CompoundOperationMap map = target.startCompoundOp(false)) {
+        try (var map = target.startCompoundOp(false)) {
             ids = target.getIds(map, true, true);
         }
         for (Object o : ids) {

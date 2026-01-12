@@ -311,7 +311,7 @@ class NativeProxy extends ScriptableObject {
             boolean extensibleTarget = target.isExtensible();
             // don't use the provided values here we have to check all
             Object[] targetKeys;
-            try (CompoundOperationMap targetMap = target.startCompoundOp(false)) {
+            try (var targetMap = target.startCompoundOp(false)) {
                 targetKeys = target.getIds(targetMap, true, true);
             }
 
@@ -361,7 +361,7 @@ class NativeProxy extends ScriptableObject {
             // target is not extensible, fall back to the target call
         }
 
-        try (CompoundOperationMap targetMap = target.startCompoundOp(false)) {
+        try (var targetMap = target.startCompoundOp(false)) {
             return target.getIds(targetMap, getNonEnumerable, getSymbols);
         }
     }
@@ -922,7 +922,7 @@ class NativeProxy extends ScriptableObject {
                         "getOwnPropertyDescriptor trap has to return undefined or an object");
             }
 
-            DescriptorInfo targetDesc =
+            var targetDesc =
                     ScriptRuntime.isSymbol(id)
                             ? target.getOwnPropertyDescriptor(cx, id)
                             : target.getOwnPropertyDescriptor(cx, ScriptRuntime.toString(id));
@@ -951,7 +951,7 @@ class NativeProxy extends ScriptableObject {
                                 getProperty(trapResult, "writable"),
                                 getProperty(trapResult, "configurable"));
 
-                DescriptorInfo desc = ScriptableObject.buildDataDescriptor(value, attributes);
+                var desc = ScriptableObject.buildDataDescriptor(value, attributes);
                 return desc;
             }
             return null;

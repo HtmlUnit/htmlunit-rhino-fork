@@ -78,7 +78,7 @@ public class AbstractEcmaObjectOperations {
         if (obj.isExtensible()) return false;
 
         Object[] ids;
-        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
+        try (var map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         for (Object name : ids) {
@@ -144,7 +144,7 @@ public class AbstractEcmaObjectOperations {
         }
 
         Object[] ids;
-        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
+        try (var map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         for (Object key : ids) {
@@ -532,7 +532,7 @@ public class AbstractEcmaObjectOperations {
             return false;
         }
         if (argument instanceof NativeProxy.NativeProxyFunction) {
-            ScriptableObject f = ((NativeProxy) argument).getTargetThrowIfRevoked();
+            var f = ((NativeProxy) argument).getTargetThrowIfRevoked();
             return isConstructor(cx, f);
         }
 

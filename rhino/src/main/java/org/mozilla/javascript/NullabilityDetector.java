@@ -31,7 +31,7 @@ public interface NullabilityDetector {
         boolean isNullable(int index);
 
         static NullabilityAccessor compress(boolean[] values) {
-            int length = values.length;
+            var length = values.length;
             // empty
             if (length == 0) {
                 return INDEX_OUT_OF_BOUNDS;
@@ -42,7 +42,7 @@ public interface NullabilityDetector {
             }
             // same elements
             Boolean allMatch = values[0];
-            for (boolean value : values) {
+            for (var value : values) {
                 if (allMatch != value) {
                     allMatch = null;
                     break;
@@ -53,13 +53,13 @@ public interface NullabilityDetector {
             }
             // use smaller object (int) as backend
             if (length < 32) { // length: [2, 31]
-                int compressed = 0;
+                var compressed = 0;
                 for (int i = 0; i < length; i++) {
                     if (values[i]) {
                         compressed |= (1 << i);
                     }
                 }
-                final int compressedFinal = compressed;
+                final var compressedFinal = compressed;
                 return i -> ((compressedFinal >> i) & 1) != 0;
             }
             // fallback

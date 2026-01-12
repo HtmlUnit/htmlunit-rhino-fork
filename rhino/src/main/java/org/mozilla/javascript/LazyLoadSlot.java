@@ -15,7 +15,7 @@ public class LazyLoadSlot extends Slot {
 
     @Override
     LazyLoadSlot copySlot() {
-        LazyLoadSlot newSlot = new LazyLoadSlot(this);
+        var newSlot = new LazyLoadSlot(this);
         newSlot.value = value;
         newSlot.next = null;
         newSlot.orderedNext = null;

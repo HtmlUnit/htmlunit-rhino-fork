@@ -9,8 +9,6 @@ package org.mozilla.javascript;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 final class InterpreterData<T extends ScriptOrFn<T>> extends JSCode<T> implements Serializable {
@@ -153,7 +151,7 @@ final class InterpreterData<T extends ScriptOrFn<T>> extends JSCode<T> implement
         @Override
         public JSCode<T> build() {
             if (built == null) {
-                Map<Integer, Integer> jumpMap = longJumps != null ? Collections.unmodifiableMap(new HashMap<>(longJumps)) : null;
+                var jumpMap = longJumps != null ? Map.copyOf(longJumps) : null;
                 built =
                         new InterpreterData<T>(
                                 itsStringTable,

@@ -197,7 +197,7 @@ public abstract class NativeTypedArrayView<T> extends NativeArrayBufferView
 
         LambdaConstructor ta = (LambdaConstructor) s.getAssociatedValue(TYPED_ARRAY_TAG);
         if (ta == null) {
-            ScriptableObject proto = (ScriptableObject) cx.newObject(s);
+            var proto = (ScriptableObject) cx.newObject(s);
             ta =
                     new LambdaConstructor(
                             s,
@@ -615,9 +615,9 @@ public abstract class NativeTypedArrayView<T> extends NativeArrayBufferView
     }
 
     private Object getElemForToString(Context cx, Scriptable scope, int index, boolean useLocale) {
-        Object elem = js_get(index);
+        var elem = js_get(index);
         if (useLocale) {
-            ScriptRuntime.LookupResult toLocaleString = ScriptRuntime.getPropAndThis(elem, "toLocaleString", cx, scope);
+            var toLocaleString = ScriptRuntime.getPropAndThis(elem, "toLocaleString", cx, scope);
             return toLocaleString.call(cx, scope, ScriptRuntime.emptyArgs);
         } else {
             return elem;
@@ -862,7 +862,7 @@ public abstract class NativeTypedArrayView<T> extends NativeArrayBufferView
 
         long count = Math.max(end - begin, 0);
 
-        NativeTypedArrayView<?> a = self.typedArraySpeciesCreate(cx, scope, new Object[] {count}, "slice");
+        var a = self.typedArraySpeciesCreate(cx, scope, new Object[] {count}, "slice");
 
         if (count > 0) {
             if (self.isTypedArrayOutOfBounds()) {

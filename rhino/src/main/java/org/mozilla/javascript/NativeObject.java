@@ -47,7 +47,7 @@ public class NativeObject extends ScriptableObject implements Map {
                     }
                 };
 
-        NativeObject proto = new NativeObject();
+        var proto = new NativeObject();
         proto.setParentScope(s);
         ctor.setPrototypeProperty(proto);
         proto.defineProperty("constructor", ctor, DONTENUM);
@@ -533,7 +533,7 @@ public class NativeObject extends ScriptableObject implements Map {
         Scriptable s = getCompatibleObject(cx, scope, arg);
         ScriptableObject obj = ensureScriptableObject(s);
         Object[] ids;
-        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
+        try (var map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, false);
         }
         for (int i = 0; i < ids.length; i++) {
@@ -548,7 +548,7 @@ public class NativeObject extends ScriptableObject implements Map {
         Scriptable s = getCompatibleObject(cx, scope, arg);
         ScriptableObject obj = ensureScriptableObject(s);
         Object[] ids;
-        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
+        try (var map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         ArrayList<Object> syms = new ArrayList<>();
@@ -569,7 +569,7 @@ public class NativeObject extends ScriptableObject implements Map {
         Scriptable s = getCompatibleObject(cx, scope, arg);
         ScriptableObject obj = ensureScriptableObject(s);
         Object nameArg = args.length < 2 ? Undefined.instance : args[1];
-        DescriptorInfo desc = obj.getOwnPropertyDescriptor(cx, nameArg);
+        var desc = obj.getOwnPropertyDescriptor(cx, nameArg);
         return desc == null ? Undefined.instance : desc.toObject(scope);
     }
 
@@ -581,11 +581,11 @@ public class NativeObject extends ScriptableObject implements Map {
 
         ScriptableObject descs = (ScriptableObject) cx.newObject(scope);
         Object[] ids;
-        try (CompoundOperationMap map = obj.startCompoundOp(false)) {
+        try (var map = obj.startCompoundOp(false)) {
             ids = obj.getIds(map, true, true);
         }
         for (Object key : ids) {
-            DescriptorInfo desc = obj.getOwnPropertyDescriptor(cx, key);
+            var desc = obj.getOwnPropertyDescriptor(cx, key);
             if (desc == null) {
                 continue;
             } else if (key instanceof Symbol) {
@@ -605,7 +605,7 @@ public class NativeObject extends ScriptableObject implements Map {
         ScriptableObject obj = ensureScriptableObject(arg);
         Object name = args.length < 2 ? Undefined.instance : args[1];
         Object descArg = args.length < 3 ? Undefined.instance : args[2];
-        DescriptorInfo desc = new DescriptorInfo(ensureScriptableObject(descArg));
+        var desc = new DescriptorInfo(ensureScriptableObject(descArg));
         ScriptableObject.checkPropertyDefinition(desc);
         obj.defineOwnProperty(cx, name, desc);
         return obj;
@@ -732,8 +732,8 @@ public class NativeObject extends ScriptableObject implements Map {
             Scriptable sourceObj = ScriptRuntime.toObject(cx, scope, args[i]);
             Object[] ids;
             if (sourceObj instanceof ScriptableObject) {
-                ScriptableObject scriptable = (ScriptableObject) sourceObj;
-                try (CompoundOperationMap map = scriptable.startCompoundOp(false)) {
+                var scriptable = (ScriptableObject) sourceObj;
+                try (var map = scriptable.startCompoundOp(false)) {
                     ids = scriptable.getIds(map, false, true);
                 }
             } else {

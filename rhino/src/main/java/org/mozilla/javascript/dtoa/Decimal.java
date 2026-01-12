@@ -101,7 +101,7 @@ public class Decimal {
          * to handle JavaScript, which requires fixed-format numbers for a
          * wider range of values before switching to exponential format.
          */
-        long hm = multiplyHigh(f, 193_428_131_138_340_668L) >>> 20;
+        long hm = Math.multiplyHigh(f, 193_428_131_138_340_668L) >>> 20;
         int l = (int) (f - 100_000_000L * hm);
         int h = (int) ((hm * 1_441_151_881L) >>> 57);
         int m = (int) (hm - 100_000_000L * h);
@@ -227,7 +227,7 @@ public class Decimal {
             (a + 1) 2^n <= 10^8 2^28 < 10^17
         For n = 17, m = 8 the table in section 10 of [1] leads to:
          */
-        return (int) (multiplyHigh((long) (a + 1) << 28, 193_428_131_138_340_668L) >>> 20) - 1;
+        return (int) (Math.multiplyHigh((long) (a + 1) << 28, 193_428_131_138_340_668L) >>> 20) - 1;
     }
 
     private void lowDigits(int l) {
@@ -302,23 +302,4 @@ public class Decimal {
     private String makeString() {
         return new String(buf, 0, length);
     }
-
-    // HtmlUnit JDK8
-    public static long multiplyHigh(long x, long y) {
-        // Use technique from section 8-2 of Henry S. Warren, Jr.,
-        // Hacker's Delight (2nd ed.) (Addison Wesley, 2013), 173-174.
-        long x1 = x >> 32;
-        long x2 = x & 0xFFFFFFFFL;
-        long y1 = y >> 32;
-        long y2 = y & 0xFFFFFFFFL;
-
-        long z2 = x2 * y2;
-        long t = x1 * y2 + (z2 >>> 32);
-        long z1 = t & 0xFFFFFFFFL;
-        long z0 = t >> 32;
-        z1 += x2 * y1;
-
-        return x1 * y1 + z0 + (z1 >> 32);
-    }
-    // HtmlUnit
 }

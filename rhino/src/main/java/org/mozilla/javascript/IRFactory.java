@@ -641,7 +641,7 @@ public final class IRFactory {
         Node mexpr = decompileFunctionHeader(fn);
         int index = parser.currentScriptOrFn.addFunction(fn);
 
-        boolean savedStrict = outerScopeIsStrict;
+        var savedStrict = outerScopeIsStrict;
         outerScopeIsStrict |= fn.isInStrictMode();
         Parser.PerFunctionVariables savedVars = parser.createPerFunctionVariables(fn);
         try {
@@ -699,7 +699,7 @@ public final class IRFactory {
             /* transform nodes used as default parameters */
             List<Node[]> dfns = fn.getDestructuringRvalues();
             if (dfns != null) {
-                for (Node[] i : dfns) {
+                for (var i : dfns) {
                     Node a = i[0];
                     if (i[1] instanceof AstNode) {
                         AstNode b = (AstNode) i[1];
@@ -996,7 +996,7 @@ public final class IRFactory {
             for (AbstractObjectProperty abstractProp : elems) {
                 if (abstractProp instanceof SpreadObjectProperty) {
                     SpreadObjectProperty spreadObjectProperty = (SpreadObjectProperty) abstractProp;
-                    Node transformedSpreadNode = transform(spreadObjectProperty.getSpreadNode());
+                    var transformedSpreadNode = transform(spreadObjectProperty.getSpreadNode());
                     properties[i++] = transformedSpreadNode;
                     object.putIntProp(
                             Node.NUMBER_OF_SPREAD, object.getIntProp(Node.NUMBER_OF_SPREAD, 0) + 1);
@@ -2467,7 +2467,7 @@ public final class IRFactory {
                 return;
             }
 
-            int fnIndex = right.getExistingIntProp(Node.FUNCTION_PROP);
+            var fnIndex = right.getExistingIntProp(Node.FUNCTION_PROP);
             FunctionNode functionNode = parser.currentScriptOrFn.getFunctionNode(fnIndex);
             if (functionNode.getType() != 0 && functionNode.getFunctionName() == null) {
                 if (prefix != null) {

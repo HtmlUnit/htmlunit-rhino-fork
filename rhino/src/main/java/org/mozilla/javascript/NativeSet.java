@@ -27,7 +27,7 @@ public class NativeSet extends ScriptableObject {
                         NativeSet::jsConstructor);
         constructor.setPrototypePropertyAttributes(DONTENUM | READONLY | PERMANENT);
 
-        int propAttrs = DONTENUM | READONLY;
+        var propAttrs = DONTENUM | READONLY;
         constructor.definePrototypeMethod(scope, "add", 1, NativeSet::js_add, DONTENUM, propAttrs);
         constructor.definePrototypeMethod(
                 scope, "delete", 1, NativeSet::js_delete, DONTENUM, propAttrs);
@@ -104,7 +104,7 @@ public class NativeSet extends ScriptableObject {
 
     private static Object js_add(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
         NativeSet realThis = realThis(thisObj, "add");
-        Object k = NativeMap.key(args);
+        var k = NativeMap.key(args);
         return realThis.js_add(k);
     }
 
@@ -121,7 +121,7 @@ public class NativeSet extends ScriptableObject {
     private static Object js_delete(
             Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
         NativeSet realThis = realThis(thisObj, "add");
-        Object arg = NativeMap.key(args);
+        var arg = NativeMap.key(args);
         return realThis.js_delete(arg);
     }
 
@@ -131,7 +131,7 @@ public class NativeSet extends ScriptableObject {
 
     private static Object js_has(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
         NativeSet realThis = realThis(thisObj, "add");
-        Object arg = NativeMap.key(args);
+        var arg = NativeMap.key(args);
         return realThis.js_has(arg);
     }
 
@@ -234,7 +234,7 @@ public class NativeSet extends ScriptableObject {
         // been replaced. Since we're not fully constructed yet, create a dummy instance
         // so that we can get our own prototype.
         ScriptableObject dummy = ensureScriptableObject(cx.newObject(scope, set.getClassName()));
-        ScriptRuntime.LookupResult addCall = ScriptRuntime.getPropAndThis(dummy.getPrototype(), "add", cx, scope);
+        var addCall = ScriptRuntime.getPropAndThis(dummy.getPrototype(), "add", cx, scope);
         Callable add = addCall.getCallable();
 
         // Finally, run through all the iterated values and add them!

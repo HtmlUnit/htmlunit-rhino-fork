@@ -148,10 +148,10 @@ public class CodeGenUtils {
      */
     private static String[] disambiguateNames(String[] names, int paramCount) {
         String[] result = new String[names.length];
-        HashMap<String, AtomicInteger> checkMap = new HashMap<String, AtomicInteger>();
+        var checkMap = new HashMap<String, AtomicInteger>();
         for (int i = 0; i < names.length; i++) {
-            AtomicInteger counter = checkMap.computeIfAbsent(names[i], k -> new AtomicInteger());
-            int count = counter.getAndIncrement();
+            var counter = checkMap.computeIfAbsent(names[i], k -> new AtomicInteger());
+            var count = counter.getAndIncrement();
             if (i >= paramCount && count > 0) {
                 result[i] = String.format("%s(%d)", names[i], count);
             } else {

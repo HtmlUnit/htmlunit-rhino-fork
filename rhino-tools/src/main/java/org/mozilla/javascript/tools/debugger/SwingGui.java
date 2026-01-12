@@ -21,7 +21,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.MenuComponent;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -720,8 +719,7 @@ public class SwingGui extends JFrame implements GuiCallback {
     private String readFile(String fileName) {
         String text;
         try {
-            // HtmlUnit try (Reader r = new FileReader(fileName, StandardCharsets.UTF_8)) {
-            try (Reader r = new FileReader(fileName)) {
+            try (Reader r = new FileReader(fileName, StandardCharsets.UTF_8)) {
                 text = Kit.readReader(r);
             }
         } catch (IOException ex) {
@@ -1338,21 +1336,18 @@ class FileTextArea extends JTextArea
         if (pos >= 0) {
             try {
                 int line = getLineOfOffset(pos);
-                // HtmlUnit Rectangle2D rect = modelToView2D(pos);
-                Rectangle rect = modelToView(pos);
+                Rectangle2D rect = modelToView2D(pos);
                 if (rect == null) {
                     select(pos, pos);
                 } else {
                     try {
-                        // HtmlUnit Rectangle2D nrect = modelToView2D(getLineStartOffset(line + 1));
-                        Rectangle nrect = modelToView(getLineStartOffset(line + 1));
+                        Rectangle2D nrect = modelToView2D(getLineStartOffset(line + 1));
                         if (nrect != null) {
                             rect = nrect;
                         }
                     } catch (Exception exc) {
                     }
                     JViewport vp = (JViewport) getParent();
-                    /* HtmlUnit
                     Rectangle2D viewRect = vp.getViewRect();
                     if (viewRect.getY() + viewRect.getHeight() > rect.getY()) {
                         // need to scroll up
@@ -1362,17 +1357,6 @@ class FileTextArea extends JTextArea
                         double newY = rect.getY() + ((viewRect.getHeight() - rect.getHeight()) / 2);
                         rect.setRect(rect.getX(), newY, rect.getWidth(), rect.getHeight());
                         scrollRectToVisible(rect.getBounds());
-                        select(pos, pos);
-                    }
-                    */
-                    Rectangle viewRect = vp.getViewRect();
-                    if (viewRect.y + viewRect.height > rect.y) {
-                        // need to scroll up
-                        select(pos, pos);
-                    } else {
-                        // need to scroll down
-                        rect.y += (viewRect.height - rect.height) / 2;
-                        scrollRectToVisible(rect);
                         select(pos, pos);
                     }
                 }
@@ -1439,8 +1423,7 @@ class FileTextArea extends JTextArea
     /** Performs an action. */
     @Override
     public void actionPerformed(ActionEvent e) {
-        // HtmlUnit int pos = viewToModel2D(new Point2D.Double(popup.x, popup.y));
-        int pos = viewToModel(new Point(popup.x, popup.y));
+        int pos = viewToModel2D(new Point2D.Double(popup.x, popup.y));
         popup.setVisible(false);
         String cmd = e.getActionCommand();
         int line = -1;

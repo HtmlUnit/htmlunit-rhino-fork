@@ -144,7 +144,7 @@ public class EmbeddedSlotMap implements SlotMap {
     }
 
     protected void promoteMap(SlotMapOwner owner, Slot newSlot) {
-        HashSlotMap newMap = new HashSlotMap(this, newSlot);
+        var newMap = new HashSlotMap(this, newSlot);
         owner.setMap(newMap);
     }
 

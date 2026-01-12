@@ -9,8 +9,6 @@ package org.mozilla.javascript;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.mozilla.javascript.lc.type.ParameterizedTypeInfo;
@@ -43,7 +41,7 @@ public class NativeJavaMethod extends BaseFunction {
 
     NativeJavaMethod(MemberBox method, String name) {
         this.functionName = name;
-        this.methods = new MemberBox[]{method};
+        this.methods = new MemberBox[] {method};
     }
 
     @Deprecated
@@ -143,10 +141,9 @@ public class NativeJavaMethod extends BaseFunction {
 
         MemberBox meth = methods[index];
 
-        // HtmlUnit Map<VariableTypeInfo, TypeInfo> mapping = Map.of();
-        Map<VariableTypeInfo, TypeInfo> mapping = new HashMap<>();
+        Map<VariableTypeInfo, TypeInfo> mapping = Map.of();
         if (thisObj instanceof NativeJavaObject) {
-            TypeInfo staticType = ((NativeJavaObject) thisObj).staticType;
+            var staticType = ((NativeJavaObject) thisObj).staticType;
             if (staticType instanceof ParameterizedTypeInfo) {
                 mapping =
                         ((ParameterizedTypeInfo) staticType)
@@ -182,8 +179,8 @@ public class NativeJavaMethod extends BaseFunction {
             printDebug("Calling ", meth, args);
         }
 
-        Object returnValue = meth.invoke(javaObject, args);
-        TypeInfo returnType = meth.getReturnType();
+        var returnValue = meth.invoke(javaObject, args);
+        var returnType = meth.getReturnType();
 
         if (debug) {
             Class<?> actualType = (returnValue == null) ? null : returnValue.getClass();
@@ -260,7 +257,7 @@ public class NativeJavaMethod extends BaseFunction {
         for (int i = 0; i < methodsOrCtors.length; i++) {
             MemberBox member = methodsOrCtors[i];
 
-            final int[] weights = failFastConversionWeights(args, member);
+            final var weights = failFastConversionWeights(args, member);
             if (weights == null) {
                 continue search;
             }
@@ -309,7 +306,7 @@ public class NativeJavaMethod extends BaseFunction {
                         // We want to call the derived class's method.
                         if (bestFit.isStatic()
                                 && bestFit.getDeclaringClass()
-                                .isAssignableFrom(member.getDeclaringClass())) {
+                                        .isAssignableFrom(member.getDeclaringClass())) {
                             // On some JVMs, Class.getMethods will return all
                             // static methods of the class hierarchy, even if
                             // a derived class's parameters match exactly.
@@ -389,17 +386,13 @@ public class NativeJavaMethod extends BaseFunction {
                 buf.toString());
     }
 
-    /**
-     * Types are equal
-     */
+    /** Types are equal */
     private static final int PREFERENCE_EQUAL = 0;
 
     private static final int PREFERENCE_FIRST_ARG = 1;
     private static final int PREFERENCE_SECOND_ARG = 2;
 
-    /**
-     * No clear "easy" conversion
-     */
+    /** No clear "easy" conversion */
     private static final int PREFERENCE_AMBIGUOUS = 3;
 
     /**
@@ -413,31 +406,31 @@ public class NativeJavaMethod extends BaseFunction {
             int[] computedWeights1,
             MemberBox member2,
             int[] computedWeights2) {
-        final List<TypeInfo> types1 = member1.getArgTypes();
-        final List<TypeInfo> types2 = member2.getArgTypes();
+        final var types1 = member1.getArgTypes();
+        final var types2 = member2.getArgTypes();
 
         int totalPreference = 0;
         for (int j = 0; j < args.length; j++) {
-            final TypeInfo type1 =
+            final var type1 =
                     member1.vararg && j >= types1.size()
                             ? types1.get(types1.size() - 1)
                             : types1.get(j);
-            final TypeInfo type2 =
+            final var type2 =
                     member2.vararg && j >= types2.size()
                             ? types2.get(types2.size() - 1)
                             : types2.get(j);
             if (type1.asClass() == type2.asClass()) {
                 continue;
             }
-            final Object arg = args[j];
+            final var arg = args[j];
 
             // Determine which of type1, type2 is easier to convert from arg.
 
-            final int rank1 =
+            final var rank1 =
                     j < computedWeights1.length
                             ? computedWeights1[j]
                             : NativeJavaObject.getConversionWeight(arg, type1);
-            final int rank2 =
+            final var rank2 =
                     j < computedWeights2.length
                             ? computedWeights2[j]
                             : NativeJavaObject.getConversionWeight(arg, type2);
@@ -483,8 +476,8 @@ public class NativeJavaMethod extends BaseFunction {
      * @see NativeJavaObject#canConvert(Object, org.mozilla.javascript.lc.type.TypeInfo)
      */
     static int[] failFastConversionWeights(Object[] args, MemberBox member) {
-        final List<TypeInfo> argTypes = member.getArgTypes();
-        int typeLen = argTypes.size();
+        final var argTypes = member.getArgTypes();
+        var typeLen = argTypes.size();
         if (member.vararg) {
             typeLen--;
             if (typeLen > args.length) {
@@ -495,9 +488,9 @@ public class NativeJavaMethod extends BaseFunction {
                 return null;
             }
         }
-        final int[] weights = new int[typeLen];
+        final var weights = new int[typeLen];
         for (int i = 0; i < typeLen; i++) {
-            final int weight = NativeJavaObject.getConversionWeight(args[i], argTypes.get(i));
+            final var weight = NativeJavaObject.getConversionWeight(args[i], argTypes.get(i));
             if (weight >= NativeJavaObject.CONVERSION_NONE) {
                 if (debug) {
                     printDebug("Rejecting (args can't convert) ", member, args);

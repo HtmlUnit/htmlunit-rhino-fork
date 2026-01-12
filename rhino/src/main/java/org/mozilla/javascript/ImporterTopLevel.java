@@ -77,7 +77,7 @@ public class ImporterTopLevel extends TopLevel {
             ctor.sealObject();
         }
 
-        Scriptable proto = (Scriptable) ctor.getPrototypeProperty();
+        var proto = (Scriptable) ctor.getPrototypeProperty();
 
         if (isTopScope) {
             scope.put("importClass", scope, proto.get("importClass", proto));

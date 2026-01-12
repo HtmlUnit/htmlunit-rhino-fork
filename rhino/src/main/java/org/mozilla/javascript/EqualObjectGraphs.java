@@ -323,7 +323,7 @@ final class EqualObjectGraphs {
     private static Object[] getIds(final Scriptable s) {
         if (s instanceof ScriptableObject) {
             // Grabs symbols too
-            try (CompoundOperationMap map = ((ScriptableObject) s).startCompoundOp(false)) {
+            try (var map = ((ScriptableObject) s).startCompoundOp(false)) {
                 return ((ScriptableObject) s).getIds(map, true, true);
             }
         } else if (s instanceof DebuggableObject) {

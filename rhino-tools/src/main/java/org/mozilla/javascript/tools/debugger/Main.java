@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.JFrame;
 import org.mozilla.javascript.Context;
@@ -178,7 +177,7 @@ public class Main {
             global.setOut(main.getOut());
             global.setErr(main.getErr());
 
-            global.installRequire(cx, Collections.EMPTY_LIST, false);
+            global.installRequire(cx, List.of(), false);
 
             URI uri = new File(System.getProperty("user.dir")).toURI();
             ModuleScope scope = new ModuleScope(global, uri, null);

@@ -218,7 +218,7 @@ public final class JSDescriptor<T extends ScriptOrFn<T>> implements Serializable
 
     public boolean hasFunctionNamed(String name) {
         for (int f = 0; f < getFunctionCount(); f++) {
-            JSDescriptor<JSFunction> functionData = getFunction(f);
+            var functionData = getFunction(f);
             if (!functionData.declaredAsFunctionExpression()
                     && name.equals(functionData.getFunctionName())) {
                 return false;
@@ -356,7 +356,7 @@ public final class JSDescriptor<T extends ScriptOrFn<T>> implements Serializable
                 paramAndVarNames[i] = paramAndVarNames[i].intern();
             }
 
-            JSDescriptor<T> result =
+            var result =
                     new JSDescriptor<T>(
                             code.build(),
                             constructor.build(),

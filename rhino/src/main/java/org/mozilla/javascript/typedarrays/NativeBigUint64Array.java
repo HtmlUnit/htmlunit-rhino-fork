@@ -92,15 +92,15 @@ public class NativeBigUint64Array extends NativeBigIntArrayView {
             return BigInteger.valueOf(base);
         } else {
             // Do it in two parts
-            BigInteger lsw = BigInteger.valueOf(base & 0xffffffff);
-            BigInteger msw = BigInteger.valueOf((base >> 32) & 0xffffffff).shiftLeft(32);
+            var lsw = BigInteger.valueOf(base & 0xffffffff);
+            var msw = BigInteger.valueOf((base >> 32) & 0xffffffff).shiftLeft(32);
             return msw.add(lsw);
         }
     }
 
     @Override
     protected Object js_set(int index, Object c) {
-        BigInteger val = ScriptRuntime.toBigInt(c);
+        var val = ScriptRuntime.toBigInt(c);
         if (checkIndex(index)) {
             return Undefined.instance;
         }

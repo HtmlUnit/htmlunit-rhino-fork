@@ -7,7 +7,6 @@
 package org.mozilla.javascript;
 
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
 import java.util.Map;
 import org.mozilla.javascript.lc.type.TypeInfo;
 
@@ -190,8 +189,7 @@ public class NativeJavaClass extends NativeJavaObject implements Function {
     }
 
     static Object constructInternal(Object[] args, MemberBox ctor) {
-        // HtmlUnit args = ctor.wrapArgsInternal(args, Map.of());
-        args = ctor.wrapArgsInternal(args, new HashMap<>());
+        args = ctor.wrapArgsInternal(args, Map.of());
 
         return ctor.newInstance(args);
     }

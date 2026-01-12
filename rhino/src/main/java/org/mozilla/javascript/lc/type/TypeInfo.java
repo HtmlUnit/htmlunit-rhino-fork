@@ -2,7 +2,6 @@ package org.mozilla.javascript.lc.type;
 
 import java.lang.reflect.Array;
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -184,8 +183,7 @@ public interface TypeInfo {
      * @see Class#getEnumConstants()
      */
     default List<Object> enumConstants() {
-        // HtmlUnit return List.of();
-        return (List<Object>) Collections.EMPTY_LIST;
+        return List.of();
     }
 
     default Object createDefaultValue() {

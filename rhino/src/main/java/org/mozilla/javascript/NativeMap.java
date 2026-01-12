@@ -240,7 +240,7 @@ public class NativeMap extends ScriptableObject {
         // been replaced. Since we're not fully constructed yet, create a dummy instance
         // so that we can get our own prototype.
         Scriptable proto = ScriptableObject.getClassPrototype(scope, map.getClassName());
-        ScriptRuntime.LookupResult setCall = ScriptRuntime.getPropAndThis(proto, "set", cx, scope);
+        var setCall = ScriptRuntime.getPropAndThis(proto, "set", cx, scope);
         Callable set = setCall.getCallable();
         ScriptRuntime.loadFromIterable(
                 cx,
