@@ -663,7 +663,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      * @return whether the property is a getter or a setter
      */
     protected boolean isGetterOrSetter(String name, int index, boolean setter) {
-        try (CompoundOperationMap map = startCompoundOp(false)) {
+        try (var map = startCompoundOp(false)) {
             return isGetterOrSetter(map, name, index, setter);
         }
     }
@@ -765,7 +765,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      */
     @Override
     public Object[] getIds() {
-        try (CompoundOperationMap map = startCompoundOp(false)) {
+        try (var map = startCompoundOp(false)) {
             return getIds(map, false, false);
         }
     }
@@ -781,7 +781,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      */
     @Override
     public Object[] getAllIds() {
-        try (CompoundOperationMap map = startCompoundOp(false)) {
+        try (var map = startCompoundOp(false)) {
             return getIds(map, true, false);
         }
     }
@@ -864,7 +864,7 @@ public abstract class ScriptableObject extends SlotMapOwner
         Context cx = Context.getCurrentContext();
         Object hasInstance = ScriptRuntime.getObjectElem(this, SymbolKey.HAS_INSTANCE, cx);
         if (hasInstance instanceof Function) {
-            Scriptable scope = ((Function) hasInstance).getDeclarationScope();
+            var scope = ((Function) hasInstance).getDeclarationScope();
             return ScriptRuntime.toBoolean(
                     ((Function) hasInstance).call(cx, scope, this, new Object[] {this}));
         }
@@ -1529,7 +1529,7 @@ public abstract class ScriptableObject extends SlotMapOwner
      */
     public void defineProperty(
             String propertyName, Object delegateTo, Method getter, Method setter, int attributes) {
-        TypeInfoFactory typeFactory = TypeInfoFactory.getOrElse(this, TypeInfoFactory.GLOBAL);
+        var typeFactory = TypeInfoFactory.getOrElse(this, TypeInfoFactory.GLOBAL);
 
         MemberBox getterBox = null;
         if (getter != null) {
@@ -1629,13 +1629,13 @@ public abstract class ScriptableObject extends SlotMapOwner
      */
     public void defineOwnProperties(Context cx, ScriptableObject props) {
         Object[] ids;
-        try (CompoundOperationMap map = props.startCompoundOp(false)) {
+        try (var map = props.startCompoundOp(false)) {
             ids = props.getIds(map, false, true);
         }
         DescriptorInfo[] descs = new DescriptorInfo[ids.length];
         for (int i = 0, len = ids.length; i < len; ++i) {
             Object descObj = ScriptRuntime.getObjectElem(props, ids[i], cx);
-            DescriptorInfo desc = new DescriptorInfo(ensureScriptableObject(descObj));
+            var desc = new DescriptorInfo(ensureScriptableObject(descObj));
             checkPropertyDefinition(desc);
             descs[i] = desc;
         }
@@ -1704,7 +1704,7 @@ public abstract class ScriptableObject extends SlotMapOwner
 
             return ((BuiltInSlot<?>) aSlot).applyNewDescriptor(id, desc, checkValid, key, index);
         } else {
-            try (CompoundOperationMap map = startCompoundOp(true)) {
+            try (var map = startCompoundOp(true)) {
                 return defineOrdinaryProperty(
                         ScriptableObject::setSlotValue,
                         this,
@@ -2044,7 +2044,7 @@ public abstract class ScriptableObject extends SlotMapOwner
     }
 
     private void replaceLambdaAccessorSlot(Context cx, Object key, LambdaAccessorSlot newSlot) {
-        DescriptorInfo newDesc = newSlot.buildPropertyDescriptor(cx);
+        var newDesc = newSlot.buildPropertyDescriptor(cx);
         checkPropertyDefinition(newDesc);
         getMap().compute(
                         this,
@@ -2072,7 +2072,7 @@ public abstract class ScriptableObject extends SlotMapOwner
         }
 
         replacedSlot.replaceWith(newSlot);
-        DescriptorInfo replacedDesc = replacedSlot.buildPropertyDescriptor(cx);
+        var replacedDesc = replacedSlot.buildPropertyDescriptor(cx);
 
         checkPropertyChangeForSlot(key, existing, replacedDesc);
         return replacedSlot;
@@ -2146,7 +2146,7 @@ public abstract class ScriptableObject extends SlotMapOwner
                             throw ScriptRuntime.typeErrorById(
                                     "msg.change.writable.false.to.true.with.configurable.false",
                                     id);
-                        Object currentValue =
+                        var currentValue =
                                 isBuiltIn
                                         ? ((BuiltInSlot<?>) current).getValue(null)
                                         : current.value;
@@ -2444,7 +2444,7 @@ public abstract class ScriptableObject extends SlotMapOwner
             }
             toInitialize.clear();
 
-            try (CompoundOperationMap map = startCompoundOp(false)) {
+            try (var map = startCompoundOp(false)) {
                 for (Slot slot : map) {
                     Object value = slot.value;
                     if (value instanceof LazilyLoadedCtor) {
@@ -3190,7 +3190,7 @@ public abstract class ScriptableObject extends SlotMapOwner
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
-        try (CompoundOperationMap map = startCompoundOp(false)) {
+        try (var map = startCompoundOp(false)) {
             int objectsCount = map.dirtySize();
             if (objectsCount == 0) {
                 out.writeInt(0);

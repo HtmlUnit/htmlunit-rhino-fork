@@ -132,8 +132,7 @@ public interface TypeInfoFactory extends Serializable {
      * @see TypeInfo#consolidate(Map)
      */
     default Map<VariableTypeInfo, TypeInfo> getConsolidationMapping(Class<?> from) {
-        // HtmlUnit return Map.of();
-        return (Map<VariableTypeInfo, TypeInfo>) Collections.EMPTY_MAP;
+        return Map.of();
     }
 
     /// helpers
@@ -173,22 +172,20 @@ public interface TypeInfoFactory extends Serializable {
             return types;
         }
 
-        int size = types.size();
+        var size = types.size();
 
         if (size == 0) {
-            // HtmlUnit return List.of();
-            return (List<TypeInfo>) Collections.EMPTY_LIST;
+            return List.of();
         }
 
         if (size == 1) {
-            TypeInfo type = types.get(0);
-            TypeInfo consolidated = type.consolidate(mapping);
-            // HtmlUnit return type == consolidated ? types : List.of(consolidated);
-            return type == consolidated ? types : Collections.singletonList(consolidated);
+            var type = types.get(0);
+            var consolidated = type.consolidate(mapping);
+            return type == consolidated ? types : List.of(consolidated);
         }
 
-        ArrayList<TypeInfo> consolidatedTypes = new ArrayList<TypeInfo>(types.size());
-        for (TypeInfo type : types) {
+        var consolidatedTypes = new ArrayList<TypeInfo>(types.size());
+        for (var type : types) {
             consolidatedTypes.add(type.consolidate(mapping));
         }
         return consolidatedTypes;
@@ -203,17 +200,13 @@ public interface TypeInfoFactory extends Serializable {
     static Map<VariableTypeInfo, TypeInfo> transformMapping(
             Map<VariableTypeInfo, TypeInfo> mapping, Map<VariableTypeInfo, TypeInfo> transformer) {
         if (mapping.isEmpty()) {
-            // HtmlUnit return Map.of();
-            return new HashMap<>();
+            return Map.of();
         } else if (mapping.size() == 1) {
-            Map.Entry<VariableTypeInfo, TypeInfo> entry = mapping.entrySet().iterator().next();
-            // HtmlUnit return Map.of(entry.getKey(), entry.getValue().consolidate(transformer));
-            Map<VariableTypeInfo, TypeInfo> result = new HashMap<>();
-            result.put(entry.getKey(), entry.getValue().consolidate(transformer));
-            return result;
+            var entry = mapping.entrySet().iterator().next();
+            return Map.of(entry.getKey(), entry.getValue().consolidate(transformer));
         }
-        HashMap<VariableTypeInfo, TypeInfo> transformed = new HashMap<>(mapping);
-        for (Map.Entry<VariableTypeInfo, TypeInfo> entry : transformed.entrySet()) {
+        var transformed = new HashMap<>(mapping);
+        for (var entry : transformed.entrySet()) {
             entry.setValue(entry.getValue().consolidate(transformer));
         }
         return transformed;
@@ -251,8 +244,8 @@ public interface TypeInfoFactory extends Serializable {
         if (types.length == 0) {
             return EMPTY_ARRAY;
         }
-        final int len = types.length;
-        final TypeInfo[] arr = new TypeInfo[len];
+        final var len = types.length;
+        final var arr = new TypeInfo[len];
         for (int i = 0; i < len; i++) {
             arr[i] = create(types[i]);
         }
@@ -262,14 +255,11 @@ public interface TypeInfoFactory extends Serializable {
     default <T extends Type> List<TypeInfo> createList(T[] types) {
         switch (types.length) {
             case 0:
-                // HtmlUnit return List.of();
-                return (List<TypeInfo>) Collections.EMPTY_LIST;
+                return List.of();
             case 1:
-                // HtmlUnit return List.of(create(types[0]));
-                return Collections.singletonList(create(types[0]));
+                return List.of(create(types[0]));
             case 2:
-                // HtmlUnit return List.of(create(types[0]), create(types[1]));
-                return Collections.unmodifiableList(Arrays.asList(create(types[0]), create(types[1])));
+                return List.of(create(types[0]), create(types[1]));
             default:
                 // List.of(createArray(types)) will cause one more array copying
                 return Collections.unmodifiableList(Arrays.asList(createArray(types)));
@@ -388,7 +378,7 @@ public interface TypeInfoFactory extends Serializable {
      * @see #associate(ScriptableObject topScope)
      */
     static TypeInfoFactory get(Scriptable scope) {
-        TypeInfoFactory got = getOrElse(scope, null);
+        var got = getOrElse(scope, null);
         if (got == null) {
             throw new IllegalArgumentException("top scope have no associated TypeInfoFactory");
         }
@@ -405,7 +395,7 @@ public interface TypeInfoFactory extends Serializable {
      * @see #associate(ScriptableObject topScope)
      */
     static TypeInfoFactory getOrElse(Scriptable scope, TypeInfoFactory fallback) {
-        TypeInfoFactory got = (TypeInfoFactory) ScriptableObject.getTopScopeValue(scope, "TypeInfoFactory");
+        var got = (TypeInfoFactory) ScriptableObject.getTopScopeValue(scope, "TypeInfoFactory");
         if (got == null) {
             return fallback;
         }

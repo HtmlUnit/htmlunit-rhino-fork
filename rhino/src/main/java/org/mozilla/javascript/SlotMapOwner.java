@@ -1,7 +1,7 @@
 package org.mozilla.javascript;
 
 import java.lang.invoke.MethodHandles;
-// HtmlUnit import java.lang.invoke.VarHandle;
+import java.lang.invoke.VarHandle;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -19,9 +19,8 @@ public abstract class SlotMapOwner {
 
     static final SlotMap EMPTY_SLOT_MAP = new EmptySlotMap();
 
-    // HtmlUnit static final SlotMap THREAD_SAFE_EMPTY_SLOT_MAP = new ThreadSafeEmptySlotMap();
+    static final SlotMap THREAD_SAFE_EMPTY_SLOT_MAP = new ThreadSafeEmptySlotMap();
 
-    /* HtmlUnit
     @SuppressWarnings("AndroidJdkLibsChecker")
     // https://developer.android.com/reference/java/lang/invoke/VarHandle added in API level 33
     // Note: Due presence of this class, dexing of rhino will not be possible for APIs < 26
@@ -42,7 +41,6 @@ public abstract class SlotMapOwner {
             return (SlotMap) SLOT_MAP.compareAndExchange(owner, oldMap, newMap);
         }
     }
-    HtmlUnit */
 
     private static class EmptySlotMap implements SlotMap {
 
@@ -63,8 +61,8 @@ public abstract class SlotMapOwner {
 
         @Override
         public Slot modify(SlotMapOwner owner, Object key, int index, int attributes) {
-            Slot newSlot = new Slot(key, index, attributes);
-            SingleEntrySlotMap map = new SingleEntrySlotMap(newSlot);
+            var newSlot = new Slot(key, index, attributes);
+            var map = new SingleEntrySlotMap(newSlot);
             owner.setMap(map);
             return newSlot;
         }
@@ -77,7 +75,7 @@ public abstract class SlotMapOwner {
         @Override
         public void add(SlotMapOwner owner, Slot newSlot) {
             if (newSlot != null) {
-                SingleEntrySlotMap map = new SingleEntrySlotMap(newSlot);
+                var map = new SingleEntrySlotMap(newSlot);
                 owner.setMap(map);
             }
         }
@@ -89,10 +87,10 @@ public abstract class SlotMapOwner {
                 Object key,
                 int index,
                 SlotComputer<S> c) {
-            S newSlot = c.compute(key, index, null, compoundOp, owner);
+            var newSlot = c.compute(key, index, null, compoundOp, owner);
             if (newSlot != null) {
                 if (!compoundOp.isTouched()) {
-                    SingleEntrySlotMap map = new SingleEntrySlotMap(newSlot);
+                    var map = new SingleEntrySlotMap(newSlot);
                     owner.setMap(map);
                 } else {
                     // The map has been touched so delegate the add (can't do
@@ -104,7 +102,6 @@ public abstract class SlotMapOwner {
         }
     }
 
-    /* HtmlUnit
     private static final class ThreadSafeEmptySlotMap extends EmptySlotMap {
 
         @Override
@@ -156,7 +153,6 @@ public abstract class SlotMapOwner {
                     .startCompoundOp(owner, forWriting);
         }
     }
-    HtmlUnit */
 
     private static final class Iter implements Iterator<Slot> {
         private Slot next;
@@ -232,7 +228,7 @@ public abstract class SlotMapOwner {
             if (owner == null) {
                 throw new IllegalStateException();
             } else {
-                EmbeddedSlotMap newMap = new EmbeddedSlotMap();
+                var newMap = new EmbeddedSlotMap();
                 owner.setMap(newMap);
                 newMap.add(owner, slot);
                 newMap.add(owner, newSlot);
@@ -246,14 +242,13 @@ public abstract class SlotMapOwner {
                 Object key,
                 int index,
                 SlotComputer<S> c) {
-            EmbeddedSlotMap newMap = new EmbeddedSlotMap();
+            var newMap = new EmbeddedSlotMap();
             owner.setMap(newMap);
             newMap.add(owner, slot);
             return newMap.compute(owner, compoundOp, key, index, c);
         }
     }
 
-    /* HtmlUnit
     static final class ThreadSafeSingleEntrySlotMap extends SingleEntrySlotMap {
 
         ThreadSafeSingleEntrySlotMap(Slot slot) {
@@ -299,7 +294,6 @@ public abstract class SlotMapOwner {
             return currentMap;
         }
     }
-    HtmlUnit */
 
     /**
      * This holds all the slots. It may or may not be thread-safe, and may expand itself to a

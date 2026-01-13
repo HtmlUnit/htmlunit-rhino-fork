@@ -22,8 +22,7 @@ public interface Script {
      * @deprecated Use {@link #exec(Context, Scriptable, Scriptable)}
      */
     // Maintained for backward compatibility of already-compiled classes
-    // HtmlUnit @Deprecated(since = "1.8.1")
-    @Deprecated
+    @Deprecated(since = "1.8.1")
     default Object exec(Context cx, Scriptable scope) {
         return exec(cx, scope, scope);
     }

@@ -2,7 +2,6 @@ package org.mozilla.javascript;
 
 import java.util.concurrent.locks.StampedLock;
 
-/* HtmlUnit
 @SuppressWarnings("AndroidJdkLibsChecker")
 class ThreadSafeEmbeddedSlotMap extends EmbeddedSlotMap implements LockAwareSlotMap {
 
@@ -161,4 +160,3 @@ class ThreadSafeEmbeddedSlotMap extends EmbeddedSlotMap implements LockAwareSlot
         current = newMap;
     }
 }
-HtmlUnit */

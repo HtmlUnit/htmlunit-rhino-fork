@@ -1,6 +1,5 @@
 package org.mozilla.javascript.regexp;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -70,119 +69,113 @@ public class UnicodeProperties {
     public static final byte FALSE = TRUE + 1;
 
     // Property Name Map (canonical names and aliases)
-    public static Map<String, Byte> PROPERTY_NAMES;
-    static {
-        Map<String, Byte> map = new HashMap<>();
-        map.put("Alphabetic", ALPHABETIC);
-        map.put("Alpha", ALPHABETIC);
-        map.put("ASCII", ASCII);
-        map.put("Case_Ignorable", CASE_IGNORABLE);
-        map.put("CI", CASE_IGNORABLE);
-        map.put("General_Category", GENERAL_CATEGORY);
-        map.put("gc", GENERAL_CATEGORY);
-        map.put("Script", SCRIPT);
-        map.put("sc", SCRIPT);
-        map.put("ASCII_Hex_Digit", ASCII_HEX_DIGIT);
-        map.put("AHex", ASCII_HEX_DIGIT);
-        map.put("Hex_Digit", HEX_DIGIT);
-        map.put("Hex", HEX_DIGIT);
-        map.put("ID_Continue", ID_CONTINUE);
-        map.put("IDC", ID_CONTINUE);
-        map.put("ID_Start", ID_START);
-        map.put("IDS", ID_START);
-        map.put("Lowercase", LOWERCASE);
-        map.put("Lower", LOWERCASE);
-        map.put("Uppercase", UPPERCASE);
-        map.put("Upper", UPPERCASE);
-        map.put("White_Space", WHITE_SPACE);
-        map.put("space", WHITE_SPACE);
-        PROPERTY_NAMES = map;
-    }
+    public static final Map<String, Byte> PROPERTY_NAMES =
+            Map.ofEntries(
+                    Map.entry("Alphabetic", ALPHABETIC),
+                    Map.entry("Alpha", ALPHABETIC),
+                    Map.entry("ASCII", ASCII),
+                    Map.entry("Case_Ignorable", CASE_IGNORABLE),
+                    Map.entry("CI", CASE_IGNORABLE),
+                    Map.entry("General_Category", GENERAL_CATEGORY),
+                    Map.entry("gc", GENERAL_CATEGORY),
+                    Map.entry("Script", SCRIPT),
+                    Map.entry("sc", SCRIPT),
+                    Map.entry("ASCII_Hex_Digit", ASCII_HEX_DIGIT),
+                    Map.entry("AHex", ASCII_HEX_DIGIT),
+                    Map.entry("Hex_Digit", HEX_DIGIT),
+                    Map.entry("Hex", HEX_DIGIT),
+                    Map.entry("ID_Continue", ID_CONTINUE),
+                    Map.entry("IDC", ID_CONTINUE),
+                    Map.entry("ID_Start", ID_START),
+                    Map.entry("IDS", ID_START),
+                    Map.entry("Lowercase", LOWERCASE),
+                    Map.entry("Lower", LOWERCASE),
+                    Map.entry("Uppercase", UPPERCASE),
+                    Map.entry("Upper", UPPERCASE),
+                    Map.entry("White_Space", WHITE_SPACE),
+                    Map.entry("space", WHITE_SPACE));
 
     // Property Value Map for General Category (canonical names and aliases)
-    public static Map<String, Byte> PROPERTY_VALUES;
-    static {
-        Map<String, Byte> map = new HashMap<>();
-        map.put("Other", OTHER);
-        map.put("C", OTHER);
-        map.put("Control", CONTROL);
-        map.put("Cc", CONTROL);
-        map.put("cntrl", CONTROL);
-        map.put("Format", FORMAT);
-        map.put("Cf", FORMAT);
-        map.put("Unassigned", UNASSIGNED);
-        map.put("Cn", UNASSIGNED);
-        map.put("Private_Use", PRIVATE_USE);
-        map.put("Co", PRIVATE_USE);
-        map.put("Surrogate", SURROGATE);
-        map.put("Cs", SURROGATE);
-        map.put("Letter", LETTER);
-        map.put("L", LETTER);
-        map.put("Lowercase_Letter", LOWERCASE_LETTER);
-        map.put("Ll", LOWERCASE_LETTER);
-        map.put("Modifier_Letter", MODIFIER_LETTER);
-        map.put("Lm", MODIFIER_LETTER);
-        map.put("Other_Letter", OTHER_LETTER);
-        map.put("Lo", OTHER_LETTER);
-        map.put("Titlecase_Letter", TITLECASE_LETTER);
-        map.put("Lt", TITLECASE_LETTER);
-        map.put("Uppercase_Letter", UPPERCASE_LETTER);
-        map.put("Lu", UPPERCASE_LETTER);
-        map.put("Mark", MARK);
-        map.put("M", MARK);
-        map.put("Combining_Mark", MARK);
-        map.put("Spacing_Mark", SPACING_MARK);
-        map.put("Mc", SPACING_MARK);
-        map.put("Enclosing_Mark", ENCLOSING_MARK);
-        map.put("Me", ENCLOSING_MARK);
-        map.put("Nonspacing_Mark", NONSPACING_MARK);
-        map.put("Mn", NONSPACING_MARK);
-        map.put("Number", NUMBER);
-        map.put("N", NUMBER);
-        map.put("Decimal_Number", DECIMAL_NUMBER);
-        map.put("Nd", DECIMAL_NUMBER);
-        map.put("digit", NUMBER);
-        map.put("Letter_Number", LETTER_NUMBER);
-        map.put("Nl", LETTER_NUMBER);
-        map.put("Other_Number", OTHER_NUMBER);
-        map.put("No", OTHER_NUMBER);
-        map.put("Punctuation", PUNCTUATION);
-        map.put("P", PUNCTUATION);
-        map.put("punct", PUNCTUATION);
-        map.put("Connector_Punctuation", CONNECTOR_PUNCTUATION);
-        map.put("Pc", CONNECTOR_PUNCTUATION);
-        map.put("Dash_Punctuation", DASH_PUNCTUATION);
-        map.put("Pd", DASH_PUNCTUATION);
-        map.put("Close_Punctuation", CLOSE_PUNCTUATION);
-        map.put("Pe", CLOSE_PUNCTUATION);
-        map.put("Final_Punctuation", FINAL_PUNCTUATION);
-        map.put("Pf", FINAL_PUNCTUATION);
-        map.put("Initial_Punctuation", INITIAL_PUNCTUATION);
-        map.put("Pi", INITIAL_PUNCTUATION);
-        map.put("Other_Punctuation", OTHER_PUNCTUATION);
-        map.put("Po", OTHER_PUNCTUATION);
-        map.put("Open_Punctuation", OPEN_PUNCTUATION);
-        map.put("Ps", OPEN_PUNCTUATION);
-        map.put("Symbol", SYMBOL);
-        map.put("S", SYMBOL);
-        map.put("Currency_Symbol", CURRENCY_SYMBOL);
-        map.put("Sc", CURRENCY_SYMBOL);
-        map.put("Modifier_Symbol", MODIFIER_SYMBOL);
-        map.put("Sk", MODIFIER_SYMBOL);
-        map.put("Math_Symbol", MATH_SYMBOL);
-        map.put("Sm", MATH_SYMBOL);
-        map.put("Other_Symbol", OTHER_SYMBOL);
-        map.put("So", OTHER_SYMBOL);
-        map.put("Separator", SEPARATOR);
-        map.put("Z", SEPARATOR);
-        map.put("Line_Separator", LINE_SEPARATOR);
-        map.put("Zl", LINE_SEPARATOR);
-        map.put("Paragraph_Separator", PARAGRAPH_SEPARATOR);
-        map.put("Zp", PARAGRAPH_SEPARATOR);
-        map.put("Space_Separator", SPACE_SEPARATOR);
-        map.put("Zs", SPACE_SEPARATOR);
-        PROPERTY_VALUES = map;
-    }
+    public static final Map<String, Byte> PROPERTY_VALUES =
+            Map.<String, Byte>ofEntries(
+                    Map.entry("Other", OTHER),
+                    Map.entry("C", OTHER),
+                    Map.entry("Control", CONTROL),
+                    Map.entry("Cc", CONTROL),
+                    Map.entry("cntrl", CONTROL),
+                    Map.entry("Format", FORMAT),
+                    Map.entry("Cf", FORMAT),
+                    Map.entry("Unassigned", UNASSIGNED),
+                    Map.entry("Cn", UNASSIGNED),
+                    Map.entry("Private_Use", PRIVATE_USE),
+                    Map.entry("Co", PRIVATE_USE),
+                    Map.entry("Surrogate", SURROGATE),
+                    Map.entry("Cs", SURROGATE),
+                    Map.entry("Letter", LETTER),
+                    Map.entry("L", LETTER),
+                    Map.entry("Lowercase_Letter", LOWERCASE_LETTER),
+                    Map.entry("Ll", LOWERCASE_LETTER),
+                    Map.entry("Modifier_Letter", MODIFIER_LETTER),
+                    Map.entry("Lm", MODIFIER_LETTER),
+                    Map.entry("Other_Letter", OTHER_LETTER),
+                    Map.entry("Lo", OTHER_LETTER),
+                    Map.entry("Titlecase_Letter", TITLECASE_LETTER),
+                    Map.entry("Lt", TITLECASE_LETTER),
+                    Map.entry("Uppercase_Letter", UPPERCASE_LETTER),
+                    Map.entry("Lu", UPPERCASE_LETTER),
+                    Map.entry("Mark", MARK),
+                    Map.entry("M", MARK),
+                    Map.entry("Combining_Mark", MARK),
+                    Map.entry("Spacing_Mark", SPACING_MARK),
+                    Map.entry("Mc", SPACING_MARK),
+                    Map.entry("Enclosing_Mark", ENCLOSING_MARK),
+                    Map.entry("Me", ENCLOSING_MARK),
+                    Map.entry("Nonspacing_Mark", NONSPACING_MARK),
+                    Map.entry("Mn", NONSPACING_MARK),
+                    Map.entry("Number", NUMBER),
+                    Map.entry("N", NUMBER),
+                    Map.entry("Decimal_Number", DECIMAL_NUMBER),
+                    Map.entry("Nd", DECIMAL_NUMBER),
+                    Map.entry("digit", NUMBER),
+                    Map.entry("Letter_Number", LETTER_NUMBER),
+                    Map.entry("Nl", LETTER_NUMBER),
+                    Map.entry("Other_Number", OTHER_NUMBER),
+                    Map.entry("No", OTHER_NUMBER),
+                    Map.entry("Punctuation", PUNCTUATION),
+                    Map.entry("P", PUNCTUATION),
+                    Map.entry("punct", PUNCTUATION),
+                    Map.entry("Connector_Punctuation", CONNECTOR_PUNCTUATION),
+                    Map.entry("Pc", CONNECTOR_PUNCTUATION),
+                    Map.entry("Dash_Punctuation", DASH_PUNCTUATION),
+                    Map.entry("Pd", DASH_PUNCTUATION),
+                    Map.entry("Close_Punctuation", CLOSE_PUNCTUATION),
+                    Map.entry("Pe", CLOSE_PUNCTUATION),
+                    Map.entry("Final_Punctuation", FINAL_PUNCTUATION),
+                    Map.entry("Pf", FINAL_PUNCTUATION),
+                    Map.entry("Initial_Punctuation", INITIAL_PUNCTUATION),
+                    Map.entry("Pi", INITIAL_PUNCTUATION),
+                    Map.entry("Other_Punctuation", OTHER_PUNCTUATION),
+                    Map.entry("Po", OTHER_PUNCTUATION),
+                    Map.entry("Open_Punctuation", OPEN_PUNCTUATION),
+                    Map.entry("Ps", OPEN_PUNCTUATION),
+                    Map.entry("Symbol", SYMBOL),
+                    Map.entry("S", SYMBOL),
+                    Map.entry("Currency_Symbol", CURRENCY_SYMBOL),
+                    Map.entry("Sc", CURRENCY_SYMBOL),
+                    Map.entry("Modifier_Symbol", MODIFIER_SYMBOL),
+                    Map.entry("Sk", MODIFIER_SYMBOL),
+                    Map.entry("Math_Symbol", MATH_SYMBOL),
+                    Map.entry("Sm", MATH_SYMBOL),
+                    Map.entry("Other_Symbol", OTHER_SYMBOL),
+                    Map.entry("So", OTHER_SYMBOL),
+                    Map.entry("Separator", SEPARATOR),
+                    Map.entry("Z", SEPARATOR),
+                    Map.entry("Line_Separator", LINE_SEPARATOR),
+                    Map.entry("Zl", LINE_SEPARATOR),
+                    Map.entry("Paragraph_Separator", PARAGRAPH_SEPARATOR),
+                    Map.entry("Zp", PARAGRAPH_SEPARATOR),
+                    Map.entry("Space_Separator", SPACE_SEPARATOR),
+                    Map.entry("Zs", SPACE_SEPARATOR));
 
     /**
      * Looks up a property name and optionally a value and returns an encoded int. For binary

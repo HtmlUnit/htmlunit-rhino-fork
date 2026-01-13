@@ -30,7 +30,6 @@ class SlotMapPromotionTest {
                 HashSlotMap.class);
     }
 
-    /* HtmlUnit
     @Test
     public void promotionFromThreadSafeEmptyToSingleSlot() {
         assertPromotes(
@@ -55,7 +54,6 @@ class SlotMapPromotionTest {
                 },
                 ThreadSafeHashSlotMap.class);
     }
-    HtmlUnit */
 
     private static void fillToCapacity(int size, EmbeddedSlotMap map) {
         for (int i = 0; i < size; ++i) {

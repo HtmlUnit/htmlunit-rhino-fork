@@ -1,7 +1,6 @@
 package org.mozilla.javascript.lc.type;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,7 @@ public interface ParameterizedTypeInfo extends TypeInfo {
 
     @Override
     default TypeInfo param(int index) {
-        final List<TypeInfo> params = params();
+        final var params = params();
         return index >= 0 && index < params.size() ? params.get(index) : TypeInfo.NONE;
     }
 
@@ -41,10 +40,10 @@ public interface ParameterizedTypeInfo extends TypeInfo {
      * where the {@code E} the type variable declared by {@link List}
      */
     default Map<VariableTypeInfo, TypeInfo> extractConsolidationMapping(TypeInfoFactory factory) {
-        TypeVariable<? extends Class<?>>[] typeVariables = this.asClass().getTypeParameters();
-        List<TypeInfo> actualParams = this.params();
+        var typeVariables = this.asClass().getTypeParameters();
+        var actualParams = this.params();
 
-        int len = typeVariables.length;
+        var len = typeVariables.length;
         if (len != actualParams.size()) {
             throw new IllegalStateException(
                     String.format(
@@ -57,13 +56,10 @@ public interface ParameterizedTypeInfo extends TypeInfo {
         }
 
         if (len == 1) {
-            // HtmlUnit return Map.of((VariableTypeInfo) factory.create(typeVariables[0]), actualParams.get(0));
-            Map<VariableTypeInfo, TypeInfo> result = new HashMap<>();
-            result.put((VariableTypeInfo) factory.create(typeVariables[0]), actualParams.get(0));
-            return result;
+            return Map.of((VariableTypeInfo) factory.create(typeVariables[0]), actualParams.get(0));
         }
 
-        HashMap<VariableTypeInfo, TypeInfo> mapping = new HashMap<VariableTypeInfo, TypeInfo>();
+        var mapping = new HashMap<VariableTypeInfo, TypeInfo>();
         for (int i = 0; i < len; i++) {
             mapping.put((VariableTypeInfo) factory.create(typeVariables[i]), actualParams.get(i));
         }
