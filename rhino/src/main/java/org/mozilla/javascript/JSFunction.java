@@ -226,6 +226,11 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
         return f;
     }
 
+    @Override
+    public boolean isConstructor() {
+        return descriptor.getConstructor() != null;
+    }
+
     // HtmlUnit
     Object callerObj;
 
