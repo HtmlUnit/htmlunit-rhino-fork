@@ -4927,7 +4927,7 @@ public final class Interpreter extends Icode implements Evaluator {
     }
 
     private static void exitFrame(Context cx, CallFrame frame, Object throwable) {
-        // HtmlUnit
+        // HtmlUnit - enhanced Arguments support
         if (frame.fnOrScript instanceof JSFunction) {
             JSFunction jsFunction = (JSFunction) frame.fnOrScript;
             jsFunction.setCallerObj(null);
