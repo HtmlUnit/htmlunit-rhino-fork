@@ -1004,7 +1004,7 @@ public class NativeArray extends ScriptableObject implements List {
         if (cx.iterating == null) {
             toplevel = true;
             iterating = false;
-            cx.iterating = new HashSet<Scriptable>();
+            cx.iterating = new HashSet<Object>();
         } else {
             toplevel = false;
             iterating = cx.iterating.contains(o);
