@@ -63,7 +63,7 @@ public class NullableArgumentsConversionTest {
                             };
                     Object convertedArg =
                             FunctionObject.convertArg(
-                                    context, scriptable, arg, typeTag /* HtmlUnit, isNullable */);
+                                    context, scriptable, arg, typeTag, isNullable);
 
                     assertThat(convertedArg, is(expectedConvertedArg));
                     return null;

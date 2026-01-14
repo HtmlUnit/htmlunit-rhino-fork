@@ -171,32 +171,9 @@ public class FunctionObject extends BaseFunction {
     }
 
     public static Object convertArg(Context cx, Scriptable scope, Object arg, int typeTag) {
-        /* HtmlUnit preserve the old code */
-
-        switch (typeTag) {
-            case JAVA_STRING_TYPE:
-                if (arg instanceof String) return arg;
-                return ScriptRuntime.toString(arg);
-            case JAVA_INT_TYPE:
-                if (arg instanceof Integer) return arg;
-                return Integer.valueOf(ScriptRuntime.toInt32(arg));
-            case JAVA_BOOLEAN_TYPE:
-                if (arg instanceof Boolean) return arg;
-                return ScriptRuntime.toBoolean(arg) ? Boolean.TRUE : Boolean.FALSE;
-            case JAVA_DOUBLE_TYPE:
-                if (arg instanceof Double) return arg;
-                return Double.valueOf(ScriptRuntime.toNumber(arg));
-            case JAVA_SCRIPTABLE_TYPE:
-                return ScriptRuntime.toObjectOrNull(cx, arg, scope);
-            case JAVA_OBJECT_TYPE:
-                if (arg instanceof ConsString) return arg.toString();
-                return arg;
-            default:
-                throw new IllegalArgumentException();
-        }
+        return convertArg(cx, scope, arg, typeTag, false);
     }
 
-    /* HtmlUnit
     public static Object convertArg(
             Context cx, Scriptable scope, Object arg, int typeTag, boolean isNullable) {
         switch (typeTag) {
@@ -229,7 +206,6 @@ public class FunctionObject extends BaseFunction {
                 throw new IllegalArgumentException();
         }
     }
-    HtmlUnit */
 
     /**
      * Return the value defined by the method used to construct the object (number of parameters of
@@ -373,7 +349,7 @@ public class FunctionObject extends BaseFunction {
         if (tag == JAVA_UNSUPPORTED_TYPE) {
             throw Context.reportRuntimeErrorById("msg.cant.convert", desired.getName());
         }
-        return convertArg(cx, scope, arg, tag /* HtmlUnit, false */);
+        return convertArg(cx, scope, arg, tag, false);
     }
 
     /**
@@ -452,8 +428,8 @@ public class FunctionObject extends BaseFunction {
                                     cx,
                                     scope,
                                     arg,
-                                    typeTags[i] /* HtmlUnit,
-                                    member.getArgNullability().isNullable(i) HtmlUnit */);
+                                    typeTags[i],
+                                    member.getArgNullability().isNullable(i));
                     if (arg != converted) {
                         if (invokeArgs == args) {
                             invokeArgs = args.clone();
@@ -472,8 +448,8 @@ public class FunctionObject extends BaseFunction {
                                     cx,
                                     scope,
                                     arg,
-                                    typeTags[i] /* HtmlUnit,
-                                    member.getArgNullability().isNullable(i) HtmlUnit */);
+                                    typeTags[i],
+                                    member.getArgNullability().isNullable(i));
                 }
             }
 
