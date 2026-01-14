@@ -404,9 +404,9 @@ public class FunctionObject extends BaseFunction {
 
             // HtmlUnit support also methods with the scope as second parameter
             } else if (parmsLength == VARARGS_METHOD_WITH_SCOPE) {
-                    Object[] invokeArgs = {cx, scope, thisObj, args, this};
-                    result = member.invoke(null, invokeArgs);
-                    checkMethodResult = true;
+                Object[] invokeArgs = {cx, scope, thisObj, args, this};
+                result = member.invoke(null, invokeArgs);
+                checkMethodResult = true;
             } else if (parmsLength == VARARGS_CTOR_WITH_SCOPE) {
                 boolean inNewExpr = (thisObj == null);
                 Boolean b = inNewExpr ? Boolean.TRUE : Boolean.FALSE;
@@ -520,7 +520,8 @@ public class FunctionObject extends BaseFunction {
      */
     @Override
     public Scriptable createObject(Context cx, Scriptable scope) {
-        if (member.isCtor() || parmsLength == VARARGS_CTOR) {
+        // HtmlUnit if (member.isCtor() || parmsLength == VARARGS_CTOR) {
+        if (member.isCtor() || parmsLength == VARARGS_CTOR || parmsLength == VARARGS_CTOR_WITH_SCOPE) {
             return null;
         }
         Scriptable result;
@@ -567,7 +568,7 @@ public class FunctionObject extends BaseFunction {
     private static final short VARARGS_METHOD = -1;
     private static final short VARARGS_CTOR = -2;
 
-    // HtmlUnit extension
+    // HtmlUnit support also methods with the scope as second parameter
     private static final short VARARGS_METHOD_WITH_SCOPE = -98;
     private static final short VARARGS_CTOR_WITH_SCOPE = -99;
 
