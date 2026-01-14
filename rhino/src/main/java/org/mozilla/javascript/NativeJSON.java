@@ -256,15 +256,7 @@ public final class NativeJSON extends ScriptableObject {
             value = getProperty(holder, keyString);
         } else {
             keyInt = ((Number) key).intValue();
-            // HtmlUnit
-            // value = getProperty(holder, keyInt);
-            if (keyInt < 0) {
-                value = getProperty(holder, Integer.toString(keyInt));
-            }
-            else {
-                value = getProperty(holder, keyInt);
-            }
-            // end HtmlUnit
+            value = getProperty(holder, keyInt);
         }
 
         if (value instanceof Scriptable && hasProperty((Scriptable) value, "toJSON")) {
