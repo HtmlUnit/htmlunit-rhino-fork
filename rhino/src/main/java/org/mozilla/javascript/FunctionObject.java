@@ -95,28 +95,51 @@ public class FunctionObject extends BaseFunction {
         this.functionName = name;
         var types = member.getArgTypes();
         int arity = types.size();
-        if (arity == 5 && (types.get(2).isArray() || types.get(3).isArray())) {
+        if (arity == 4 && (types.get(1).isArray() || types.get(2).isArray())) {
             // Either variable args or an error.
-            if (types.get(2).isArray()) {
+            if (types.get(1).isArray()) {
                 if (!isStatic
                         || types.get(0).isNot(Context.class)
-                        || types.get(1).isNot(Scriptable.class) // HtmlUnit scope
-                        || types.get(2).isNot(Object[].class)
-                        || types.get(3).isNot(Function.class)
-                        || types.get(4).isNot(boolean.class)) {
+                        || types.get(1).isNot(Object[].class)
+                        || types.get(2).isNot(Function.class)
+                        || types.get(3).isNot(boolean.class)) {
                     throw Context.reportRuntimeErrorById("msg.varargs.ctor", methodName);
                 }
                 parmsLength = VARARGS_CTOR;
             } else {
                 if (!isStatic
                         || types.get(0).isNot(Context.class)
-                        || types.get(1).isNot(Scriptable.class) // HtmlUnit scope
+                        || types.get(1).isNot(Scriptable.class)
+                        || types.get(2).isNot(Object[].class)
+                        || types.get(3).isNot(Function.class)) {
+                    throw Context.reportRuntimeErrorById("msg.varargs.fun", methodName);
+                }
+                parmsLength = VARARGS_METHOD;
+            }
+
+        // HtmlUnit support also methods with the scope as second parameter
+        } else if (arity == 5 && (types.get(2).isArray() || types.get(3).isArray())) {
+            // Either variable args or an error.
+            if (types.get(2).isArray()) {
+                if (!isStatic
+                        || types.get(0).isNot(Context.class)
+                        || types.get(1).isNot(Scriptable.class)
+                        || types.get(2).isNot(Object[].class)
+                        || types.get(3).isNot(Function.class)
+                        || types.get(4).isNot(boolean.class)) {
+                    throw Context.reportRuntimeErrorById("msg.varargs.ctor", methodName);
+                }
+                parmsLength = VARARGS_CTOR_WITH_SCOPE;
+            } else {
+                if (!isStatic
+                        || types.get(0).isNot(Context.class)
+                        || types.get(1).isNot(Scriptable.class)
                         || types.get(2).isNot(Scriptable.class)
                         || types.get(3).isNot(Object[].class)
                         || types.get(4).isNot(Function.class)) {
                     throw Context.reportRuntimeErrorById("msg.varargs.fun", methodName);
                 }
-                parmsLength = VARARGS_METHOD;
+                parmsLength = VARARGS_METHOD_WITH_SCOPE;
             }
         } else {
             parmsLength = arity;
@@ -375,15 +398,29 @@ public class FunctionObject extends BaseFunction {
             }
 
             if (parmsLength == VARARGS_METHOD) {
-                // HtmlUnit include scope
-                Object[] invokeArgs = {cx, scope, thisObj, args, this};
+                Object[] invokeArgs = {cx, thisObj, args, this};
                 result = member.invoke(null, invokeArgs);
                 checkMethodResult = true;
+
+            // HtmlUnit support also methods with the scope as second parameter
+            } else if (parmsLength == VARARGS_METHOD_WITH_SCOPE) {
+                    Object[] invokeArgs = {cx, scope, thisObj, args, this};
+                    result = member.invoke(null, invokeArgs);
+                    checkMethodResult = true;
+            } else if (parmsLength == VARARGS_CTOR_WITH_SCOPE) {
+                boolean inNewExpr = (thisObj == null);
+                Boolean b = inNewExpr ? Boolean.TRUE : Boolean.FALSE;
+                Object[] invokeArgs = {cx, scope, args, this, b};
+                result =
+                        member.isCtor()
+                                ? member.newInstance(invokeArgs)
+                                : member.invoke(null, invokeArgs);
+            // HtmlUnit
+
             } else {
                 boolean inNewExpr = (thisObj == null);
                 Boolean b = inNewExpr ? Boolean.TRUE : Boolean.FALSE;
-                // HtmlUnit include scope
-                Object[] invokeArgs = {cx, scope, args, this, b};
+                Object[] invokeArgs = {cx, args, this, b};
                 result =
                         member.isCtor()
                                 ? member.newInstance(invokeArgs)
@@ -499,7 +536,8 @@ public class FunctionObject extends BaseFunction {
     }
 
     boolean isVarArgsMethod() {
-        return parmsLength == VARARGS_METHOD;
+        // HtmlUnit return parmsLength == VARARGS_METHOD;
+        return parmsLength == VARARGS_METHOD || parmsLength == VARARGS_METHOD_WITH_SCOPE;
     }
 
     boolean isVarArgsConstructor() {
@@ -528,6 +566,10 @@ public class FunctionObject extends BaseFunction {
 
     private static final short VARARGS_METHOD = -1;
     private static final short VARARGS_CTOR = -2;
+
+    // HtmlUnit extension
+    private static final short VARARGS_METHOD_WITH_SCOPE = -98;
+    private static final short VARARGS_CTOR_WITH_SCOPE = -99;
 
     private static boolean sawSecurityException;
 
