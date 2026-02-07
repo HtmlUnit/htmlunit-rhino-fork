@@ -2723,11 +2723,6 @@ public class Parser {
                 case Token.SHNE:
                     consumeToken();
                     int parseToken = tt;
-                    if (compilerEnv.getLanguageVersion() == Context.VERSION_1_2) {
-                        // JavaScript 1.2 uses shallow equality for == and != .
-                        if (tt == Token.EQ) parseToken = Token.SHEQ;
-                        else if (tt == Token.NE) parseToken = Token.SHNE;
-                    }
                     pn = new InfixExpression(parseToken, pn, relExpr(), opPos);
                     continue;
             }
@@ -4344,11 +4339,6 @@ public class Parser {
         } else if (compilerEnv.getActivationNames() != null
                 && compilerEnv.getActivationNames().contains(name)) {
             activation = true;
-        } else if ("length".equals(name)) {
-            if (token == Token.GETPROP && compilerEnv.getLanguageVersion() == Context.VERSION_1_2) {
-                // Use of "length" in 1.2 requires an activation object.
-                activation = true;
-            }
         }
         if (activation) {
             setRequiresActivation();

@@ -19,7 +19,9 @@ var FAILED = " FAILED! expected: ";
 
 var	DEBUG =	false;
 
-version("120");
+// as of Rhino 2.0 we removed VERSION_1_2 & VERSION_1_3 & VERSION_1_4 support
+// switching to 1.5 for these tests
+version("150");
 /*
  * change this for date tests if you're not in PST
  */
@@ -44,7 +46,9 @@ function TestCase( n, d, e, a ) {
     this.passed = getTestCaseResult( this.expect, this.actual );
 }
 function startTest() {
-    version(120);
+    // as of Rhino 2.0 we removed VERSION_1_2 & VERSION_1_3 support
+    // switching to 1.4 for these tests
+    version(140);
 
     // for ecma version 2.0, we will leave the javascript version to
     // the default ( for now ).

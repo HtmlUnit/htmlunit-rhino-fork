@@ -7,4 +7,6 @@
 
 gTestsubsuite = 'version120';
 
-version(120);
+// as of Rhino 2.0 we removed VERSION_1_2 & VERSION_1_3 & VERSION_1_4 support
+// switching to 1.5 for these tests
+version(150);
