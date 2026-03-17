@@ -497,6 +497,40 @@ public class NativeReflectTest {
     }
 
     @Test
+    public void setWithReceiver() {
+        String js =
+                // accessor: receiver is used as 'this' in setter
+                "var target = {};\n"
+                        + "Object.defineProperty(target, 'x', {\n"
+                        + "  set: function(v) { this.result = v; },\n"
+                        + "  get: function() { return this.result; }\n"
+                        + "});\n"
+                        + "var receiver = {};\n"
+                        + "Reflect.set(target, 'x', 42, receiver);\n"
+                        + "var accessorResult = receiver.result + ' ' + (target.result === undefined);\n"
+                        // non-writable target: returns false
+                        + "var nonWritableTarget = {};\n"
+                        + "Object.defineProperty(nonWritableTarget, 'x',"
+                        + " { value: 1, writable: false, configurable: true });\n"
+                        + "var nonWritableResult = Reflect.set(nonWritableTarget, 'x', 2);\n"
+                        // receiver constraints: accessor, non-writable, non-extensible all return false
+                        + "var accessorReceiver = {};\n"
+                        + "Object.defineProperty(accessorReceiver, 'x',"
+                        + " { get: function() {}, set: function() {} });\n"
+                        + "var readonlyReceiver = {};\n"
+                        + "Object.defineProperty(readonlyReceiver, 'x',"
+                        + " { value: 99, writable: false });\n"
+                        + "var sealedReceiver = {}; Object.preventExtensions(sealedReceiver);\n"
+                        + "var receiverResults = Reflect.set({ x: 1 }, 'x', 2, accessorReceiver)"
+                        + " + ' ' + Reflect.set({ x: 1 }, 'x', 2, readonlyReceiver)"
+                        + " + ' ' + Reflect.set(Object.create({ x: 1 }), 'x', 2, sealedReceiver);\n"
+                        + "accessorResult"
+                        + " + ' ' + nonWritableResult"
+                        + " + ' ' + receiverResults";
+        Utils.assertWithAllModes_ES6("42 true false false false false", js);
+    }
+
+    @Test
     public void getWithProxyTarget() {
         String js =
                 "var target = { x: 1 };\n"
@@ -520,6 +554,33 @@ public class NativeReflectTest {
     }
 
     @Test
+    public void setWithProxyTarget() {
+        String js =
+                "var trapLog = '';\n"
+                        + "var target = {};\n"
+                        + "var proxy = new Proxy(target, {\n"
+                        + "  set: function(target, prop, value, receiver) {\n"
+                        + "    trapLog = prop + '=' + value;\n"
+                        + "    target[prop] = value;\n"
+                        + "    return true;\n"
+                        + "  }\n"
+                        + "});\n"
+                        + "var trapResult = Reflect.set(proxy, 'x', 42);\n"
+                        + "var frozenTarget = {};\n"
+                        + "Object.defineProperty(frozenTarget, 'x',"
+                        + " { value: 42, writable: false, configurable: false });\n"
+                        + "var nonConfigurableProxy = new Proxy(frozenTarget, {\n"
+                        + "  set: function(target, prop, value, receiver) { return true; }\n"
+                        + "});\n"
+                        + "var nonConfigurableResult;\n"
+                        + "try { Reflect.set(nonConfigurableProxy, 'x', 99); nonConfigurableResult = 'no error'; }"
+                        + " catch (e) { nonConfigurableResult = 'threw'; }\n"
+                        + "trapResult + ' ' + trapLog + ' ' + target.x"
+                        + " + ' ' + nonConfigurableResult";
+        Utils.assertWithAllModes_ES6("true x=42 42 threw", js);
+    }
+
+    @Test
     public void proxyTrapForwardsViaReflect() {
         String js =
                 "var target = { x: 'hello' };\n"
@@ -531,11 +592,18 @@ public class NativeReflectTest {
                         + "  get: function(target, key, receiver) {\n"
                         + "    accessLog.push('get:' + key);\n"
                         + "    return Reflect.get(target, key, receiver);\n"
+                        + "  },\n"
+                        + "  set: function(target, key, value, receiver) {\n"
+                        + "    accessLog.push('set:' + key);\n"
+                        + "    return Reflect.set(target, key, value, receiver);\n"
                         + "  }\n"
                         + "});\n"
                         + "var getResult = proxy.x;\n"
                         + "var accessorResult = Reflect.get(proxy, 'context', { id: 'custom' });\n"
-                        + "getResult + ' ' + accessorResult + ' | ' + accessLog";
-        Utils.assertWithAllModes_ES6("hello context-custom | get:x,get:context", js);
+                        + "proxy.y = 99;\n"
+                        + "var setResult = target.y;\n"
+                        + "getResult + ' ' + accessorResult + ' ' + setResult"
+                        + " + ' | ' + accessLog";
+        Utils.assertWithAllModes_ES6("hello context-custom 99 | get:x,get:context,set:y", js);
     }
 }
