@@ -15,6 +15,7 @@ import java.util.Objects;
  * This class implements the Proxy object.
  *
  * @author Ronald Brill
+ * @author Lai Quang Duong
  */
 class NativeProxy extends ScriptableObject {
     private static final long serialVersionUID = 6676871870513494844L;
@@ -569,7 +570,7 @@ class NativeProxy extends ScriptableObject {
         Function trap = getTrap(TRAP_SET);
         if (trap != null) {
             boolean booleanTrapResult =
-                    ScriptRuntime.toBoolean(callTrap(trap, new Object[] {target, name, value}));
+                    ScriptRuntime.toBoolean(callTrap(trap, new Object[] {target, name, value, this}));
             if (!booleanTrapResult) {
                 return; // false
             }
@@ -631,7 +632,7 @@ class NativeProxy extends ScriptableObject {
                     ScriptRuntime.toBoolean(
                             callTrap(
                                     trap,
-                                    new Object[] {target, ScriptRuntime.toString(index), value}));
+                                    new Object[] {target, ScriptRuntime.toString(index), value, this}));
             if (!booleanTrapResult) {
                 return; // false
             }
@@ -691,7 +692,7 @@ class NativeProxy extends ScriptableObject {
         Function trap = getTrap(TRAP_SET);
         if (trap != null) {
             boolean booleanTrapResult =
-                    ScriptRuntime.toBoolean(callTrap(trap, new Object[] {target, key, value}));
+                    ScriptRuntime.toBoolean(callTrap(trap, new Object[] {target, key, value, this}));
             if (!booleanTrapResult) {
                 return; // false
             }
