@@ -8,6 +8,7 @@ package org.mozilla.javascript;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.mozilla.javascript.ScriptRuntime.StringIdOrIndex;
 
 /**
@@ -214,23 +215,101 @@ final class NativeReflect extends ScriptableObject {
         return false;
     }
 
+    /*
+     * https://tc39.es/ecma262/#sec-reflect.get
+     * 1. If target is not an Object, throw a TypeError exception.
+     * 2. Let key be ? ToPropertyKey(propertyKey).
+     * 3. If receiver is not present, then
+     *        a. Set receiver to target.
+     * 4. Return ? target.[[Get]](key, receiver).
+     */
     private static Object get(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        ScriptableObject target = checkTarget(args);
+        final ScriptableObject target = checkTarget(args);
+        final Object propertyKey = args.length > 1 ? args[1] : Undefined.instance;
+        final Object receiver = args.length > 2 ? args[2] : target;
 
-        if (args.length > 1) {
-            if (ScriptRuntime.isSymbol(args[1])) {
-                Object prop = ScriptableObject.getProperty(target, (Symbol) args[1]);
-                return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
-            }
-            if (args[1] instanceof Number) {
-                Object prop = ScriptableObject.getProperty(target, ScriptRuntime.toIndex(args[1]));
-                return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
-            }
+        // If target is a proxy, delegate to the proxy handler
+        if (target instanceof NativeProxy) {
+            final NativeProxy proxy = (NativeProxy) target;
+            final Function trap = proxy.getTrap("get");
+            if (trap != null) {
+                final ScriptableObject proxyTarget = proxy.getTargetThrowIfRevoked();
+                final Object[] trapArgs = {proxyTarget, propertyKey, receiver};
+                final Object trapResult = proxy.callTrap(trap, trapArgs);
 
-            Object prop = ScriptableObject.getProperty(target, ScriptRuntime.toString(args[1]));
-            return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
+                // checks for non-configurable properties
+                // https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-get-p-receiver steps 9
+                final DescriptorInfo targetDesc = proxyTarget.getOwnPropertyDescriptor(cx, propertyKey);
+                if (targetDesc != null && targetDesc.isConfigurable(false)) {
+                    if (targetDesc.isDataDescriptor() && targetDesc.isWritable(false)) {
+                        if (!Objects.equals(trapResult, targetDesc.value)) {
+                            throw ScriptRuntime.typeError(
+                                    "proxy must report the same value for the non-writable,"
+                                            + " non-configurable property '\"" + propertyKey + "\"'");
+                        }
+                    }
+                    if (targetDesc.isAccessorDescriptor()
+                            && (targetDesc.getter == null
+                                    || targetDesc.getter == Scriptable.NOT_FOUND
+                                    || Undefined.isUndefined(targetDesc.getter))) {
+                        if (!Undefined.isUndefined(trapResult)) {
+                            throw ScriptRuntime.typeError(
+                                    "proxy must report the same value for the non-writable,"
+                                            + " non-configurable property '\"" + propertyKey + "\"'");
+                        }
+                    }
+                }
+                return trapResult;
+            }
         }
-        return Undefined.SCRIPTABLE_UNDEFINED;
+
+        return internalGet(cx, target, propertyKey, receiver);
+    }
+
+    /*
+     * https://tc39.es/ecma262/#sec-ordinary-object-internal-methods-and-internal-slots-get-p-receiver
+     * 1. Let desc be ? O.[[GetOwnProperty]](P).
+     * 2. If desc is undefined, then
+     *        a. Let parent be ? O.[[GetPrototypeOf]]().
+     *        b. If parent is null, return undefined.
+     *        c. Return ? parent.[[Get]](P, Receiver).
+     * 3. If IsDataDescriptor(desc) is true, return desc.[[Value]].
+     * 4. Assert: IsAccessorDescriptor(desc) is true.
+     * 5. Let getter be desc.[[Get]].
+     * 6. If getter is undefined, return undefined.
+     * 7. Return ? Call(getter, Receiver).
+     */
+    private static Object internalGet(
+            Context cx, ScriptableObject target, Object propertyKey, Object receiver) {
+        final DescriptorInfo desc = target.getOwnPropertyDescriptor(cx, propertyKey);
+        if (desc == null) {
+            final Scriptable parent = target.getPrototype();
+            if (parent == null) {
+                return Undefined.SCRIPTABLE_UNDEFINED;
+            }
+            return internalGet(cx, ScriptableObject.ensureScriptableObject(parent), propertyKey, receiver);
+        }
+
+        if (desc.isDataDescriptor()) {
+            return desc.value == Scriptable.NOT_FOUND
+                    ? Undefined.SCRIPTABLE_UNDEFINED
+                    : desc.value;
+        }
+
+        final Object getter = desc.getter;
+        if (getter == null || getter == Scriptable.NOT_FOUND || Undefined.isUndefined(getter)) {
+            return Undefined.SCRIPTABLE_UNDEFINED;
+        }
+
+        final Scriptable receiverForCall;
+        if (receiver == null || Undefined.isUndefined(receiver)) {
+            receiverForCall = cx.isStrictMode()
+                    ? null
+                    : ScriptableObject.getTopLevelScope(target);
+        } else {
+            receiverForCall = ScriptableObject.ensureScriptable(receiver);
+        }
+        return ((Function) getter).call(cx, target, receiverForCall, ScriptRuntime.emptyArgs);
     }
 
     private static Scriptable getOwnPropertyDescriptor(

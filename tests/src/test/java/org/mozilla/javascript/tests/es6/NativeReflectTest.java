@@ -477,4 +477,65 @@ public class NativeReflectTest {
                         + " + ' ' + (Object.getPrototypeOf(set) === CustomSet.prototype)";
         Utils.assertWithAllModes_ES6("1,2,3,4 true true true", js);
     }
+
+    @Test
+    public void getWithReceiver() {
+        String js =
+                // accessor: receiver is used as 'this' in getter
+                "var target = {};\n"
+                        + "Object.defineProperty(target, 'x', {\n"
+                        + "  get: function() { return this.value; }\n"
+                        + "});\n"
+                        + "var accessorResult = Reflect.get(target, 'x', { value: 42 });\n"
+                        // inherited accessor: receiver is still used as 'this'
+                        + "var child = Object.create(target);\n"
+                        + "var protoResult = Reflect.get(child, 'x', { value: 'hello' });\n"
+                        // data property: receiver is ignored
+                        + "var dataResult = Reflect.get({ x: 10 }, 'x', { x: 99 });\n"
+                        + "accessorResult + ' ' + protoResult + ' ' + dataResult";
+        Utils.assertWithAllModes_ES6("42 hello 10", js);
+    }
+
+    @Test
+    public void getWithProxyTarget() {
+        String js =
+                "var target = { x: 1 };\n"
+                        + "var proxy = new Proxy(target, {\n"
+                        + "  get: function(target, prop, receiver) {\n"
+                        + "    return 'trapped:' + prop;\n"
+                        + "  }\n"
+                        + "});\n"
+                        + "var trapResult = Reflect.get(proxy, 'x');\n"
+                        + "var frozenTarget = {};\n"
+                        + "Object.defineProperty(frozenTarget, 'x',"
+                        + " { value: 42, writable: false, configurable: false });\n"
+                        + "var nonConfigurableProxy = new Proxy(frozenTarget, {\n"
+                        + "  get: function(target, prop, receiver) { return 'wrong'; }\n"
+                        + "});\n"
+                        + "var nonConfigurableResult;\n"
+                        + "try { Reflect.get(nonConfigurableProxy, 'x'); nonConfigurableResult = 'no error'; }"
+                        + " catch (e) { nonConfigurableResult = 'threw'; }\n"
+                        + "trapResult + ' ' + nonConfigurableResult";
+        Utils.assertWithAllModes_ES6("trapped:x threw", js);
+    }
+
+    @Test
+    public void proxyTrapForwardsViaReflect() {
+        String js =
+                "var target = { x: 'hello' };\n"
+                        + "Object.defineProperty(target, 'context', {\n"
+                        + "  get: function() { return 'context-' + (this.id || 'default'); }\n"
+                        + "});\n"
+                        + "var accessLog = [];\n"
+                        + "var proxy = new Proxy(target, {\n"
+                        + "  get: function(target, key, receiver) {\n"
+                        + "    accessLog.push('get:' + key);\n"
+                        + "    return Reflect.get(target, key, receiver);\n"
+                        + "  }\n"
+                        + "});\n"
+                        + "var getResult = proxy.x;\n"
+                        + "var accessorResult = Reflect.get(proxy, 'context', { id: 'custom' });\n"
+                        + "getResult + ' ' + accessorResult + ' | ' + accessLog";
+        Utils.assertWithAllModes_ES6("hello context-custom | get:x,get:context", js);
+    }
 }
