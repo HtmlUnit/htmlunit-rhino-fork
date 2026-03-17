@@ -14,6 +14,7 @@ import org.mozilla.javascript.ScriptRuntime.StringIdOrIndex;
  * This class implements the Reflect object.
  *
  * @author Ronald Brill
+ * @author Lai Quang Duong
  */
 final class NativeReflect extends ScriptableObject {
     private static final long serialVersionUID = 2920773905356325445L;
@@ -142,6 +143,15 @@ final class NativeReflect extends ScriptableObject {
             Scriptable result = ctorBaseFunction.createObject(cx, scope);
             if (result != null) {
                 result.setPrototype((Scriptable) newTargetPrototype);
+
+                // LambdaConstructor could be non-callable (requires "new") or
+                // non-constructable (no "new"). Check its flag to decide.
+                if (ctorBaseFunction instanceof LambdaConstructor
+                        && ((LambdaConstructor) ctorBaseFunction).isConstructable()) {
+                    Scriptable newScriptable = ctorBaseFunction.construct(cx, scope, callArgs);
+                    newScriptable.setPrototype((Scriptable) newTargetPrototype);
+                    return newScriptable;
+                }
 
                 Object val = ctorBaseFunction.call(cx, scope, result, callArgs);
                 if (val instanceof Scriptable) {

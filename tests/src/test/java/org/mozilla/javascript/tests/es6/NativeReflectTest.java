@@ -460,4 +460,21 @@ public class NativeReflectTest {
                         + "+ ' ' + Reflect.setPrototypeOf(o3, proto)";
         Utils.assertWithAllModes_ES6("true true true", js);
     }
+
+    @Test
+    public void constructSubclassBuiltin() {
+        String js =
+                "function CustomSet() {\n"
+                        + "  return Reflect.construct(Set, arguments, this.constructor);\n"
+                        + "}\n"
+                        + "CustomSet.prototype = Object.create(Set.prototype);\n"
+                        + "CustomSet.prototype.constructor = CustomSet;\n"
+                        + "var set = new CustomSet([1, 2, 3]);\n"
+                        + "set.add(4);\n"
+                        + "'' + Array.from(set)"
+                        + " + ' ' + (set instanceof CustomSet)"
+                        + " + ' ' + (set instanceof Set)"
+                        + " + ' ' + (Object.getPrototypeOf(set) === CustomSet.prototype)";
+        Utils.assertWithAllModes_ES6("1,2,3,4 true true true", js);
+    }
 }
