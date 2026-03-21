@@ -1334,7 +1334,7 @@ public class Context implements Closeable {
         // Annotate so we can check later to ensure no java code in
         // intervening frames
         isContinuationsTopCall = true;
-        return ScriptRuntime.doTopCall(script, this, scope, scope, isTopLevelStrict);
+        return ScriptRuntime.doTopCall(script, this, scope, scope, isStrict);
     }
 
     public Object callFunctionWithContinuations(Callable callable, Scriptable scope, Object[] args)
@@ -1354,8 +1354,7 @@ public class Context implements Closeable {
         // Annotate so we can check later to ensure no java code in
         // intervening frames
         isContinuationsTopCall = true;
-        return ScriptRuntime.doTopCall(
-                (JSFunction) callable, this, scope, scope, args, isTopLevelStrict);
+        return ScriptRuntime.doTopCall((JSFunction) callable, this, scope, scope, args, isStrict);
     }
 
     /**
@@ -2810,9 +2809,12 @@ public class Context implements Closeable {
         if (activationNames != null) activationNames.remove(name);
     }
 
+    public final void setIsStrictMode(boolean isStrict) {
+        this.isStrict = isStrict;
+    }
+
     public final boolean isStrictMode() {
-        return isTopLevelStrict
-                || (currentActivationCall != null && currentActivationCall.isStrict);
+        return isStrict;
     }
 
     public static boolean isCurrentContextStrict() {
@@ -2830,6 +2832,7 @@ public class Context implements Closeable {
     Scriptable topCallScope;
     boolean isContinuationsTopCall;
     NativeCall currentActivationCall;
+    private boolean isStrict;
     XMLLib cachedXMLLib;
     BaseFunction typeErrorThrower;
 
@@ -2886,6 +2889,4 @@ public class Context implements Closeable {
 
     // Generate an observer count on compiled code
     boolean generateObserverCount = false;
-
-    boolean isTopLevelStrict;
 }
