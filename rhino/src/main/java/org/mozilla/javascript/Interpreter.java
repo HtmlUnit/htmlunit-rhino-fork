@@ -5048,10 +5048,13 @@ public final class Interpreter extends Icode implements Evaluator {
             Context cx, CallFrame frame, Object[] args, boolean continuationRestart) {
         // HtmlUnit - enhanced Arguments support (see org.htmlunit.javascript.ArgumentsTest.argumentsCallee())
         if (frame.fnOrScript instanceof JSFunction) {
-            JSFunction jsFunction = (JSFunction) frame.fnOrScript;
-            if (!(cx.isStrictMode() || jsFunction.isStrict())
-                    && frame.parentFrame != null && !(frame.parentFrame.fnOrScript instanceof JSScript)) {
-                jsFunction.setCallerObj(frame.parentFrame.fnOrScript);
+            if (frame.parentFrame != null) {
+                if (frame.parentFrame.fnOrScript instanceof JSFunction) {
+                    JSFunction jsParentFunction = (JSFunction) frame.parentFrame.fnOrScript;
+                    if (!jsParentFunction.isStrict()) {
+                        ((JSFunction) frame.fnOrScript).setCallerObj(jsParentFunction);
+                    }
+                }
             }
         }
         // end HtmlUnit
