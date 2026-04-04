@@ -336,7 +336,7 @@ public abstract class SlotMapOwner {
         }
     }
 
-    final SlotMap getMap() {
+    SlotMap getMap() {
         return slotMap;
     }
 
