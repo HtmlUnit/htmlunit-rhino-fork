@@ -11,14 +11,14 @@ import java.util.List;
  * using Java and JavaScript functions. Unlike LambdaSlot, the fact that these values are accessed
  * and mutated by functions is visible via the slot's property descriptor.
  */
-public class AccessorSlot extends Slot {
+public class AccessorSlot extends Slot<Scriptable> {
     private static final long serialVersionUID = 1677840254177335827L;
 
     AccessorSlot(Object name, int index) {
         super(name, index, 0);
     }
 
-    AccessorSlot(Slot oldSlot) {
+    AccessorSlot(Slot<Scriptable> oldSlot) {
         super(oldSlot);
     }
 
@@ -110,19 +110,19 @@ public class AccessorSlot extends Slot {
     }
 
     @Override
-    Function getSetterFunction(String name, Scriptable scope) {
+    Function getSetterFunction(String name, Scriptable start) {
         if (setter == null) {
             return null;
         }
-        return setter.asSetterFunction(name, scope);
+        return setter.asSetterFunction(name, start);
     }
 
     @Override
-    Function getGetterFunction(String name, Scriptable scope) {
+    Function getGetterFunction(String name, Scriptable start) {
         if (getter == null) {
             return null;
         }
-        return getter.asGetterFunction(name, scope);
+        return getter.asGetterFunction(name, start);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class AccessorSlot extends Slot {
     interface Getter extends Serializable {
         Object getValue(Scriptable start);
 
-        Function asGetterFunction(final String name, final Scriptable scope);
+        Function asGetterFunction(String name, Scriptable start);
 
         boolean isSameGetterFunction(Object getter);
     }
@@ -174,7 +174,7 @@ public class AccessorSlot extends Slot {
         }
 
         @Override
-        public Function asGetterFunction(String name, Scriptable scope) {
+        public Function asGetterFunction(String name, Scriptable start) {
             return member.asGetterFunction(name);
         }
 
@@ -206,7 +206,7 @@ public class AccessorSlot extends Slot {
         }
 
         @Override
-        public Function asGetterFunction(String name, Scriptable scope) {
+        public Function asGetterFunction(String name, Scriptable start) {
             return target instanceof Function ? (Function) target : null;
         }
 
@@ -220,7 +220,7 @@ public class AccessorSlot extends Slot {
     interface Setter extends Serializable {
         boolean setValue(Object value, Scriptable owner, Scriptable start);
 
-        Function asSetterFunction(final String name, final Scriptable scope);
+        Function asSetterFunction(String name, Scriptable scope);
 
         boolean isSameSetterFunction(Object getter);
     }
@@ -244,7 +244,7 @@ public class AccessorSlot extends Slot {
             var valueType = pTypes[pTypes.length - 1];
             boolean isNullable = member.getArgNullability().isNullable(pTypes.length - 1);
             int tag = FunctionObject.getTypeTag(valueType);
-            Object actualArg = FunctionObject.convertArg(cx, start, value, tag, isNullable);
+            Object actualArg = FunctionObject.convertArg(cx, member.scope, value, tag, isNullable);
 
             if (member.delegateTo == null) {
                 member.invoke(start, new Object[] {actualArg});
@@ -255,7 +255,7 @@ public class AccessorSlot extends Slot {
         }
 
         @Override
-        public Function asSetterFunction(String name, Scriptable scope) {
+        public Function asSetterFunction(String name, Scriptable start) {
             return member.asSetterFunction(name);
         }
 

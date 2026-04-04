@@ -1105,7 +1105,7 @@ public class Context implements Closeable {
      *
      * @return the initialized scope
      */
-    public final ScriptableObject initSafeStandardObjects() {
+    public final TopLevel initSafeStandardObjects() {
         return initSafeStandardObjects(null, false);
     }
 
