@@ -8,12 +8,14 @@ package org.mozilla.javascript;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.mozilla.javascript.ScriptRuntime.StringIdOrIndex;
 
 /**
  * This class implements the Reflect object.
  *
  * @author Ronald Brill
+ * @author Lai Quang Duong
  */
 final class NativeReflect extends ScriptableObject {
     private static final long serialVersionUID = 2920773905356325445L;
@@ -143,6 +145,15 @@ final class NativeReflect extends ScriptableObject {
             if (result != null) {
                 result.setPrototype((Scriptable) newTargetPrototype);
 
+                // LambdaConstructor could be non-callable (requires "new") or
+                // non-constructable (no "new"). Check its flag to decide.
+                if (ctorBaseFunction instanceof LambdaConstructor
+                        && ((LambdaConstructor) ctorBaseFunction).isConstructable()) {
+                    Scriptable newScriptable = ctorBaseFunction.construct(cx, scope, callArgs);
+                    newScriptable.setPrototype((Scriptable) newTargetPrototype);
+                    return newScriptable;
+                }
+
                 Object val = ctorBaseFunction.call(cx, scope, result, callArgs);
                 if (val instanceof Scriptable) {
                     return (Scriptable) val;
@@ -204,23 +215,101 @@ final class NativeReflect extends ScriptableObject {
         return false;
     }
 
+    /*
+     * https://tc39.es/ecma262/#sec-reflect.get
+     * 1. If target is not an Object, throw a TypeError exception.
+     * 2. Let key be ? ToPropertyKey(propertyKey).
+     * 3. If receiver is not present, then
+     *        a. Set receiver to target.
+     * 4. Return ? target.[[Get]](key, receiver).
+     */
     private static Object get(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        ScriptableObject target = checkTarget(args);
+        final ScriptableObject target = checkTarget(args);
+        final Object propertyKey = args.length > 1 ? args[1] : Undefined.instance;
+        final Object receiver = args.length > 2 ? args[2] : target;
 
-        if (args.length > 1) {
-            if (ScriptRuntime.isSymbol(args[1])) {
-                Object prop = ScriptableObject.getProperty(target, (Symbol) args[1]);
-                return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
-            }
-            if (args[1] instanceof Number) {
-                Object prop = ScriptableObject.getProperty(target, ScriptRuntime.toIndex(args[1]));
-                return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
-            }
+        // If target is a proxy, delegate to the proxy handler
+        if (target instanceof NativeProxy) {
+            final NativeProxy proxy = (NativeProxy) target;
+            final Function trap = proxy.getTrap("get");
+            if (trap != null) {
+                final ScriptableObject proxyTarget = proxy.getTargetThrowIfRevoked();
+                final Object[] trapArgs = {proxyTarget, propertyKey, receiver};
+                final Object trapResult = proxy.callTrap(trap, trapArgs);
 
-            Object prop = ScriptableObject.getProperty(target, ScriptRuntime.toString(args[1]));
-            return prop == Scriptable.NOT_FOUND ? Undefined.SCRIPTABLE_UNDEFINED : prop;
+                // checks for non-configurable properties
+                // https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-get-p-receiver steps 9
+                final DescriptorInfo targetDesc = proxyTarget.getOwnPropertyDescriptor(cx, propertyKey);
+                if (targetDesc != null && targetDesc.isConfigurable(false)) {
+                    if (targetDesc.isDataDescriptor() && targetDesc.isWritable(false)) {
+                        if (!Objects.equals(trapResult, targetDesc.value)) {
+                            throw ScriptRuntime.typeError(
+                                    "proxy must report the same value for the non-writable,"
+                                            + " non-configurable property '\"" + propertyKey + "\"'");
+                        }
+                    }
+                    if (targetDesc.isAccessorDescriptor()
+                            && (targetDesc.getter == null
+                                    || targetDesc.getter == Scriptable.NOT_FOUND
+                                    || Undefined.isUndefined(targetDesc.getter))) {
+                        if (!Undefined.isUndefined(trapResult)) {
+                            throw ScriptRuntime.typeError(
+                                    "proxy must report the same value for the non-writable,"
+                                            + " non-configurable property '\"" + propertyKey + "\"'");
+                        }
+                    }
+                }
+                return trapResult;
+            }
         }
-        return Undefined.SCRIPTABLE_UNDEFINED;
+
+        return internalGet(cx, target, propertyKey, receiver);
+    }
+
+    /*
+     * https://tc39.es/ecma262/#sec-ordinary-object-internal-methods-and-internal-slots-get-p-receiver
+     * 1. Let desc be ? O.[[GetOwnProperty]](P).
+     * 2. If desc is undefined, then
+     *        a. Let parent be ? O.[[GetPrototypeOf]]().
+     *        b. If parent is null, return undefined.
+     *        c. Return ? parent.[[Get]](P, Receiver).
+     * 3. If IsDataDescriptor(desc) is true, return desc.[[Value]].
+     * 4. Assert: IsAccessorDescriptor(desc) is true.
+     * 5. Let getter be desc.[[Get]].
+     * 6. If getter is undefined, return undefined.
+     * 7. Return ? Call(getter, Receiver).
+     */
+    private static Object internalGet(
+            Context cx, ScriptableObject target, Object propertyKey, Object receiver) {
+        final DescriptorInfo desc = target.getOwnPropertyDescriptor(cx, propertyKey);
+        if (desc == null) {
+            final Scriptable parent = target.getPrototype();
+            if (parent == null) {
+                return Undefined.SCRIPTABLE_UNDEFINED;
+            }
+            return internalGet(cx, ScriptableObject.ensureScriptableObject(parent), propertyKey, receiver);
+        }
+
+        if (desc.isDataDescriptor()) {
+            return desc.value == Scriptable.NOT_FOUND
+                    ? Undefined.SCRIPTABLE_UNDEFINED
+                    : desc.value;
+        }
+
+        final Object getter = desc.getter;
+        if (getter == null || getter == Scriptable.NOT_FOUND || Undefined.isUndefined(getter)) {
+            return Undefined.SCRIPTABLE_UNDEFINED;
+        }
+
+        final Scriptable receiverForCall;
+        if (receiver == null || Undefined.isUndefined(receiver)) {
+            receiverForCall = cx.isStrictMode()
+                    ? null
+                    : ScriptableObject.getTopLevelScope(target);
+        } else {
+            receiverForCall = ScriptableObject.ensureScriptable(receiver);
+        }
+        return ((Function) getter).call(cx, target, receiverForCall, ScriptRuntime.emptyArgs);
     }
 
     private static Scriptable getOwnPropertyDescriptor(
@@ -298,41 +387,165 @@ final class NativeReflect extends ScriptableObject {
         return target.preventExtensions();
     }
 
+    /*
+     * https://tc39.es/ecma262/#sec-reflect.set
+     * 1. If target is not an Object, throw a TypeError exception.
+     * 2. Let key be ? ToPropertyKey(propertyKey).
+     * 3. If receiver is not present, then
+     *        a. Set receiver to target.
+     * 4. Return ? target.[[Set]](key, V, receiver).
+     */
     private static Object set(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        ScriptableObject target = checkTarget(args);
-        if (args.length < 2) {
-            return true;
-        }
+        final ScriptableObject target = checkTarget(args);
+        final Object propertyKey = args.length > 1 ? args[1] : Undefined.instance;
+        final Object value = args.length > 2 ? args[2] : Undefined.instance;
+        final Object receiver = args.length > 3 ? args[3] : target;
 
-        ScriptableObject receiver =
-                args.length > 3 ? ScriptableObject.ensureScriptableObject(args[3]) : target;
-        if (receiver != target) {
-            DescriptorInfo descriptor = target.getOwnPropertyDescriptor(cx, args[1]);
-            if (descriptor != null) {
-                Object setter = descriptor.setter;
-                if (setter != null && setter != NOT_FOUND) {
-                    ((Function) setter).call(cx, scope, receiver, new Object[] {args[2]});
-                    return true;
-                }
-
-                if (descriptor.isConfigurable(false)) {
+        // If target is a proxy, delegate to the proxy handler
+        if (target instanceof NativeProxy) {
+            final NativeProxy proxy = (NativeProxy) target;
+            final Function trap = proxy.getTrap("set");
+            if (trap != null) {
+                final ScriptableObject proxyTarget = proxy.getTargetThrowIfRevoked();
+                final Object[] trapArgs = {proxyTarget, propertyKey, value, receiver};
+                final boolean booleanTrapResult = ScriptRuntime.toBoolean(proxy.callTrap(trap, trapArgs));
+                if (!booleanTrapResult) {
                     return false;
                 }
+
+                // checks for non-configurable properties
+                // https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots-set-p-v-receiver steps 10
+                final DescriptorInfo targetDesc = proxyTarget.getOwnPropertyDescriptor(cx, propertyKey);
+                if (targetDesc != null && targetDesc.isConfigurable(false)) {
+                    if (targetDesc.isDataDescriptor() && targetDesc.isWritable(false)) {
+                        if (!Objects.equals(value, targetDesc.value)) {
+                            throw ScriptRuntime.typeError(
+                                    "proxy can't successfully set a non-writable,"
+                                            + " non-configurable property '\"" + propertyKey + "\"'");
+                        }
+                    }
+                    if (targetDesc.isAccessorDescriptor()
+                            && (targetDesc.setter == null
+                                    || targetDesc.setter == Scriptable.NOT_FOUND
+                                    || Undefined.isUndefined(targetDesc.setter))) {
+                        throw ScriptRuntime.typeError(
+                                "proxy can't successfully set a non-writable,"
+                                        + " non-configurable property '\"" + propertyKey + "\"'");
+                    }
+                }
+                return true;
             }
         }
 
-        if (ScriptRuntime.isSymbol(args[1])) {
-            receiver.put((Symbol) args[1], receiver, args[2]);
-        } else {
-            StringIdOrIndex s = ScriptRuntime.toStringIdOrIndex(args[1]);
-            if (s.stringId == null) {
-                receiver.put(s.index, receiver, args[2]);
-            } else {
-                receiver.put(s.stringId, receiver, args[2]);
-            }
-        }
+        return internalSet(cx, target, propertyKey, value, receiver);
+    }
 
-        return true;
+    /*
+     * https://tc39.es/ecma262/#sec-ordinary-object-internal-methods-and-internal-slots-set-p-v-receiver
+     * 1. Let ownDesc be ? O.[[GetOwnProperty]](P).
+     * 2. If ownDesc is undefined, then
+     *        a. Let parent be ? O.[[GetPrototypeOf]]().
+     *        b. If parent is not null, then
+     *               i. Return ? parent.[[Set]](P, V, Receiver).
+     *        c. Else,
+     *               i. Set ownDesc to the PropertyDescriptor
+     *                  { [[Value]]: undefined, [[Writable]]: true,
+     *                    [[Enumerable]]: true, [[Configurable]]: true }.
+     * 3. If IsDataDescriptor(ownDesc) is true, then
+     *        a. If ownDesc.[[Writable]] is false, return false.
+     *        b. If Receiver is not an Object, return false.
+     *        c. Let existingDescriptor be ? Receiver.[[GetOwnProperty]](P).
+     *        d. If existingDescriptor is not undefined, then
+     *               i. If IsAccessorDescriptor(existingDescriptor) is true, return false.
+     *               ii. If existingDescriptor.[[Writable]] is false, return false.
+     *               iii. Let valueDesc be the PropertyDescriptor { [[Value]]: V }.
+     *               iv. Return ? Receiver.[[DefineOwnProperty]](P, valueDesc).
+     *        e. Else,
+     *               i. Assert: Receiver does not currently have a property P.
+     *               ii. Return ? CreateDataProperty(Receiver, P, V).
+     * 4. Assert: IsAccessorDescriptor(ownDesc) is true.
+     * 5. Let setter be ownDesc.[[Set]].
+     * 6. If setter is undefined, return false.
+     * 7. Perform ? Call(setter, Receiver, « V »).
+     * 8. Return true.
+     */
+    private static boolean internalSet(Context cx, ScriptableObject target, Object propertyKey,
+            Object value, Object receiver) {
+        try {
+            DescriptorInfo ownDesc = target.getOwnPropertyDescriptor(cx, propertyKey);
+            if (ownDesc == null) {
+                final Scriptable parent = target.getPrototype();
+                if (parent != null) {
+                    return internalSet(cx, ScriptableObject.ensureScriptableObject(parent), propertyKey, value, receiver);
+                }
+                ownDesc = new DescriptorInfo(true, true, true, Undefined.instance);
+            }
+
+            if (ownDesc.isDataDescriptor()) {
+                if (ownDesc.isWritable(false)) {
+                    return false;
+                }
+                if (!ScriptRuntime.isObject(receiver)) {
+                    return false;
+                }
+
+                final ScriptableObject receiverObj = ScriptableObject.ensureScriptableObject(receiver);
+                final DescriptorInfo existingDescriptor = receiverObj.getOwnPropertyDescriptor(cx, propertyKey);
+                if (existingDescriptor != null) {
+                    if (existingDescriptor.isAccessorDescriptor()) {
+                        return false;
+                    }
+                    if (existingDescriptor.isWritable(false)) {
+                        return false;
+                    }
+                } else if (!receiverObj.isExtensible()) {
+                    return false;
+                }
+
+                // If receiver is a proxy, set property directly on the proxy's target
+                // to avoid recursion (reflect <-> proxy)
+                final ScriptableObject realReceiverObj = receiverObj instanceof NativeProxy
+                        ? ((NativeProxy) receiverObj).getTargetThrowIfRevoked()
+                        : receiverObj;
+
+                if (ScriptRuntime.isSymbol(propertyKey)) {
+                    realReceiverObj.put((Symbol) propertyKey, realReceiverObj, value);
+                } else {
+                    final StringIdOrIndex s = ScriptRuntime.toStringIdOrIndex(propertyKey);
+                    if (s.stringId == null) {
+                        realReceiverObj.put(s.index, realReceiverObj, value);
+                    } else {
+                        realReceiverObj.put(s.stringId, realReceiverObj, value);
+                    }
+                }
+
+                return true;
+            }
+
+            if (ownDesc.isAccessorDescriptor()) {
+                final Object setter = ownDesc.setter;
+                if (setter == null
+                        || setter == Scriptable.NOT_FOUND
+                        || Undefined.isUndefined(setter)) {
+                    return false;
+                }
+                final Scriptable receiverForCall;
+                if (receiver == null || Undefined.isUndefined(receiver)) {
+                    receiverForCall = cx.isStrictMode()
+                            ? null
+                            : ScriptableObject.getTopLevelScope(target);
+                } else {
+                    receiverForCall = ScriptableObject.ensureScriptable(receiver);
+                }
+
+                ((Function) setter).call(cx, target, receiverForCall, new Object[] {value});
+            }
+
+            return true;
+
+        } catch (EcmaError e) {
+            return false;
+        }
     }
 
     private static Object setPrototypeOf(

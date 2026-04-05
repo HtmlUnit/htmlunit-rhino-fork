@@ -127,9 +127,17 @@ public class LambdaConstructor extends LambdaFunction {
         return targetConstructor;
     }
 
+    public boolean isCallable() {
+        return (flags & CONSTRUCTOR_FUNCTION) != 0;
+    }
+
+    public boolean isConstructable() {
+        return (flags & CONSTRUCTOR_NEW) != 0;
+    }
+
     @Override
     public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
-        if ((flags & CONSTRUCTOR_FUNCTION) == 0) {
+        if (!isCallable()) {
             throw ScriptRuntime.typeErrorById("msg.constructor.no.function", getFunctionName());
         }
         scope = getDeclarationScope();
@@ -141,7 +149,7 @@ public class LambdaConstructor extends LambdaFunction {
 
     @Override
     public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
-        if ((flags & CONSTRUCTOR_NEW) == 0) {
+        if (!isConstructable()) {
             throw ScriptRuntime.typeErrorById("msg.no.new", getFunctionName());
         }
         return fireConstructor(cx, getDeclarationScope(), args);
