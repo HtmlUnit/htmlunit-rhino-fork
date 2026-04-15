@@ -5,16 +5,16 @@
 /** */
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.Parser;
-import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.ScopeObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.ast.AstRoot;
 
@@ -24,16 +24,16 @@ import org.mozilla.javascript.ast.AstRoot;
 public class Bug687669Test {
 
     private Context cx;
-    private ScriptableObject scope;
+    private ScopeObject scope;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         cx = Context.enter();
         cx.setLanguageVersion(Context.VERSION_1_8);
         scope = cx.initStandardObjects();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         Context.exit();
     }

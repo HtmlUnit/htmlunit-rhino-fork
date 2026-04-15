@@ -5,15 +5,16 @@
 /** */
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EvaluatorException;
+import org.mozilla.javascript.ScopeObject;
 import org.mozilla.javascript.Script;
-import org.mozilla.javascript.ScriptableObject;
 
 /**
  * @author André Bargull
@@ -21,16 +22,16 @@ import org.mozilla.javascript.ScriptableObject;
 public class Bug714204Test {
 
     private Context cx;
-    private ScriptableObject scope;
+    private ScopeObject scope;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         cx = Context.enter();
         scope = cx.initStandardObjects();
         cx.setLanguageVersion(Context.VERSION_1_7);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         Context.exit();
     }
@@ -48,38 +49,54 @@ public class Bug714204Test {
         assertEquals(Boolean.TRUE, result);
     }
 
-    @Test(expected = EvaluatorException.class)
+    @Test
     public void varThis() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("function F() {\n");
-        sb.append("  var [this.x] = arguments;\n");
-        sb.append("}\n");
-        cx.compileString(sb.toString(), "<eval>", 1, null);
+        assertThrows(
+                EvaluatorException.class,
+                () -> {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("function F() {\n");
+                    sb.append("  var [this.x] = arguments;\n");
+                    sb.append("}\n");
+                    cx.compileString(sb.toString(), "<eval>", 1, null);
+                });
     }
 
-    @Test(expected = EvaluatorException.class)
+    @Test
     public void letThis() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("function F() {\n");
-        sb.append("  let [this.x] = arguments;\n");
-        sb.append("}\n");
-        cx.compileString(sb.toString(), "<eval>", 1, null);
+        assertThrows(
+                EvaluatorException.class,
+                () -> {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("function F() {\n");
+                    sb.append("  let [this.x] = arguments;\n");
+                    sb.append("}\n");
+                    cx.compileString(sb.toString(), "<eval>", 1, null);
+                });
     }
 
-    @Test(expected = EvaluatorException.class)
+    @Test
     public void constThis() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("function F() {\n");
-        sb.append("  const [this.x] = arguments;\n");
-        sb.append("}\n");
-        cx.compileString(sb.toString(), "<eval>", 1, null);
+        assertThrows(
+                EvaluatorException.class,
+                () -> {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("function F() {\n");
+                    sb.append("  const [this.x] = arguments;\n");
+                    sb.append("}\n");
+                    cx.compileString(sb.toString(), "<eval>", 1, null);
+                });
     }
 
-    @Test(expected = EvaluatorException.class)
+    @Test
     public void argsThis() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("function F([this.x]) {\n");
-        sb.append("}\n");
-        cx.compileString(sb.toString(), "<eval>", 1, null);
+        assertThrows(
+                EvaluatorException.class,
+                () -> {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("function F([this.x]) {\n");
+                    sb.append("}\n");
+                    cx.compileString(sb.toString(), "<eval>", 1, null);
+                });
     }
 }

@@ -7,7 +7,7 @@
  */
 package org.mozilla.javascript.tests.es6;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.testutils.Utils;
 
 public class ParentPropertyTest {
@@ -18,7 +18,7 @@ public class ParentPropertyTest {
         // https://whereswalden.com/2010/05/07/spidermonkey-change-du-jour-the-special-__parent__-property-has-been-removed/
         String script = "var a = {};" + "'' + a.__parent__;";
 
-        Utils.assertWithAllModes_1_8("[object topLevel]", script);
+        Utils.assertWithAllModes_1_8("[object scope]", script);
         Utils.assertWithAllModes_ES6("undefined", script);
     }
 }

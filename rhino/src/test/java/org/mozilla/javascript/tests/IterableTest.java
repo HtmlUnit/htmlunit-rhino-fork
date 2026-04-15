@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.Scriptable;
@@ -15,6 +15,7 @@ import org.mozilla.javascript.SymbolKey;
 import org.mozilla.javascript.SymbolScriptable;
 import org.mozilla.javascript.TopLevel;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.testutils.Utils;
 
 /**
@@ -203,7 +204,7 @@ public class IterableTest {
         }
 
         @Override
-        public Scriptable getParentScope() {
+        public VarScope getParentScope() {
             return scope;
         }
 

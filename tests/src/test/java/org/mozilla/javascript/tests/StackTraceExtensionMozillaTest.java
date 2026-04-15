@@ -1,27 +1,27 @@
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.FileReader;
 import java.io.IOException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.RhinoException;
-import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.StackStyle;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.testutils.Utils;
 import org.mozilla.javascript.tools.shell.Global;
 
 public class StackTraceExtensionMozillaTest {
-    @BeforeClass
+    @BeforeAll
     public static void init() {
         RhinoException.setStackStyle(StackStyle.MOZILLA);
     }
 
-    @AfterClass
+    @AfterAll
     public static void terminate() {
         RhinoException.setStackStyle(StackStyle.RHINO);
     }
@@ -36,14 +36,14 @@ public class StackTraceExtensionMozillaTest {
             cx.setGeneratingDebug(true);
 
             Global global = new Global(cx);
-            Scriptable root = cx.newObject(global);
+            VarScope root = cx.newVarEnv(global);
 
             try (FileReader rdr =
                     new FileReader("testsrc/jstests/extensions/stack-traces-mozilla.js")) {
                 cx.evaluateReader(root, rdr, "stack-traces-mozilla.js", 1, null);
             }
         } catch (IOException ioe) {
-            assertFalse("I/O Error: " + ioe, true);
+            assertFalse(true, "I/O Error: " + ioe);
         }
     }
 

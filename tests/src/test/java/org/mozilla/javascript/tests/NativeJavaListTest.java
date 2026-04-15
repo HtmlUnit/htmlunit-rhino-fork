@@ -6,21 +6,19 @@
  */
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.tools.shell.Global;
 
 /** From @makusuko (Markus Sunela), imported from PR https://github.com/mozilla/rhino/pull/561 */
@@ -207,7 +205,7 @@ public class NativeJavaListTest {
         List<String> list = new ArrayList<>();
         NativeArray resEmpty =
                 (NativeArray) runScript("Object.keys(value)", list, Function.identity());
-        Assert.assertEquals(0, resEmpty.size());
+        Assertions.assertEquals(0, resEmpty.size());
 
         list.add("a");
         list.add("b");
@@ -232,7 +230,7 @@ public class NativeJavaListTest {
         return ContextFactory.getGlobal()
                 .call(
                         context -> {
-                            Scriptable scope = context.newObject(global);
+                            VarScope scope = context.newVarEnv(global);
                             scope.put("value", scope, Context.javaToJS(value, scope));
                             return convert.apply(
                                     context.evaluateString(scope, scriptSourceText, "", 1, null));

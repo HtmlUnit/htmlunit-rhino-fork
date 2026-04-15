@@ -4,13 +4,14 @@
 
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.lang.reflect.InvocationTargetException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.TopLevel;
+import org.mozilla.javascript.VarScope;
 
 @SuppressWarnings("serial")
 public class DefineClassMapInheritance {
@@ -41,7 +42,7 @@ public class DefineClassMapInheritance {
         }
     }
 
-    private static Object evaluate(Context cx, ScriptableObject scope, String source) {
+    private static Object evaluate(Context cx, VarScope scope, String source) {
         return cx.evaluateString(scope, source, "<eval>", 1, null);
     }
 }

@@ -6,8 +6,8 @@
  */
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,13 +15,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.TopLevel;
+import org.mozilla.javascript.VarScope;
 
 public class JavaIterableTest {
 
@@ -146,7 +146,7 @@ public class JavaIterableTest {
                         context -> {
                             context.setLanguageVersion(Context.VERSION_ES6);
                             TopLevel global = context.initStandardObjects();
-                            Scriptable scope = context.newObject(global);
+                            VarScope scope = context.newVarEnv(global);
                             scope.put("value", scope, Context.javaToJS(value, scope));
                             return context.evaluateString(scope, scriptSourceText, "", 1, null);
                         });

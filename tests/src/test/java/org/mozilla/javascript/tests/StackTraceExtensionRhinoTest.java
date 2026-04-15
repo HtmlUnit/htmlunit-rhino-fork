@@ -1,13 +1,13 @@
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.FileReader;
 import java.io.IOException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.testutils.Utils;
 import org.mozilla.javascript.tools.shell.Global;
 
@@ -25,7 +25,7 @@ public class StackTraceExtensionRhinoTest {
             cx.setGeneratingDebug(debug);
 
             Global global = new Global(cx);
-            Scriptable root = cx.newObject(global);
+            VarScope root = cx.newVarEnv(global);
             root.put("ExpectFileNames", global, interpretedMode || debug);
 
             try (FileReader rdr =
@@ -33,7 +33,7 @@ public class StackTraceExtensionRhinoTest {
                 cx.evaluateReader(root, rdr, "stack-traces-rhino.js", 1, null);
             }
         } catch (IOException ioe) {
-            assertFalse("I/O Error: " + ioe, true);
+            assertFalse(true, "I/O Error: " + ioe);
         }
     }
 

@@ -7,30 +7,30 @@
  */
 package org.mozilla.javascript.tests.es5;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.EcmaError;
 import org.mozilla.javascript.EvaluatorException;
-import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.ScopeObject;
 
 public class RegexpTest {
 
     private Context cx;
-    private ScriptableObject scope;
+    private ScopeObject scope;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         cx = Context.enter();
         cx.setLanguageVersion(Context.VERSION_1_8);
         scope = cx.initStandardObjects();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         Context.exit();
     }

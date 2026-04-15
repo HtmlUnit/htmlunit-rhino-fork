@@ -1,16 +1,17 @@
 package org.mozilla.javascript.tests;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.io.FileReader;
 import java.io.IOException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ExternalArrayData;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.tools.shell.Global;
 import org.mozilla.javascript.typedarrays.NativeFloat64Array;
 import org.mozilla.javascript.typedarrays.NativeInt16Array;
@@ -18,19 +19,19 @@ import org.mozilla.javascript.typedarrays.NativeInt32Array;
 
 public class ExternalArrayTest {
     private Context cx;
-    private Scriptable root;
+    private VarScope root;
 
-    @Before
+    @BeforeEach
     public void init() {
         cx = Context.enter();
         cx.setLanguageVersion(Context.VERSION_1_8);
         cx.setGeneratingDebug(true);
 
         Global global = new Global(cx);
-        root = cx.newObject(global);
+        root = cx.newVarEnv(global);
     }
 
-    @After
+    @AfterEach
     public void terminate() {
         Context.exit();
     }
@@ -128,7 +129,7 @@ public class ExternalArrayTest {
                 cx.evaluateReader(root, rdr, script, 1, null);
             }
         } catch (IOException ioe) {
-            assertFalse("I/O Error: " + ioe, true);
+            assertFalse(true, "I/O Error: " + ioe);
         }
     }
 

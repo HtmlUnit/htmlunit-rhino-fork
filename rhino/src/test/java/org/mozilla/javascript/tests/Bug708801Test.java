@@ -7,15 +7,11 @@ package org.mozilla.javascript.tests;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
@@ -24,7 +20,7 @@ import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.IRFactory;
 import org.mozilla.javascript.JSDescriptor;
 import org.mozilla.javascript.Parser;
-import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.ScopeObject;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.ScriptNode;
@@ -49,7 +45,7 @@ public class Bug708801Test {
 
     private abstract static class Action implements ContextAction<Object> {
         protected Context cx;
-        protected ScriptableObject scope;
+        protected ScopeObject scope;
 
         @SuppressWarnings("unused")
         protected Object evaluate(String s) {
@@ -109,7 +105,7 @@ public class Bug708801Test {
                 assertFalse(opt.isParameter(i));
                 String name = fnode.getParamOrVarName(i);
                 String msg = format("{%s -> number? = %b}", name, opt.isNumberVar(i));
-                assertEquals(msg, set.contains(name), opt.isNumberVar(i));
+                assertEquals(set.contains(name), opt.isNumberVar(i), msg);
             }
         }
 
