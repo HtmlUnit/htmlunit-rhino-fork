@@ -8,11 +8,14 @@
 
 package org.mozilla.javascript;
 
+import java.io.Serializable;
+
 /**
  * Interface that represents an the bindings of an ECMAScript environment record. Unlike {@link
  * Scriptable} scopes do not have prototypes.
  */
-public interface VarScope extends Scriptable, ConstProperties<Scriptable> {
+public interface VarScope extends Scriptable, ConstProperties<Scriptable>, Serializable {
+// HtmlUnit serializable added
 
     @Override
     default String getClassName() {
