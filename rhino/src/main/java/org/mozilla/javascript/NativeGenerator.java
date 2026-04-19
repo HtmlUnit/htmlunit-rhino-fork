@@ -99,7 +99,7 @@ public final class NativeGenerator extends IdScriptableObject {
 
     @Override
     public Object execIdCall(
-            IdFunctionObject f, Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+            IdFunctionObject f, Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
         if (!f.hasTag(GENERATOR_TAG)) {
             return super.execIdCall(f, cx, scope, thisObj, args);
         }
@@ -138,7 +138,7 @@ public final class NativeGenerator extends IdScriptableObject {
         }
     }
 
-    private Object resume(Context cx, Scriptable scope, int operation, Object value) {
+    private Object resume(Context cx, VarScope scope, int operation, Object value) {
         if (savedState == null) {
             if (operation == GENERATOR_CLOSE) return Undefined.instance;
             Object thrown;

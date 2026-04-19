@@ -6,7 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.VarScope;
 
 /**
  * @see <a
@@ -14,7 +14,7 @@ import org.mozilla.javascript.Scriptable;
  */
 public class StringSearchTest {
     private Context cx;
-    private Scriptable scope;
+    private VarScope scope;
 
     @BeforeEach
     public void setUp() {

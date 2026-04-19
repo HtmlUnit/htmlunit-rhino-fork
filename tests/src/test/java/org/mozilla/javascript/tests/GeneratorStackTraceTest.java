@@ -138,7 +138,7 @@ public class GeneratorStackTraceTest {
                                     "javaHelper",
                                     0,
                                     (Context ctx,
-                                            Scriptable scope2,
+                                            VarScope scope2,
                                             Scriptable thisObj,
                                             Object[] args) -> {
                                         throw new RuntimeException("Java-side failure!");

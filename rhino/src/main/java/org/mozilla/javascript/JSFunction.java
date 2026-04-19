@@ -138,7 +138,7 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
     }
 
     @Override
-    public Object call(Context cx, Scriptable scope, Scriptable thisObj, Object[] args) {
+    public Object call(Context cx, VarScope scope, Scriptable thisObj, Object[] args) {
         if (!ScriptRuntime.hasTopCall(cx)) {
             return ScriptRuntime.doTopCall(this, cx, scope, thisObj, args, isStrict());
         }
@@ -158,7 +158,7 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
     }
 
     @Override
-    public Scriptable construct(Context cx, Scriptable scope, Object[] args) {
+    public Scriptable construct(Context cx, VarScope scope, Object[] args) {
         if (!ScriptRuntime.hasTopCall(cx)) {
             return (Scriptable)
                     ScriptRuntime.doTopCall(
@@ -201,7 +201,7 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
     }
 
     public Object resumeGenerator(
-            Context cx, Scriptable scope, int operation, Object state, Object value) {
+            Context cx, VarScope scope, int operation, Object state, Object value) {
         return descriptor.getCode().resume(cx, this, state, scope, operation, value);
     }
 

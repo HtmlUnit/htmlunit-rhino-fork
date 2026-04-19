@@ -10,7 +10,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptRuntime;
-import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.TopLevel;
 import org.mozilla.javascript.testutils.Utils;
 import org.mozilla.javascript.tools.shell.Global;
 import org.mozilla.javascript.tools.shell.Timers;
@@ -19,7 +19,7 @@ import org.mozilla.javascript.tools.shell.Timers;
 public class ShellTimerTest {
     int optLevel;
     private Context cx;
-    private Scriptable global;
+    private TopLevel global;
     private final Timers timers = new Timers();
 
     public void initShellTimerTest(int optLevel) {

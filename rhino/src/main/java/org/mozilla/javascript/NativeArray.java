@@ -625,7 +625,7 @@ public class NativeArray extends ScriptableObject implements List {
                         (lengthAlways || (length > 0))
                                 ? new Object[] {Long.valueOf(length)}
                                 : ScriptRuntime.emptyArgs;
-                result = ((Constructable) arg).construct(cx, s, args);
+                result = ((Constructable) arg).construct(cx, (VarScope) s, args);
             } catch (EcmaError ee) {
                 if (!"TypeError".equals(ee.getName())) {
                     throw ee;
@@ -671,7 +671,12 @@ public class NativeArray extends ScriptableObject implements List {
                 try (IteratorLikeIterable it = new IteratorLikeIterable(cx, s, iterator)) {
                     for (Object temp : it) {
                         if (mapping) {
-                            temp = mapFn.call(cx, s, thisArg, new Object[] {temp, Long.valueOf(k)});
+                            temp =
+                                    mapFn.call(
+                                            cx,
+                                            (VarScope) s,
+                                            thisArg,
+                                            new Object[] {temp, Long.valueOf(k)});
                         }
                         ArrayLikeAbstractOperations.defineElem(cx, result, k, temp);
                         k++;
@@ -687,7 +692,7 @@ public class NativeArray extends ScriptableObject implements List {
         for (long k = 0; k < length; k++) {
             Object temp = getElem(cx, items, k);
             if (mapping) {
-                temp = mapFn.call(cx, s, thisArg, new Object[] {temp, Long.valueOf(k)});
+                temp = mapFn.call(cx, (VarScope) s, thisArg, new Object[] {temp, Long.valueOf(k)});
             }
             ArrayLikeAbstractOperations.defineElem(cx, result, k, temp);
         }
@@ -836,7 +841,9 @@ public class NativeArray extends ScriptableObject implements List {
         }
         if (obj instanceof XMLObject) {
             Callable lengthFunc = (Callable) obj.get("length", obj);
-            return ((Number) lengthFunc.call(cx, obj, obj, ScriptRuntime.emptyArgs)).longValue();
+            return ((Number)
+                            lengthFunc.call(cx, obj.getParentScope(), obj, ScriptRuntime.emptyArgs))
+                    .longValue();
         }
 
         Object len = ScriptableObject.getProperty(obj, "length");
@@ -999,7 +1006,7 @@ public class NativeArray extends ScriptableObject implements List {
                     haslast = true;
 
                     if (toSource) {
-                        result.append(ScriptRuntime.uneval(cx, s, elem));
+                        result.append(ScriptRuntime.uneval(cx, (VarScope) s, elem));
 
                     } else if (elem instanceof String) {
                         result.append((String) elem);
@@ -1911,7 +1918,7 @@ public class NativeArray extends ScriptableObject implements List {
                 continue;
             }
             Object[] innerArgs = new Object[] {elem, Long.valueOf(i), o};
-            Object mapCall = cbf.call(cx, parent, thisArg, innerArgs);
+            Object mapCall = cbf.call(cx, (VarScope) parent, thisArg, innerArgs);
             if (js_isArray(mapCall)) {
                 Scriptable arr = (Scriptable) mapCall;
                 long arrLength = getLengthProperty(cx, arr);

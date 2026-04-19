@@ -239,7 +239,7 @@ public class ArrayLikeAbstractOperations {
             if (!Undefined.isUndefined(c)) {
                 if (c instanceof Constructable) {
                     return ((Constructable) c)
-                            .construct(cx, scope, new Object[] {Double.valueOf(length)});
+                            .construct(cx, (VarScope) scope, new Object[] {Double.valueOf(length)});
                 } else {
                     throw ScriptRuntime.typeErrorById("msg.ctor.not.found", o);
                 }
@@ -384,7 +384,7 @@ public class ArrayLikeAbstractOperations {
                     // This comparator is invoked only for non-undefined objects
                     cmpBuf[0] = x;
                     cmpBuf[1] = y;
-                    Object ret = compare.call(cx, scope, compareThis, cmpBuf);
+                    Object ret = compare.call(cx, (VarScope) scope, compareThis, cmpBuf);
 
                     // HtmlUnit
                     if (cx.hasFeature(Context.FEATURE_HTMLUNIT_ARRAY_SORT_COMPERATOR_ACCEPTS_BOOL)) {

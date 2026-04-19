@@ -10,8 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.TopLevel;
+import org.mozilla.javascript.VarScope;
 
 /**
  * Test cases for a legacy ToNumber conversion applied to a String type.
@@ -109,7 +109,7 @@ public class ToNumberLegacyConversionsTest {
     public boolean interpreted;
 
     @SuppressWarnings("ConstantConditions")
-    private boolean execute(Context cx, Scriptable scope, String script) {
+    private boolean execute(Context cx, VarScope scope, String script) {
         return (Boolean) cx.evaluateString(scope, script, "inline", 1, null);
     }
 

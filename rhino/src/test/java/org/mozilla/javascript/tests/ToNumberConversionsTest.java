@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.VarScope;
 import org.mozilla.javascript.testutils.Utils;
 
 /**
@@ -96,7 +96,7 @@ public class ToNumberConversionsTest {
     public String source;
 
     @SuppressWarnings("ConstantConditions")
-    private boolean execute(Context cx, Scriptable scope, String script) {
+    private boolean execute(Context cx, VarScope scope, String script) {
         return (Boolean) cx.evaluateString(scope, script, "inline", 1, null);
     }
 
