@@ -116,7 +116,7 @@ public class FunctionObject extends BaseFunction {
             if (types[2].isArray()) {
                 if (!isStatic
                         || types[0] != Context.class
-                        || types[1] != Scriptable.class
+                        || types[1] != VarScope.class
                         || types[2] != Object[].class
                         || types[3] != Function.class
                         || types[4] != boolean.class) {
@@ -126,7 +126,7 @@ public class FunctionObject extends BaseFunction {
             } else {
                 if (!isStatic
                         || types[0] != Context.class
-                        || types[1] != Scriptable.class
+                        || types[1] != VarScope.class
                         || types[2] != Scriptable.class
                         || types[3] != Object[].class
                         || types[4] != Function.class) {
