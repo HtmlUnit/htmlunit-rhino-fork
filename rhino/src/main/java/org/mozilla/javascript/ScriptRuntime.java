@@ -2963,12 +2963,6 @@ public class ScriptRuntime {
 
     private static Callable getNameFunctionAndThisInner(
             String name, Context cx, VarScope scope, boolean isOptionalChainingCall) {
-        // HtmlUnit hack for indirect eval() calls
-        if ("eval".equals(name)) {
-            lastEvalTopCalled_ = true;
-        }
-        // end HtmlUnit
-
         Scriptable parent = scope.getParentScope();
         if (parent == null) {
             Object result = topScopeName(cx, scope, name);
@@ -3009,12 +3003,6 @@ public class ScriptRuntime {
 
     private static LookupResult getNameAndThisInner(
             String name, Context cx, VarScope scope, boolean isOptionalChainingCall) {
-        // HtmlUnit hack for indirect eval() calls
-        if ("eval".equals(name)) {
-            lastEvalTopCalled_ = true;
-        }
-        // end HtmlUnit
-
         Scriptable parent = scope.getParentScope();
         if (parent == null) {
             Object result = topScopeName(cx, scope, name);
@@ -3216,12 +3204,6 @@ public class ScriptRuntime {
             Context cx,
             VarScope scope,
             boolean isOptionalChainingCall) {
-        // HtmlUnit hack for indirect eval() calls
-        if ("eval".equals(property)) {
-            lastEvalTopCalled_ = false;
-        }
-        // end HtmlUnit
-
         Scriptable thisObj = toObjectOrNull(cx, obj, scope);
         return getPropFunctionAndThisHelper(obj, property, cx, thisObj, isOptionalChainingCall);
     }
@@ -3282,12 +3264,6 @@ public class ScriptRuntime {
             Context cx,
             VarScope scope,
             boolean isOptionalChainingCall) {
-        // HtmlUnit hack for indirect eval() calls
-        if ("eval".equals(property)) {
-            lastEvalTopCalled_ = false;
-        }
-        // end HtmlUnit
-
         Scriptable thisObj = toObjectOrNull(cx, obj, scope);
         return getPropAndThisHelper(obj, property, cx, thisObj, isOptionalChainingCall);
     }
@@ -3460,19 +3436,6 @@ public class ScriptRuntime {
         return ((Constructable) ctor).construct(cx, (VarScope) scope, args);
     }
 
-    /**
-     * HtmlUnit hack for indirect eval() calls
-     * This indicates whether last call of "eval" was at the top scope (i.e. "eval()") or not (i.e.
-     * "scope.eval()"), as each one has different behavior.
-     *
-     * <p>Ideally, we should have "eval" at top scope and we use Context.FEATURE_DYNAMIC_SCOPE, but
-     * it will complex the code.
-     *
-     * <p>The current implementation sets this value to true when "eval" is called, and false on
-     * "something.eval()"
-     */
-    private static boolean lastEvalTopCalled_;
-
     public static Object callSpecial(
             Context cx,
             Callable fun,
@@ -3490,11 +3453,6 @@ public class ScriptRuntime {
 
         if (callType == Node.SPECIALCALL_EVAL) {
             if (thisObj.getParentScope() == null && NativeGlobal.isEvalFunction(fun)) {
-                // HtmlUnit hack for indirect eval() calls
-                if (!lastEvalTopCalled_) {
-                    scope = thisObj;
-                }
-                // end HtmlUnit
                 return evalSpecial(cx, (VarScope) scope, callerThis, args, filename, lineNumber);
             }
         } else if (callType == Node.SPECIALCALL_WITH) {
