@@ -1,5 +1,6 @@
 package org.mozilla.javascript;
 
+import java.io.Serial;
 import java.io.Serializable;
 import org.mozilla.javascript.ScriptableObject.DescriptorInfo;
 
@@ -22,7 +23,9 @@ import org.mozilla.javascript.ScriptableObject.DescriptorInfo;
  * map from which a slot was fetched. We store it in the slot's value field as this is not used for
  * any real value storage on a built in slot.
  */
-public class BuiltInSlot<T extends ScriptableObject> extends Slot<Scriptable> {
+public class BuiltInSlot<T extends ScriptableObject>
+        extends CompactSlot<BuiltInSlot.Descriptor<T>, Scriptable, T> {
+    @Serial private static final long serialVersionUID = 8728562620206845355L;
 
     public interface Getter<T extends ScriptableObject> extends Serializable {
         Object apply(T builtIn, Scriptable start);
@@ -47,133 +50,101 @@ public class BuiltInSlot<T extends ScriptableObject> extends Slot<Scriptable> {
                 int index);
     }
 
-    private final Getter<T> getter;
-    private final Setter<T> setter;
-    private final AttributeSetter<T> attrUpdater;
-    private final PropDescriptionSetter<T> propDescSetter;
+    public static class Descriptor<T extends ScriptableObject>
+            extends CompactSlot.Descriptor<BuiltInSlot.Descriptor<T>, Scriptable, T> {
+        @Serial private static final long serialVersionUID = 8728562620206845355L;
 
-    BuiltInSlot(Object name, int index, int attr, T builtIn, Getter<T> getter) {
-        this(
-                name,
-                index,
-                attr,
-                builtIn,
-                getter,
-                BuiltInSlot::defaultSetter,
-                BuiltInSlot::defaultAttrSetter,
-                BuiltInSlot::defaultPropDescSetter);
-    }
+        private final Getter<T> getter;
+        private final Setter<T> setter;
+        private final AttributeSetter<T> attrUpdater;
+        private final PropDescriptionSetter<T> propDescSetter;
 
-    BuiltInSlot(Object name, int index, int attr, T builtIn, Getter<T> getter, Setter<T> setter) {
-        this(
-                name,
-                index,
-                attr,
-                builtIn,
-                getter,
-                setter,
-                BuiltInSlot::defaultAttrSetter,
-                BuiltInSlot::defaultPropDescSetter);
-    }
+        public Descriptor(Object name, Getter<T> getter) {
+            this(
+                    name,
+                    0,
+                    getter,
+                    BuiltInSlot::defaultSetter,
+                    BuiltInSlot::defaultAttrSetter,
+                    BuiltInSlot::defaultPropDescSetter);
+        }
 
-    BuiltInSlot(
-            Object name,
-            int index,
-            int attr,
-            T builtIn,
-            Getter<T> getter,
-            Setter<T> setter,
-            AttributeSetter<T> attrUpdater) {
-        this(
-                name,
-                index,
-                attr,
-                builtIn,
-                getter,
-                setter,
-                attrUpdater,
-                BuiltInSlot::defaultPropDescSetter);
-    }
+        public Descriptor(Object name, Getter<T> getter, Setter<T> setter) {
+            this(
+                    name,
+                    0,
+                    getter,
+                    setter,
+                    BuiltInSlot::defaultAttrSetter,
+                    BuiltInSlot::defaultPropDescSetter);
+        }
 
-    BuiltInSlot(
-            Object name,
-            int index,
-            int attr,
-            T builtIn,
-            Getter<T> getter,
-            Setter<T> setter,
-            AttributeSetter<T> attrUpdater,
-            PropDescriptionSetter<T> propDescSetter) {
-        super(name, index, attr);
-        this.value = builtIn;
-        this.getter = getter;
-        this.setter = setter;
-        this.attrUpdater = attrUpdater;
-        this.propDescSetter = propDescSetter;
-    }
+        public Descriptor(
+                Object name, Getter<T> getter, Setter<T> setter, AttributeSetter<T> attrUpdater) {
+            this(name, 0, getter, setter, attrUpdater, BuiltInSlot::defaultPropDescSetter);
+        }
 
-    BuiltInSlot(BuiltInSlot<T> slot) {
-        super(slot);
-        this.getter = slot.getter;
-        this.setter = slot.setter;
-        this.attrUpdater = slot.attrUpdater;
-        this.propDescSetter = slot.propDescSetter;
-    }
+        public Descriptor(
+                Object name,
+                Getter<T> getter,
+                Setter<T> setter,
+                AttributeSetter<T> attrUpdater,
+                PropDescriptionSetter<T> propDescSetter) {
+            this(name, 0, getter, setter, attrUpdater, propDescSetter);
+        }
 
-    @Override
-    Slot<Scriptable> copySlot() {
-        var res = new BuiltInSlot<T>(this);
-        res.next = null;
-        res.orderedNext = null;
-        return res;
-    }
+        public Descriptor(
+                Object name,
+                int indexOrHash,
+                Getter<T> getter,
+                Setter<T> setter,
+                AttributeSetter<T> attrUpdater,
+                PropDescriptionSetter<T> propDescSetter) {
+            super(name, indexOrHash);
+            this.getter = getter;
+            this.setter = setter;
+            this.attrUpdater = attrUpdater;
+            this.propDescSetter = propDescSetter;
+        }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public Object getValue(Scriptable start) {
-        return getter.apply(((T) this.value), start);
-    }
+        @Override
+        @SuppressWarnings("unchecked")
+        public Object getValue(
+                CompactSlot<BuiltInSlot.Descriptor<T>, Scriptable, T> slot, Scriptable start) {
+            return getter.apply(((T) slot.getRawValue()), start);
+        }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean setValue(Object value, Scriptable owner, Scriptable start, boolean isThrow) {
-        if ((getAttributes() & ScriptableObject.READONLY) != 0) {
-            if (isThrow) {
-                throw ScriptRuntime.typeErrorById("msg.modify.readonly", name);
+        @Override
+        @SuppressWarnings("unchecked")
+        public boolean setValue(
+                CompactSlot<BuiltInSlot.Descriptor<T>, Scriptable, T> slot,
+                Object value,
+                Scriptable owner,
+                Scriptable start,
+                boolean isThrow) {
+            if ((slot.getAttributes() & ScriptableObject.READONLY) != 0) {
+                if (isThrow) {
+                    throw ScriptRuntime.typeErrorById("msg.modify.readonly", getName());
+                }
+                return true;
             }
-            return true;
+            if (owner == start) {
+                return setter.apply(((T) slot.getRawValue()), value, owner, start, isThrow);
+            }
+            return false;
         }
-        if (owner == start) {
-            return setter.apply(((T) this.value), value, owner, start, isThrow);
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void setAttributes(CompactSlot<Descriptor<T>, Scriptable, T> slot, int value) {
+            attrUpdater.apply(((T) slot.getRawValue()), value);
+            super.setAttributes(slot, value);
         }
-        return false;
-    }
 
-    /* When setting a property descriptor we need to set the property
-    _without_ the normal checks on readonly and similar. */
-    @SuppressWarnings("unchecked")
-    public void setValueFromDescriptor(
-            Object value, Scriptable owner, Scriptable start, boolean isThrow) {
-        setter.apply(((T) this.value), value, owner, start, isThrow);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    void setAttributes(int value) {
-        attrUpdater.apply(((T) this.value), value);
-        super.setAttributes(value);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    DescriptorInfo getPropertyDescriptor(Context cx, Scriptable start) {
-        return ScriptableObject.buildDataDescriptor(getValue((T) this.value), getAttributes());
-    }
-
-    @SuppressWarnings("unchecked")
-    boolean applyNewDescriptor(
-            Object id, DescriptorInfo info, boolean checkValid, Object key, int index) {
-        return propDescSetter.apply(((T) this.value), this, id, info, checkValid, key, index);
+        @Override
+        public BuiltInSlot<T> createSlot(T owner, int attr) {
+            return new BuiltInSlot<>(this, attr, owner);
+        }
     }
 
     private static <T extends ScriptableObject> boolean defaultSetter(
@@ -197,5 +168,37 @@ public class BuiltInSlot<T extends ScriptableObject> extends Slot<Scriptable> {
             return ScriptableObject.defineOrdinaryProperty(
                     ScriptableObject::setSlotValue, builtIn, map, id, info, checkValid, key, index);
         }
+    }
+
+    BuiltInSlot(Descriptor<T> descriptor, int attr, T builtIn) {
+        super(descriptor, attr);
+        this.value = builtIn;
+    }
+
+    BuiltInSlot(BuiltInSlot<T> slot) {
+        super(slot);
+    }
+
+    @Override
+    Slot<Scriptable> copySlot() {
+        var res = new BuiltInSlot<T>(this);
+        res.next = null;
+        res.orderedNext = null;
+        return res;
+    }
+
+    /* When setting a property descriptor we need to set the property
+    _without_ the normal checks on readonly and similar. */
+    @SuppressWarnings("unchecked")
+    public void setValueFromDescriptor(
+            Object value, Scriptable owner, Scriptable start, boolean isThrow) {
+        descriptor.setter.apply(((T) this.value), value, owner, start, isThrow);
+    }
+
+    @SuppressWarnings("unchecked")
+    boolean applyNewDescriptor(
+            Object id, DescriptorInfo info, boolean checkValid, Object key, int index) {
+        return descriptor.propDescSetter.apply(
+                ((T) this.value), this, id, info, checkValid, key, index);
     }
 }

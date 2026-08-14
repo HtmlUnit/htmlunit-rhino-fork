@@ -408,7 +408,7 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
      */
     @Override
     public boolean isConst(String name) {
-        Slot slot = getMap().query(name, 0);
+        var slot = getMap().query(name, 0);
         if (slot == null) {
             return false;
         }
@@ -426,7 +426,7 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
             // Create a new AccessorSlot, or cast it if it's already set
             aSlot = getMap().compute(this, name, index, ScriptableObject::ensureAccessorSlot);
         } else {
-            Slot slot = getMap().query(name, index);
+            var slot = getMap().query(name, index);
             if (slot instanceof AccessorSlot) {
                 aSlot = (AccessorSlot) slot;
             } else {
@@ -515,7 +515,7 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
 
     protected boolean isGetterOrSetter(
             CompoundOperationMap map, String name, int index, boolean setter) {
-        Slot slot = map.query(name, index);
+        var slot = map.query(name, index);
         return (slot != null && slot.isSetterSlot());
     }
 
@@ -1696,7 +1696,7 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
                     int attributes;
 
                     if (existing == null) {
-                        slot = new Slot<>(k, ix, 0);
+                        slot = new StandardSlot<>(k, ix, 0);
                         attributes =
                                 applyDescriptorToAttributeBitset(
                                         DONTENUM | READONLY | PERMANENT,
@@ -1760,14 +1760,14 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
                 fslot.setter = new AccessorSlot.FunctionSetter(info.setter);
             }
             fslot.value = Undefined.instance;
-        } else if (slot instanceof BuiltInSlot) {
+        } else if (slot instanceof BuiltInSlot bis) {
             if (info.value != NOT_FOUND) {
-                ((BuiltInSlot<?>) slot).setValueFromDescriptor(info.value, owner, owner, true);
+                bis.setValueFromDescriptor(info.value, owner, owner, true);
             }
         } else {
             if (!slot.isValueSlot() && info.isDataDescriptor()) {
                 // Replace a non-base slot with a regular slot
-                slot = new Slot<>(slot);
+                slot = new StandardSlot<>(slot);
             }
 
             if (info.value != NOT_FOUND) {
@@ -1950,11 +1950,12 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
     }
 
     protected final void checkPropertyChangeForSlot(
-            Object id, Slot current, ScriptableObject desc) {
+            Object id, Slot<?> current, ScriptableObject desc) {
         checkPropertyChangeForSlot(id, current, new DescriptorInfo(desc));
     }
 
-    protected final void checkPropertyChangeForSlot(Object id, Slot current, DescriptorInfo info) {
+    protected final void checkPropertyChangeForSlot(
+            Object id, Slot<?> current, DescriptorInfo info) {
 
         if (current == null) { // new property
             if (!isExtensible()) throw ScriptRuntime.typeErrorById("msg.not.extensible");
@@ -2935,7 +2936,7 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
         int c = externalLen;
         for (var slot : map) {
             if ((getNonEnumerable || (slot.getAttributes() & DONTENUM) == 0)
-                    && (getSymbols || !(slot.name instanceof Symbol))) {
+                    && (getSymbols || !(slot.getName() instanceof Symbol))) {
                 if (c == externalLen) {
                     // Special handling to combine external array with additional properties
                     Object[] oldA = a;
@@ -2944,7 +2945,7 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
                         System.arraycopy(oldA, 0, a, 0, externalLen);
                     }
                 }
-                a[c++] = slot.name != null ? slot.name : Integer.valueOf(slot.indexOrHash);
+                a[c++] = slot.getKey();
             }
         }
 
@@ -3099,52 +3100,8 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
     }
 
     public static <T extends ScriptableObject> void defineBuiltInProperty(
-            T owner,
-            Object name,
-            int attributes,
-            BuiltInSlot.Getter<T> getter,
-            BuiltInSlot.Setter<T> setter) {
-        owner.getMap().add(owner, new BuiltInSlot<T>(name, 0, attributes, owner, getter, setter));
-    }
-
-    public static <T extends ScriptableObject> void defineBuiltInProperty(
-            T owner,
-            Object name,
-            int attributes,
-            BuiltInSlot.Getter<T> getter,
-            BuiltInSlot.Setter<T> setter,
-            BuiltInSlot.AttributeSetter<T> attrSetter) {
-        owner.getMap()
-                .add(
-                        owner,
-                        new BuiltInSlot<T>(name, 0, attributes, owner, getter, setter, attrSetter));
-    }
-
-    public static <T extends ScriptableObject> void defineBuiltInProperty(
-            T owner, Object name, int attributes, BuiltInSlot.Getter<T> getter) {
-        owner.getMap().add(owner, new BuiltInSlot<T>(name, 0, attributes, owner, getter));
-    }
-
-    public static <T extends ScriptableObject> void defineBuiltInProperty(
-            T owner,
-            Object name,
-            int attributes,
-            BuiltInSlot.Getter<T> getter,
-            BuiltInSlot.Setter<T> setter,
-            BuiltInSlot.AttributeSetter<T> attrSetter,
-            BuiltInSlot.PropDescriptionSetter<T> propDescSetter) {
-        owner.getMap()
-                .add(
-                        owner,
-                        new BuiltInSlot<T>(
-                                name,
-                                0,
-                                attributes,
-                                owner,
-                                getter,
-                                setter,
-                                attrSetter,
-                                propDescSetter));
+            T owner, int attributes, BuiltInSlot.Descriptor<T> descriptor) {
+        owner.getMap().add(owner, new BuiltInSlot<T>(descriptor, attributes, owner));
     }
 
     @SuppressWarnings("unchecked")

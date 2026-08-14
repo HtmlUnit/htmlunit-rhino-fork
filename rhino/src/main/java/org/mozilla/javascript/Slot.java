@@ -1,8 +1,5 @@
 package org.mozilla.javascript;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serial;
 import java.io.Serializable;
 import org.mozilla.javascript.ScriptableObject.DescriptorInfo;
 
@@ -12,27 +9,14 @@ import org.mozilla.javascript.ScriptableObject.DescriptorInfo;
  * primitive type or another object. Separate classes are used to represent properties that have
  * various types of getter and setter methods.
  */
-public class Slot<T extends PropHolder<T>> implements Serializable {
-    @Serial private static final long serialVersionUID = -6090581677123995491L;
-    Object name; // This can change due to caching
-    int indexOrHash;
-    private short attributes;
+public abstract class Slot<T extends PropHolder<T>> implements Serializable {
     Object value;
     transient Slot<T> next; // next in hash table bucket
     transient Slot<T> orderedNext; // next in linked list
 
-    Slot(Object name, int index, int attributes) {
-        this.name = name;
-        this.indexOrHash = name == null ? index : name.hashCode();
-        this.attributes = (short) attributes;
-    }
+    Slot() {}
 
-    Slot<T> copySlot() {
-        var newSlot = new Slot<T>(this);
-        newSlot.next = null;
-        newSlot.orderedNext = null;
-        return newSlot;
-    }
+    abstract Slot<T> copySlot();
 
     /**
      * Return true if this is a base-class "Slot". Sadly too much code breaks if we try to do this
@@ -50,72 +34,30 @@ public class Slot<T extends PropHolder<T>> implements Serializable {
     }
 
     protected Slot(Slot<T> oldSlot) {
-        name = oldSlot.name;
-        indexOrHash = oldSlot.indexOrHash;
-        attributes = oldSlot.attributes;
         value = oldSlot.value;
         next = oldSlot.next;
         orderedNext = oldSlot.orderedNext;
-    }
-
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        if (name != null) {
-            indexOrHash = name.hashCode();
-        }
     }
 
     public final boolean setValue(Object value, T owner, T start) {
         return setValue(value, owner, start, Context.isCurrentContextStrict());
     }
 
-    public boolean setValue(Object value, T owner, T start, boolean isThrow) {
-        if ((attributes & ScriptableObject.READONLY) != 0) {
-            if (isThrow) {
-                throw ScriptRuntime.typeErrorById("msg.modify.readonly", name);
-            }
-            return true;
-        }
-        if (owner == start) {
-            this.value = value;
-            return true;
-        }
-        return false;
-    }
+    public abstract boolean setValue(Object value, T owner, T start, boolean isThrow);
 
     public Object getValue(T start) {
         return value;
     }
 
-    int getAttributes() {
-        return attributes;
-    }
+    abstract int getAttributes();
 
-    void setAttributes(int value) {
-        ScriptableObject.checkValidAttributes(value);
-        attributes = (short) value;
-    }
+    abstract void setAttributes(int value);
 
     DescriptorInfo getPropertyDescriptor(Context cx, T scope) {
-        return ScriptableObject.buildDataDescriptor(value, attributes);
+        return ScriptableObject.buildDataDescriptor(value, getAttributes());
     }
 
-    protected void throwNoSetterException(T start, Object newValue) {
-        Context cx = Context.getContext();
-        if (cx.isStrictMode()
-                ||
-                // Based on TC39 ES3.1 Draft of 9-Feb-2009, 8.12.4, step 2,
-                // we should throw a TypeError in this case.
-                cx.hasFeature(Context.FEATURE_STRICT_MODE)) {
-
-            String prop = "";
-            if (name != null) {
-                prop = "[" + ((Scriptable) start).getClassName() + "]." + name;
-            }
-            throw ScriptRuntime.typeErrorById(
-                    "msg.set.prop.no.setter", prop, Context.toString(newValue));
-        }
-    }
+    protected abstract void throwNoSetterException(T start, Object newValue);
 
     /**
      * Return a JavaScript function that represents the "setter". This is used by some legacy
@@ -144,4 +86,12 @@ public class Slot<T extends PropHolder<T>> implements Serializable {
     boolean isSameGetterFunction(Object function) {
         return false;
     }
+
+    public abstract boolean keyMatches(Object key, int indexOrHash);
+
+    public abstract Object getKey();
+
+    public abstract Object getName();
+
+    public abstract int getIndexOrHash();
 }
