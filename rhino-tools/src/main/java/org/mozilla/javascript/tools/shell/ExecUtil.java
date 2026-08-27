@@ -195,7 +195,7 @@ class ExecUtil {
             return emptyArray;
         }
         Scriptable s = Context.toObject(obj, ScriptableObject.getTopLevelScope(scope));
-        return ScriptRuntime.getArrayElements(s);
+        return ScriptRuntime.getArrayElements(Context.getCurrentContext(), s);
     }
 
     private static Global.CommandExecutor parseCommandLauncher(Scriptable params) {

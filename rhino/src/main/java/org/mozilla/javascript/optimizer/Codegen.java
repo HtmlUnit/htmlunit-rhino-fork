@@ -40,6 +40,7 @@ import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Name;
 import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.ast.TemplateCharacters;
+import org.mozilla.javascript.config.RhinoConfig;
 import org.mozilla.javascript.debug.DebuggableScript;
 
 /**
@@ -530,6 +531,8 @@ public class Codegen implements Evaluator {
         int argCount = ofn.fnode.getParamCount();
         int firstLocal = (5 + argCount * 3) + 1;
 
+        emitTrace(cfw, "TRACE emitDirectConstructor body: " + cleanName(ofn.fnode));
+
         cfw.addALoad(1); // this
         cfw.add(ByteCode.CHECKCAST, Codegen.JSFUNCTION_CLASS_NAME);
         cfw.addALoad(0); // cx
@@ -543,11 +546,11 @@ public class Codegen implements Evaluator {
                         + ")Lorg/mozilla/javascript/Scriptable;");
         cfw.addAStore(firstLocal);
 
-        cfw.addALoad(0);
-        cfw.addALoad(1);
-        cfw.add(ByteCode.ACONST_NULL);
-        cfw.addALoad(2);
-        cfw.addALoad(firstLocal);
+        cfw.addALoad(0); // context
+        cfw.addALoad(1); // this function
+        cfw.addALoad(2); // new.target will be this function
+        cfw.addALoad(3); // Scope
+        cfw.addALoad(firstLocal); // thisObj - object created above.
         for (int i = 0; i < argCount; i++) {
             cfw.addALoad(5 + (i * 3));
             cfw.addDLoad(6 + (i * 3));
@@ -561,16 +564,28 @@ public class Codegen implements Evaluator {
         int exitLabel = cfw.acquireLabel();
         cfw.add(ByteCode.DUP); // make a copy of direct call result
         cfw.add(ByteCode.INSTANCEOF, "org/mozilla/javascript/Scriptable");
-        cfw.add(ByteCode.IFEQ, exitLabel);
-        // cast direct call result
-        cfw.add(ByteCode.CHECKCAST, "org/mozilla/javascript/Scriptable");
-        cfw.add(ByteCode.ARETURN);
-        cfw.markLabel(exitLabel);
-
+        cfw.add(ByteCode.IFNE, exitLabel);
+        // If the constructor did not return a Scriptable we pass back the `this` we passed in.
+        cfw.add(ByteCode.POP);
         cfw.addALoad(firstLocal);
+        cfw.markLabel(exitLabel);
         cfw.add(ByteCode.ARETURN);
 
         cfw.stopMethod((short) (firstLocal + 1));
+    }
+
+    static final boolean DEBUG_DIRECT_CALLS = RhinoConfig.get("rhino.debugDirectCalls", false);
+
+    /**
+     * Emits code that prints the given message when the surrounding generated code is reached. Only
+     * used to check which of the direct call paths a script actually takes.
+     */
+    static void emitTrace(ClassFileWriter cfw, String message) {
+        if (!DEBUG_DIRECT_CALLS) return;
+        cfw.add(ByteCode.GETSTATIC, "java/lang/System", "err", "Ljava/io/PrintStream;");
+        cfw.addPush(message);
+        cfw.addInvoke(
+                ByteCode.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V");
     }
 
     static boolean isGenerator(ScriptNode node) {
@@ -985,7 +1000,8 @@ public class Codegen implements Evaluator {
                     + "Lorg/mozilla/javascript/Context;"
                     + "Lorg/mozilla/javascript/VarScope;"
                     + "Lorg/mozilla/javascript/JSDescriptor;"
-                    + "Lorg/mozilla/javascript/Scriptable;"
+                    + "Ljava/lang/Object;"
+                    + "Ljava/lang/Object;"
                     + "Lorg/mozilla/javascript/Scriptable;"
                     + ")V";
 

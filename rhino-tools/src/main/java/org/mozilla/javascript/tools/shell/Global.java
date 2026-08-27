@@ -571,7 +571,7 @@ public class Global extends ImporterTopLevel {
             Function f = (Function) args[0];
             Object[] newArgs =
                     args.length > 1 && args[1] instanceof Scriptable
-                            ? cx.getElements((Scriptable) args[1])
+                            ? ScriptRuntime.getArrayElements(cx, (Scriptable) args[1])
                             : ScriptRuntime.emptyArgs;
             action = cx2 -> f.call(cx2, scope, thisObj, newArgs);
         } else if (args.length != 0 && args[0] instanceof Script) {
