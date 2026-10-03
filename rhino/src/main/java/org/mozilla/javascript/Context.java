@@ -32,7 +32,7 @@ import java.util.TimeZone;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import org.mozilla.classfile.ClassFileWriter.ClassSizeException;
-import org.mozilla.javascript.InstrumentEmitter.Type;
+// HtmlUnit import org.mozilla.javascript.InstrumentEmitter.Type;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.debug.DebuggableScript;
@@ -2805,8 +2805,8 @@ public class Context implements Closeable {
             CompilerEnvirons compilerEnv,
             ErrorReporter compilationErrorReporter,
             boolean returnFunction) {
-        var event = InstrumentEmitter.emitter.startEvent(Type.PARSE);
-        try {
+        // HtmlUnit var event = InstrumentEmitter.emitter.startEvent(Type.PARSE);
+        // try {
             return parseInt(
                     sourceString,
                     sourceName,
@@ -2814,9 +2814,9 @@ public class Context implements Closeable {
                     compilerEnv,
                     compilationErrorReporter,
                     returnFunction);
-        } finally {
-            InstrumentEmitter.emitter.endEvent(event, sourceName, sourceString.length());
-        }
+        // } finally {
+        //    InstrumentEmitter.emitter.endEvent(event, sourceName, sourceString.length());
+        // }
     }
 
     private ScriptNode parseInt(

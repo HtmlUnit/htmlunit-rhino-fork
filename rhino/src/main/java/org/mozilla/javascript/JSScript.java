@@ -1,6 +1,6 @@
 package org.mozilla.javascript;
 
-import org.mozilla.javascript.InstrumentEmitter.Type;
+// HtmlUnit import org.mozilla.javascript.InstrumentEmitter.Type;
 
 /**
  * Represents a script object built upon a {@link JSDescriptor}. This class does not support the
@@ -38,15 +38,15 @@ public class JSScript implements Script, ScriptOrFn<JSScript> {
             ret = ScriptRuntime.doTopCall(this, cx, scope, thisObj, descriptor.isStrict());
             cx.processMicrotasks();
         } else {
-            var event = InstrumentEmitter.emitter.startEvent(Type.SCRIPT_EXEC);
-            try {
+            // HtmlUnit var event = InstrumentEmitter.emitter.startEvent(Type.SCRIPT_EXEC);
+            // try {
                 ret =
                         descriptor
                                 .getCode()
                                 .execute(cx, this, null, scope, thisObj, ScriptRuntime.emptyArgs);
-            } finally {
-                InstrumentEmitter.emitter.endEvent(event, getDescriptor().getSourceName());
-            }
+            // } finally {
+            //     InstrumentEmitter.emitter.endEvent(event, getDescriptor().getSourceName());
+            // }
         }
         return ret;
     }

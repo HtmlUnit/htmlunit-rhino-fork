@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.mozilla.javascript.InstrumentEmitter.Type;
+// HtmlUnit import org.mozilla.javascript.InstrumentEmitter.Type;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.ast.Jump;
 import org.mozilla.javascript.ast.ScriptNode;
@@ -61,12 +61,12 @@ class CodeGenerator<T extends ScriptOrFn<T>> {
             ScriptNode tree,
             String rawSource,
             boolean returnFunction) {
-        var event = InstrumentEmitter.emitter.startEvent(Type.COMPILE_INTERPRETER);
-        try {
+        // HtmlUnit var event = InstrumentEmitter.emitter.startEvent(Type.COMPILE_INTERPRETER);
+        // try {
             return compileInt(compilerEnv, tree, rawSource, returnFunction);
-        } finally {
-            InstrumentEmitter.emitter.endEvent(event, tree.getSourceName());
-        }
+        // } finally {
+        //     InstrumentEmitter.emitter.endEvent(event, tree.getSourceName());
+        //}
     }
 
     private JSDescriptor<T> compileInt(

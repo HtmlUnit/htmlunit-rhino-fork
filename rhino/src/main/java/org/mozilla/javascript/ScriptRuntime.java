@@ -28,7 +28,7 @@ import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import org.mozilla.javascript.InstrumentEmitter.Type;
+// HtmlUnit import org.mozilla.javascript.InstrumentEmitter.Type;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.dtoa.DoubleFormatter;
 import org.mozilla.javascript.lc.type.TypeInfo;
@@ -207,12 +207,12 @@ public class ScriptRuntime {
     }
 
     public static TopLevel initSafeStandardObjects(Context cx, TopLevel scope, boolean sealed) {
-        var event = InstrumentEmitter.emitter.startEvent(Type.SAFE_OBJECTS_INIT);
-        try {
+        // HtmlUnit var event = InstrumentEmitter.emitter.startEvent(Type.SAFE_OBJECTS_INIT);
+        // try {
             return initSafeStandardObjectsInt(cx, scope, sealed);
-        } finally {
-            InstrumentEmitter.emitter.endEvent(event);
-        }
+        // } finally {
+        //     InstrumentEmitter.emitter.endEvent(event);
+        // }
     }
 
     private static TopLevel initSafeStandardObjectsInt(Context cx, TopLevel scope, boolean sealed) {
@@ -333,12 +333,12 @@ public class ScriptRuntime {
     }
 
     public static TopLevel initStandardObjects(Context cx, TopLevel scope, boolean sealed) {
-        var event = InstrumentEmitter.emitter.startEvent(Type.OBJECTS_INIT);
-        try {
+        // HtmlUnit var event = InstrumentEmitter.emitter.startEvent(Type.OBJECTS_INIT);
+        // try {
             return initStandardObjectsInt(cx, scope, sealed);
-        } finally {
-            InstrumentEmitter.emitter.endEvent(event);
-        }
+        // } finally {
+        //     InstrumentEmitter.emitter.endEvent(event);
+        // }
     }
 
     private static TopLevel initStandardObjectsInt(Context cx, TopLevel scope, boolean sealed) {
