@@ -122,7 +122,12 @@ public class NativeArrayBuffer extends ScriptableObject {
 
     private static ByteOrder defaultByteOrder() {
         Context cx = Context.getCurrentContext();
-        return cx == null ? ByteOrder.BIG_ENDIAN : defaultByteOrder(cx);
+        // HtmlUnit throw without context
+        // return cx == null ? ByteOrder.BIG_ENDIAN : defaultByteOrder(cx);
+        if (cx == null) {
+            throw new IllegalStateException("Context is null - no chance to determine byteOrder");
+        }
+        return defaultByteOrder(cx);
     }
 
     /** Get the number of bytes in the buffer. */
