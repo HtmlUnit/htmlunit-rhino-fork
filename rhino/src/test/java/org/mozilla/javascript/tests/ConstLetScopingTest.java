@@ -151,32 +151,77 @@ class ConstLetScopingTest {
     void constInForBodyIsRebound() {
         Utils.assertWithAllModes_ES6(
                 "1,2,3",
-                "function f(a) { var o = []; for (var i = 0; i < a.length; i++) {"
-                        + " const x = a[i]; o.push(x); } return o.join(); } f([1, 2, 3]);");
+                """
+                function f(a) {
+                    var o = [];
+                    for (var i = 0; i < a.length; i++) {
+                        const x = a[i];
+                        o.push(x);
+                    }
+                    return o.join();
+                }
+                f([1, 2, 3]);
+                """);
     }
 
     @Test
     void constInWhileBodyIsRebound() {
         Utils.assertWithAllModes_ES6(
                 "0,1,2",
-                "function f(n) { var o = []; var i = 0; while (i < n) {"
-                        + " const x = i; o.push(x); i++; } return o.join(); } f(3);");
+                """
+                function f(n) {
+                    var o = [];
+                    var i = 0;
+                    while (i < n) {
+                        const x = i;
+                        o.push(x);
+                        i++;
+                    }
+                    return o.join();
+                }
+                f(3);
+                """);
     }
 
     @Test
     void constInDoWhileBodyIsRebound() {
         Utils.assertWithAllModes_ES6(
                 "0,1,2",
-                "function f(n) { var o = []; var i = 0; do {"
-                        + " const x = i; o.push(x); i++; } while (i < n); return o.join(); } f(3);");
+                """
+                function f(n) {
+                    var o = [];
+                    var i = 0;
+                    do {
+                        const x = i;
+                        o.push(x);
+                        i++;
+                    } while (i < n);
+                    return o.join();
+                }
+                f(3);
+                """);
     }
 
     @Test
     void constInNestedBlocksIsRebound() {
         Utils.assertWithAllModes_ES6(
                 "0:0,1:2,2:4",
-                "function f(n) { var o = []; for (var i = 0; i < n; i++) { { const x = i;"
-                        + " { const y = i * 2; o.push(x + ':' + y); } } } return o.join(); } f(3);");
+                """
+                function f(n) {
+                    var o = [];
+                    for (var i = 0; i < n; i++) {
+                        {
+                            const x = i;
+                            {
+                                const y = i * 2;
+                                o.push(x + ':' + y);
+                            }
+                        }
+                    }
+                    return o.join();
+                }
+                f(3);
+                """);
     }
 
     @Test
@@ -184,9 +229,21 @@ class ConstLetScopingTest {
         // The declaration is skipped on the middle iteration, and must still re-bind on the next
         Utils.assertWithAllModes_ES6(
                 "0,skip,2",
-                "function f(n) { var o = []; for (var i = 0; i < n; i++) {"
-                        + " if (i === 1) { o.push('skip'); continue; } const x = i; o.push(x); }"
-                        + " return o.join(); } f(3);");
+                """
+                function f(n) {
+                    var o = [];
+                    for (var i = 0; i < n; i++) {
+                        if (i === 1) {
+                            o.push('skip');
+                            continue;
+                        }
+                        const x = i;
+                        o.push(x);
+                    }
+                    return o.join();
+                }
+                f(3);
+                """);
     }
 
     @Test
@@ -195,8 +252,18 @@ class ConstLetScopingTest {
         // not the value the previous iteration left in the slot
         Utils.assertWithAllModes_ES6(
                 "undefined,undefined,undefined",
-                "function f(n) { var o = []; for (var i = 0; i < n; i++) {"
-                        + " let x; o.push(String(x)); x = i; } return o.join(); } f(3);");
+                """
+                function f(n) {
+                    var o = [];
+                    for (var i = 0; i < n; i++) {
+                        let x;
+                        o.push(String(x));
+                        x = i;
+                    }
+                    return o.join();
+                }
+                f(3);
+                """);
     }
 
     @Test
@@ -205,43 +272,94 @@ class ConstLetScopingTest {
         // undefined again rather than holding the value from the first pass
         Utils.assertWithAllModes_ES6(
                 "7,undefined,d",
-                "function f(n) { var o = []; for (var i = 0; i < n; i++) { switch (i) {"
-                        + " case 0: const x = 7; o.push(x); break;"
-                        + " case 1: o.push(String(x)); break;"
-                        + " default: o.push('d'); } } return o.join(); } f(3);");
+                """
+                function f(n) {
+                    var o = [];
+                    for (var i = 0; i < n; i++) {
+                        switch (i) {
+                            case 0:
+                                const x = 7;
+                                o.push(x);
+                                break;
+                            case 1:
+                                o.push(String(x));
+                                break;
+                            default:
+                                o.push('d');
+                        }
+                    }
+                    return o.join();
+                }
+                f(3);
+                """);
     }
 
     @Test
     void constForOfHeadIsBoundEachIteration() {
         Utils.assertWithAllModes_ES6(
                 "1,2,3",
-                "function f(a) { var o = []; for (const x of a) { o.push(x); }"
-                        + " return o.join(); } f([1, 2, 3]);");
+                """
+                function f(a) {
+                    var o = [];
+                    for (const x of a) {
+                        o.push(x);
+                    }
+                    return o.join();
+                }
+                f([1, 2, 3]);
+                """);
     }
 
     @Test
     void constForInHeadIsBoundEachIteration() {
         Utils.assertWithAllModes_ES6(
                 "a,b",
-                "function f(obj) { var o = []; for (const k in obj) { o.push(k); }"
-                        + " return o.join(); } f({a: 1, b: 2});");
+                """
+                function f(obj) {
+                    var o = [];
+                    for (const k in obj) {
+                        o.push(k);
+                    }
+                    return o.join();
+                }
+                f({a: 1, b: 2});
+                """);
     }
 
     @Test
     void destructuringConstInForBodyIsRebound() {
         Utils.assertWithAllModes_ES6(
                 "1/2,3/4",
-                "function f(a) { var o = []; for (var i = 0; i < a.length; i++) {"
-                        + " const [p, q] = a[i]; o.push(p + '/' + q); } return o.join(); }"
-                        + " f([[1, 2], [3, 4]]);");
+                """
+                function f(a) {
+                    var o = [];
+                    for (var i = 0; i < a.length; i++) {
+                        const [p, q] = a[i];
+                        o.push(p + '/' + q);
+                    }
+                    return o.join();
+                }
+                f([[1, 2], [3, 4]]);
+                """);
     }
 
     @Test
     void constInLoopStillRejectsAssignment() {
         Utils.assertWithAllModes_ES6(
                 "protected",
-                "function f() { for (var i = 0; i < 2; i++) { const x = i; try { x = 99 } catch (e) {};"
-                        + " if (x !== i) return 'leaked'; } return 'protected'; } f();");
+                """
+                function f() {
+                    for (var i = 0; i < 2; i++) {
+                        const x = i;
+                        try {
+                            x = 99
+                        } catch (e) {}
+                        if (x !== i) return 'leaked';
+                    }
+                    return 'protected';
+                }
+                f();
+                """);
     }
 
     @Test
@@ -249,8 +367,18 @@ class ConstLetScopingTest {
         // The same loop in a function that does reify its scopes, for comparison
         Utils.assertWithAllModes_ES6(
                 "1,2,3",
-                "function f(a) { var o = []; for (var i = 0; i < a.length; i++) {"
-                        + " const x = a[i]; o.push(x); } eval(''); return o.join(); } f([1, 2, 3]);");
+                """
+                function f(a) {
+                    var o = [];
+                    for (var i = 0; i < a.length; i++) {
+                        const x = a[i];
+                        o.push(x);
+                    }
+                    eval('');
+                    return o.join();
+                }
+                f([1, 2, 3]);
+                """);
     }
 
     @Test
@@ -258,8 +386,17 @@ class ConstLetScopingTest {
         // The declaration initializes unconditionally, so the slot can still be a number var
         Utils.assertWithAllModes_ES6(
                 12.0,
-                "function f(n) { var s = 0; for (var i = 0; i < n; i++) { const x = i * 2;"
-                        + " s += x; } return s; } f(4);");
+                """
+                function f(n) {
+                    var s = 0;
+                    for (var i = 0; i < n; i++) {
+                        const x = i * 2;
+                        s += x;
+                    }
+                    return s;
+                }
+                f(4);
+                """);
     }
 
     @Test
@@ -267,8 +404,17 @@ class ConstLetScopingTest {
         // Pre-ES6 const is hoisted to the function scope and keeps its "assign once" behaviour
         Utils.assertWithAllModes_1_8(
                 "0,0,0",
-                "function f(n) { var o = []; for (var i = 0; i < n; i++) { const x = i;"
-                        + " o.push(x); } return o.join(); } f(3);");
+                """
+                function f(n) {
+                    var o = [];
+                    for (var i = 0; i < n; i++) {
+                        const x = i;
+                        o.push(x);
+                    }
+                    return o.join();
+                }
+                f(3);
+                """);
     }
 
     // --- for-in and for-of heads ---
@@ -294,51 +440,80 @@ class ConstLetScopingTest {
     void constForOfHeadGivesEachIterationItsOwnBinding() {
         Utils.assertWithAllModes_ES6(
                 "1,2,3",
-                "var f = []; for (const x of [1, 2, 3]) { f.push(function() { return x; }); }"
-                        + " f.map(function(g) { return g(); }).join();");
+                """
+                var f = [];
+                for (const x of [1, 2, 3]) {
+                    f.push(function() { return x; });
+                }
+                f.map(function(g) { return g(); }).join();
+                """);
     }
 
     @Test
     void constForInHeadGivesEachIterationItsOwnBinding() {
         Utils.assertWithAllModes_ES6(
                 "a,b",
-                "var f = []; for (const k in {a: 1, b: 2}) { f.push(function() { return k; }); }"
-                        + " f.map(function(g) { return g(); }).join();");
+                """
+                var f = [];
+                for (const k in {a: 1, b: 2}) {
+                    f.push(function() { return k; });
+                }
+                f.map(function(g) { return g(); }).join();
+                """);
     }
 
     @Test
     void letForOfHeadGivesEachIterationItsOwnBinding() {
         Utils.assertWithAllModes_ES6(
                 "1,2,3",
-                "var f = []; for (let x of [1, 2, 3]) { f.push(function() { return x; }); }"
-                        + " f.map(function(g) { return g(); }).join();");
+                """
+                var f = [];
+                for (let x of [1, 2, 3]) {
+                    f.push(function() { return x; });
+                }
+                f.map(function(g) { return g(); }).join();
+                """);
     }
 
     @Test
     void constForOfHeadGivesItsOwnBindingAfterContinue() {
         Utils.assertWithAllModes_ES6(
                 "1,3",
-                "var f = []; for (const x of [1, 2, 3]) { if (x === 2) continue;"
-                        + " f.push(function() { return x; }); }"
-                        + " f.map(function(g) { return g(); }).join();");
+                """
+                var f = [];
+                for (const x of [1, 2, 3]) {
+                    if (x === 2) continue;
+                    f.push(function() { return x; });
+                }
+                f.map(function(g) { return g(); }).join();
+                """);
     }
 
     @Test
     void constForOfHeadAndBodyBlockGiveEachIterationTheirOwnBindings() {
         Utils.assertWithAllModes_ES6(
                 "1:10,2:20",
-                "var f = []; for (const x of [1, 2]) { let y = x * 10;"
-                        + " f.push(function() { return x + ':' + y; }); }"
-                        + " f.map(function(g) { return g(); }).join();");
+                """
+                var f = [];
+                for (const x of [1, 2]) {
+                    let y = x * 10;
+                    f.push(function() { return x + ':' + y; });
+                }
+                f.map(function(g) { return g(); }).join();
+                """);
     }
 
     @Test
     void destructuringConstForOfHeadGivesEachIterationItsOwnBindings() {
         Utils.assertWithAllModes_ES6(
                 "1/2,3/4",
-                "var f = []; for (const [p, q] of [[1, 2], [3, 4]]) {"
-                        + " f.push(function() { return p + '/' + q; }); }"
-                        + " f.map(function(g) { return g(); }).join();");
+                """
+                var f = [];
+                for (const [p, q] of [[1, 2], [3, 4]]) {
+                    f.push(function() { return p + '/' + q; });
+                }
+                f.map(function(g) { return g(); }).join();
+                """);
     }
 
     @Test
@@ -347,8 +522,18 @@ class ConstLetScopingTest {
         // mutable binding of the same name in the loop's own scope must not be found instead
         Utils.assertWithAllModes_ES6(
                 "TypeError,TypeError",
-                "var o = []; for (const x of [1, 2]) { try { x = 9; o.push('assigned'); }"
-                        + " catch (e) { o.push(e.name); } } o.join();");
+                """
+                var o = [];
+                for (const x of [1, 2]) {
+                    try {
+                        x = 9;
+                        o.push('assigned');
+                    } catch (e) {
+                        o.push(e.name);
+                    }
+                }
+                o.join();
+                """);
     }
 
     @Test
@@ -357,8 +542,20 @@ class ConstLetScopingTest {
         // the reified path even though nothing closes over the binding
         Utils.assertWithAllModes_ES6(
                 "1,2,3",
-                "function f(a) { var o = []; for (const x of a) { try { x = 9; }"
-                        + " catch (e) { o.push(x); } } return o.join(); } f([1, 2, 3]);");
+                """
+                function f(a) {
+                    var o = [];
+                    for (const x of a) {
+                        try {
+                            x = 9;
+                        } catch (e) {
+                            o.push(x);
+                        }
+                    }
+                    return o.join();
+                }
+                f([1, 2, 3]);
+                """);
     }
 
     @Test
@@ -368,8 +565,14 @@ class ConstLetScopingTest {
         // the binding is in its temporal dead zone; Rhino has no TDZ and reads undefined
         Utils.assertWithAllModes_ES6(
                 "undefined,outside",
-                "let x = 'outside'; var seen;"
-                        + " for (const x of [x]) { seen = String(x); } [seen, x].join();");
+                """
+                let x = 'outside';
+                var seen;
+                for (const x of [x]) {
+                    seen = String(x);
+                }
+                [seen, x].join();
+                """);
     }
 
     @Test
@@ -384,10 +587,13 @@ class ConstLetScopingTest {
         // created by a destructuring default sees the binding this iteration declared
         Utils.assertWithAllModes_ES6(
                 "inside,inside,outside",
-                "let x = 'outside'; var probeDecl, probeBody;"
-                        + " for (const [x, _ = (probeDecl = function() { return x; })]"
-                        + " of [['inside']]) probeBody = function() { return x; };"
-                        + " [probeDecl(), probeBody(), x].join();");
+                """
+                let x = 'outside';
+                var probeDecl, probeBody;
+                for (const [x, _ = (probeDecl = function() { return x; })] of [['inside']])
+                    probeBody = function() { return x; };
+                [probeDecl(), probeBody(), x].join();
+                """);
     }
 
     @Test
@@ -400,30 +606,31 @@ class ConstLetScopingTest {
     @Test
     public void varFunctionRedeclaration() {
         String script =
-                ""
-                        + "function some() {\n"
-                        + "  return false;\n"
-                        + "}\n"
-                        + "if (true) {\n"
-                        + "  var some = \"abcd\";\n"
-                        + "}\n"
-                        + "some\n";
+                """
+                function some() {
+                  return false;
+                }
+                if (true) {
+                  var some = "abcd";
+                }
+                some
+                """;
         Utils.assertWithAllModes_ES6("abcd", script);
     }
 
     @Test
     public void letCaseSwitchFor() {
         String script =
-                ""
-                        + "var sum = 0;\n"
-                        + "for (let i = 0; i < 1; i++)\n"
-                        + "  switch (i) {\n"
-                        + "    case 0:\n"
-                        + "      let test = 7;\n"
-                        + "      sum += 4;\n"
-                        + "      break;\n"
-                        + "    }\n"
-                        + "sum";
+                """
+                var sum = 0;
+                for (let i = 0; i < 1; i++)
+                  switch (i) {
+                    case 0:
+                      let test = 7;
+                      sum += 4;
+                      break;
+                    }
+                sum""";
         Utils.assertWithAllModes_ES6(4, script);
     }
 }
