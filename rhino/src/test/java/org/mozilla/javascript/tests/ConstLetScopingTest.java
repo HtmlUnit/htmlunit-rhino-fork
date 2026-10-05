@@ -396,4 +396,18 @@ class ConstLetScopingTest {
         Utils.assertWithAllModes_1_8(
                 "a,a", "var o = []; for (const k in {a: 1, b: 2}) { o.push(k); } o.join();");
     }
+
+    @Test
+    public void varFunctionRedeclaration() {
+        String script =
+                ""
+                        + "function some() {\n"
+                        + "  return false;\n"
+                        + "}\n"
+                        + "if (true) {\n"
+                        + "  var some = \"abcd\";\n"
+                        + "}\n"
+                        + "some\n";
+        Utils.assertWithAllModes_ES6("abcd", script);
+    }
 }
