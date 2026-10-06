@@ -26,4 +26,8 @@ public interface VarScope extends PropHolder<VarScope>, ConstProperties<VarScope
     default VarScope getAncestor() {
         return getParentScope();
     }
+
+    default boolean isNestedScope() {
+        return false;
+    }
 }
