@@ -6298,8 +6298,9 @@ public class ScriptRuntime {
 
     public static Scriptable getThisForScope(VarScope scope, Object callThisArg) {
         if (Undefined.isUndefined(callThisArg)) {
-            callThisArg = Undefined.SCRIPTABLE_UNDEFINED;
-        } else if (callThisArg == null) {
+            return Undefined.SCRIPTABLE_UNDEFINED;
+        }
+        if (callThisArg == null) {
             return null;
         }
         return ScriptRuntime.toObject(scope, callThisArg);

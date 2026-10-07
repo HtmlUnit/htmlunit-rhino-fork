@@ -420,9 +420,8 @@ public class FunctionObject extends BaseFunction {
             // HtmlUnit
 
             } else {
-                boolean inNewExpr = (thisObj == null);
-                Boolean b = inNewExpr ? Boolean.TRUE : Boolean.FALSE;
-                Object[] invokeArgs = {cx, args, this, b};
+                Boolean inNewExpr = thisArg == null ? Boolean.TRUE : Boolean.FALSE;
+                Object[] invokeArgs = {cx, args, this, inNewExpr};
                 result =
                         member.isCtor()
                                 ? member.newInstance(invokeArgs)
