@@ -410,9 +410,8 @@ public class FunctionObject extends BaseFunction {
                 result = member.invoke(null, invokeArgs);
                 checkMethodResult = true;
             } else if (parmsLength == VARARGS_CTOR_WITH_SCOPE) {
-                boolean inNewExpr = (thisObj == null);
-                Boolean b = inNewExpr ? Boolean.TRUE : Boolean.FALSE;
-                Object[] invokeArgs = {cx, scope, args, this, b};
+                Boolean inNewExpr = thisArg == null ? Boolean.TRUE : Boolean.FALSE;
+                Object[] invokeArgs = {cx, scope, args, this, inNewExpr};
                 result =
                         member.isCtor()
                                 ? member.newInstance(invokeArgs)
