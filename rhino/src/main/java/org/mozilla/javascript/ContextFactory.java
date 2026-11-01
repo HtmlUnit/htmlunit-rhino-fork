@@ -271,6 +271,9 @@ public class ContextFactory {
             case Context.FEATURE_INTL_402:
                 return false;
 
+            case Context.FEATURE_JAVA_SERIALIZATION:
+                return JavaSerializationPolicy.isEnabled();
+
             case Context.FEATURE_HTMLUNIT_FN_ARGUMENTS_IS_RO_VIEW:
                 return false;
 
