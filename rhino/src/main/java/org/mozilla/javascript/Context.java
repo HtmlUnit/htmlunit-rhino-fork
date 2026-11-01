@@ -32,7 +32,6 @@ import java.util.TimeZone;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import org.mozilla.classfile.ClassFileWriter.ClassSizeException;
-// HtmlUnit import org.mozilla.javascript.InstrumentEmitter.Type;
 import org.mozilla.javascript.ast.AstRoot;
 import org.mozilla.javascript.ast.ScriptNode;
 import org.mozilla.javascript.debug.DebuggableScript;

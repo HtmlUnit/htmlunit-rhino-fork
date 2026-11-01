@@ -1,7 +1,5 @@
 package org.mozilla.javascript;
 
-// HtmlUnit import org.mozilla.javascript.InstrumentEmitter.Type;
-
 /**
  * Represents a script object built upon a {@link JSDescriptor}. This class does not support the
  * {@link Callable} interface scripts do not support arguments or some other parts of a call

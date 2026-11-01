@@ -28,7 +28,6 @@ import java.util.ResourceBundle;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-// HtmlUnit import org.mozilla.javascript.InstrumentEmitter.Type;
 import org.mozilla.javascript.ast.FunctionNode;
 import org.mozilla.javascript.dtoa.DoubleFormatter;
 import org.mozilla.javascript.lc.type.TypeInfo;
