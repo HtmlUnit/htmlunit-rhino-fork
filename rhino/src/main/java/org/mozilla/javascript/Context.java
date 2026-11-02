@@ -3028,12 +3028,14 @@ public class Context implements Closeable {
      * rhino.serialization.enabled} applies, resolved once per process.
      */
     public static void checkSerializationEnabled() throws NotSerializableException {
+		/* HtmlUnit serialization is on
         Context cx = getCurrentContext();
         if (cx == null) {
             JavaSerializationPolicy.checkSerializationEnabled();
         } else if (!cx.hasFeature(FEATURE_JAVA_SERIALIZATION)) {
             throw new NotSerializableException("Java serialization is disabled in Rhino");
         }
+		HtmlUnit */
     }
 
     /**
@@ -3045,12 +3047,14 @@ public class Context implements Closeable {
      * rhino.serialization.enabled} applies, resolved once per process.
      */
     public static void checkDeserializationEnabled() throws InvalidObjectException {
+		/* HtmlUnit serialization is on
         Context cx = getCurrentContext();
         if (cx == null) {
             JavaSerializationPolicy.checkDeserializationEnabled();
         } else if (!cx.hasFeature(FEATURE_JAVA_SERIALIZATION)) {
             throw new InvalidObjectException("Java deserialization is disabled in Rhino");
         }
+		HtmlUnit */
     }
 
     private final ContextFactory factory;
