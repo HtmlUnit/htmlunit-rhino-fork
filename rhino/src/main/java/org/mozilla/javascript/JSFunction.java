@@ -29,7 +29,7 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
         this.lexicalNewTarget = lexicalNewTarget;
         this.homeObject = homeObject;
         ScriptRuntime.setFunctionProtoAndParent(this, cx, scope, descriptor.isES6Generator());
-        if (!descriptor.isShorthand()) {
+        if (descriptor.hasPrototype()) {
             setupDefaultPrototype(scope);
         }
     }
@@ -88,11 +88,6 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
 
     protected int getLanguageVersion() {
         return descriptor.getLanguageVersion();
-    }
-
-    @Override
-    protected boolean hasPrototypeProperty() {
-        return true;
     }
 
     @Override
@@ -185,7 +180,13 @@ public class JSFunction extends BaseFunction implements ScriptOrFn<JSFunction> {
         if (nt == null || Undefined.isUndefined(nt)) {
             nt = this;
         }
-        var thisObj = homeObject == null ? this.createObject(cx, s, nt) : null;
+
+        // built-in constructors create their result themselves
+        var thisObj =
+                homeObject == null && !ClassDescriptor.isBuiltIn(descriptor.getConstructor())
+                        ? this.createObject(cx, s, nt)
+                        : null;
+
         // Pass `this` in as new.target for now. This can change when
         // the public `construct` signature changes.
         var res = descriptor.getConstructor().execute(cx, this, nt, s, thisObj, args);

@@ -610,6 +610,8 @@ public class BaseFunction extends ScriptableObject implements Function {
         Object proto;
         if (nt instanceof JSFunction) {
             proto = ((JSFunction) nt).getPrototypeProperty();
+        } else if (nt instanceof Scriptable) {
+            proto = ScriptableObject.getProperty((Scriptable) nt, PROTOTYPE_PROPERTY_NAME);
         } else {
             proto = Undefined.instance;
         }
@@ -617,7 +619,7 @@ public class BaseFunction extends ScriptableObject implements Function {
         if (proto instanceof Scriptable) {
             newInstance.setPrototype((Scriptable) proto);
         } else {
-            newInstance.setPrototype(getClassPrototype());
+            newInstance.setPrototype(ScriptableObject.getObjectPrototype(getDeclarationScope()));
         }
 
         newInstance.setParentScope(getParentScope());
@@ -713,7 +715,7 @@ public class BaseFunction extends ScriptableObject implements Function {
                         });
     }
 
-    protected boolean hasPrototypeProperty() {
+    public boolean hasPrototypeProperty() {
         return prototypeProperty != null && prototypeProperty != UniqueTag.NOT_FOUND;
     }
 
