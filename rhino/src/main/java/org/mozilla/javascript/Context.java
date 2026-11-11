@@ -1523,6 +1523,20 @@ public class Context implements Closeable {
     }
 
     /**
+     * Called before a string is compiled as code by {@code eval()} (direct and indirect) or by
+     * the {@code Function} constructors, like HostEnsureCanCompileStrings of the ECMAScript
+     * specification. Embeddings can throw an exception to prevent the compilation (e.g. to
+     * implement the Content Security Policy of a browser). The default implementation does
+     * nothing.
+     *
+     * @param scope the scope of the realm the code is compiled for; for indirect calls of eval and
+     *     for the Function constructors this is the global scope of the realm of the called function
+     * @param source the source to compile
+     */
+    // HtmlUnit
+    protected void ensureCanCompileStrings(VarScope scope, String source) {}
+
+    /**
      * Compiles the source in the given string.
      *
      * <p>Returns a script that may later be executed.

@@ -3711,6 +3711,9 @@ public class ScriptRuntime {
                     compilerEnvs.setHomeObject(homeObject);
                 };
 
+        // HtmlUnit
+        cx.ensureCanCompileStrings(scope, x.toString());
+
         Script script =
                 cx.compileString(
                         x.toString(),

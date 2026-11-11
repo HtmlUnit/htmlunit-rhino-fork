@@ -854,6 +854,9 @@ public class BaseFunction extends ScriptableObject implements Function {
             throw new JavaScriptException("Interpreter not present", filename, linep[0]);
         }
 
+        // HtmlUnit
+        cx.ensureCanCompileStrings(global, source);
+
         // Compile with explicit interpreter instance to force interpreter
         // mode.
         var res =
