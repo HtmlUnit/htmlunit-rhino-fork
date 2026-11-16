@@ -2932,7 +2932,7 @@ public abstract class ScriptableObject extends SlotMapOwner<Scriptable>
     }
 
     @Override
-    Object[] getIds(
+    protected Object[] getIds(
             CompoundOperationMap<Scriptable> map, boolean getNonEnumerable, boolean getSymbols) {
         Object[] a;
         int externalLen = (externalData == null ? 0 : externalData.getArrayLength());

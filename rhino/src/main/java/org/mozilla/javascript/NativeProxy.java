@@ -261,7 +261,7 @@ class NativeProxy extends ScriptableObject {
      * [[OwnPropertyKeys]] ()</a>
      */
     @Override
-    Object[] getIds(CompoundOperationMap map, boolean getNonEnumerable, boolean getSymbols) {
+    protected Object[] getIds(CompoundOperationMap map, boolean getNonEnumerable, boolean getSymbols) {
         /*
         * 1. Let handler be O.[[ProxyHandler]].
         * 2. If handler is null, throw a TypeError exception.
